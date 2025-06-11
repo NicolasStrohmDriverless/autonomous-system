@@ -57,7 +57,7 @@ setup(
     entry_points={
         'console_scripts': [
             'detection_node = tensorrt_cone_detect.detection_node:main',
-            'depth_node = tensorrt_cone_detect.depth_node:main',
+            'depth_node = depth_tracking.depth_node:main',
             'imu_viz_node = tensorrt_cone_detect.imu_viz_node:main',
             'multi_node_main = tensorrt_cone_detect.multi_node_main:main',
         ],

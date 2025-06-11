@@ -9,7 +9,7 @@ from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import Float32
 
 from pytorch_cone_detect.detection_node import DepthAIDriver
-from pytorch_cone_detect.depth_node import DepthTrackingNode
+from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
 from pytorch_cone_detect.imu_viz_node import ImuVizNode
 
