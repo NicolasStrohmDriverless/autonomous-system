@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>tensorrt_cone_detect_cpp</name>
+  <version>0.0.1</version>
+  <description>TensorRT based cone detector implemented in C++</description>
+  <maintainer email="dev@example.com">Dev</maintainer>
+  <license>MIT</license>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>oak_cone_detect_interfaces</depend>
+  <depend>image_transport</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>OpenCV</build_depend>
+
+  <exec_depend>OpenCV</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
