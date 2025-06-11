@@ -1,0 +1,38 @@
+# Autonomous System
+
+Repository for the Autonomous System of Strohm und Söhne e.V.
+
+## Structure of Autonomous System Repositories
+The codebase of the Autonomous System is divided into different subfolders dedicated to documentation (docs), environment setups (.devcontainer) and source code (src). Last can be distinguished into simulator nodes (fsds), autonomous logic (subsystems) and peripheral connectors (drivers). Source code is mainly consistent of ROS2 packages, since we use it as out middleware. The single package descriptions can be found below.
+
+### Lidar Cone Detection
+
+Contains the implementation for the --INSERT LIDAR-- Lidar for cone recognition, which is used for the cone recognition of the test vehicle. This ROS node outputs the perceived pointcloud in topic --INSERT TOPIC--.
+
+### FSDS rosbridge
+
+The Formula Student Driverless Simulator (FSDS) is our main tool of simulation. The interface is realized with rosbridge, which connects it the other modules.
+
+### Camera Cone Detection
+
+Contains the implementation for the --INSERT CAMERA-- Stereo camera. This ROS node outputs the --??--.
+
+### Cone Fusion
+
+This ROS node fuses the Lidar data with the camera data and publishes the result as --FORMAT?-- in topic --TOPIC?--
+
+### Path Planning
+
+This ROS node uses the CAR_STATE from the SLAM and calculates which path the vehicle should take. It outputs the result as --FORMAT?-- in topic --TOPIC?--
+
+## Architecture
+
+![](.drawio/architecture.png)
+
+## Example System Workflow
+
+![](.drawio/system_workflow.png)
+
+## Documentation
+
+If you have access to this Repository you also can have a look at the documentation [here](strohm-und-soehne.gitlab.io/driverless/autonomous-system/). This includes Onboarding and installation.

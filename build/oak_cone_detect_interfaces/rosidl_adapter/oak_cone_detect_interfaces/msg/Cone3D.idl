@@ -1,0 +1,26 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from oak_cone_detect_interfaces/msg/Cone3D.msg
+// generated code does not contain a copyright notice
+
+
+module oak_cone_detect_interfaces {
+  module msg {
+    @verbatim (language="comment", text=
+      "Cone3D.msg")
+    struct Cone3D {
+      string id;
+
+      string label;
+
+      float conf;
+
+      float x;
+
+      float y;
+
+      float z;
+
+      string color;
+    };
+  };
+};

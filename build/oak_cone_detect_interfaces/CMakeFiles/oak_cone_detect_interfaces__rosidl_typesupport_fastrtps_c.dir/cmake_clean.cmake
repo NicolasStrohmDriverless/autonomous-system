@@ -1,0 +1,25 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support_c.cpp.o"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support_c.cpp.o.d"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support_c.cpp.o"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support_c.cpp.o.d"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support_c.cpp.o"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support_c.cpp.o.d"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support_c.cpp.o"
+  "CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support_c.cpp.o.d"
+  "liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.pdb"
+  "liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.so"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_fastrtps_c.h"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support_c.cpp"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone3_d__rosidl_typesupport_fastrtps_c.h"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support_c.cpp"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_fastrtps_c.h"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support_c.cpp"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__rosidl_typesupport_fastrtps_c.h"
+  "rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support_c.cpp"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

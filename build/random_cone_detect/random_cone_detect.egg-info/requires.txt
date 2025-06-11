@@ -1,0 +1,6 @@
+gpxpy
+numpy
+rclpy
+scipy
+setuptools
+shapely

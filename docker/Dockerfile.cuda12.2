@@ -1,0 +1,113 @@
+# --- DEFAULT STAGE ---
+FROM osrf/ros:humble-desktop-full AS default
+
+ARG USERNAME=strohmo
+ARG UID=1000
+ARG GID=$UID
+
+# 1) System-Pakete & ROS
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      sudo \
+      software-properties-common \
+      python3-pip \
+      python3-dev \
+      build-essential \
+      pkg-config \
+      python3-numpy \
+      python3-opencv \
+      xauth \
+      libpcl-dev \
+      unzip \
+      wget \
+      git \
+      # Deine ROS-Pakete:
+      ros-${ROS_DISTRO}-ros-base \
+      ros-${ROS_DISTRO}-cv-bridge \
+      ros-${ROS_DISTRO}-image-transport \
+      ros-${ROS_DISTRO}-sensor-msgs \
+      ros-${ROS_DISTRO}-geometry-msgs \
+      ros-${ROS_DISTRO}-nav-msgs \
+      ros-${ROS_DISTRO}-visualization-msgs \
+      ros-${ROS_DISTRO}-foxglove-bridge \
+      ros-${ROS_DISTRO}-depthai-ros \
+      ros-${ROS_DISTRO}-can-msgs \
+      ros-${ROS_DISTRO}-robot-localization \
+      ros-${ROS_DISTRO}-ament-package \
+      ros-${ROS_DISTRO}-ament-cmake-python \
+  && rm -rf /var/lib/apt/lists/*
+
+# 2) CUDA & cuDNN installieren (12.6 ist passend zur GTX 1050 / Treiber 570.x)
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb \
+    && dpkg -i cuda-keyring_1.1-1_all.deb \
+    && rm cuda-keyring_1.1-1_all.deb \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cuda-toolkit-12-6 \
+        libcudnn9-cuda-12-6 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Damit pip (z. B. für pycuda) die CUDA-Binaries finden kann:
+ENV PATH="/usr/local/cuda/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+
+# 3) ONNX Runtime (GPU) – tested version for CUDA 12
+RUN mkdir -p /opt/onnxruntime \
+ && wget -q https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-linux-x64-gpu-1.16.3.tgz -O /tmp/ort.tgz \
+ && tar -xzf /tmp/ort.tgz -C /opt/onnxruntime --strip-components=1 \
+ && rm /tmp/ort.tgz
+
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/onnxruntime/lib:$LD_LIBRARY_PATH \
+    CPATH=/opt/onnxruntime/include:$CPATH
+
+# 4) Entrypoint kopieren und ausführbar machen
+COPY --chown=root:root .devcontainer/ros_entrypoint.sh /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh
+
+# 5) Nicht-Root-User anlegen
+RUN groupadd -g "$GID" "$USERNAME" \
+ && useradd -lm -u "$UID" -g "$USERNAME" -s /bin/bash "$USERNAME" \
+ && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER $USERNAME
+WORKDIR /home/$USERNAME/autonomous-system
+
+# 6) Python-Pakete
+RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
+ && pip install --no-cache-dir \
+      ultralytics \
+      numpy==1.24.4 \
+      opencv-python \
+      matplotlib \
+      pyserial \
+      depthai \
+      setuptools \
+      colcon-common-extensions \
+      mkdocs \
+      mkdocs-material \
+      scipy \
+      filterpy \
+      tensorrt \
+      onnxruntime-gpu \
+      pycuda \
+      shapely \
+      PyYAML \
+      gpxpy \
+ && pip check
+
+# ROS setup
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> $HOME/.bashrc \
+  && echo '[ -f "$HOME/autonomous-system/install/setup.bash" ] && source "$HOME/autonomous-system/install/setup.bash"' >> $HOME/.bashrc \
+  && echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
+
+# colcon defaults
+RUN mkdir -p $HOME/.colcon \
+  && cat <<EOF > $HOME/.colcon/defaults.yaml
+{
+  "build": {
+    "cmake-args": ["-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"]
+  }
+}
+EOF
+
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]

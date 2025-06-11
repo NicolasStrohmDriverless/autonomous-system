@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/build/depthai-ros/ament_cmake_core/depthai-rosConfig.cmake

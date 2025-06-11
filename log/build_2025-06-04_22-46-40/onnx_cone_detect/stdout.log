@@ -1,0 +1,31 @@
+running develop
+running egg_info
+creating onnx_cone_detect.egg-info
+writing onnx_cone_detect.egg-info/PKG-INFO
+writing dependency_links to onnx_cone_detect.egg-info/dependency_links.txt
+writing entry points to onnx_cone_detect.egg-info/entry_points.txt
+writing requirements to onnx_cone_detect.egg-info/requires.txt
+writing top-level names to onnx_cone_detect.egg-info/top_level.txt
+writing manifest file 'onnx_cone_detect.egg-info/SOURCES.txt'
+reading manifest file 'onnx_cone_detect.egg-info/SOURCES.txt'
+writing manifest file 'onnx_cone_detect.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/python3.10/site-packages/onnx-cone-detect.egg-link (link to .)
+Installing depth_node script to /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/onnx_cone_detect
+Installing detection_node script to /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/onnx_cone_detect
+Installing imu_viz_node script to /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/onnx_cone_detect
+Installing multi_node_main script to /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/onnx_cone_detect
+Installing pathfinding_node script to /home/strohmo/autonomous-system/install/onnx_cone_detect/lib/onnx_cone_detect
+
+Installed /home/strohmo/autonomous-system/build/onnx_cone_detect
+running symlink_data
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/package.xml -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect
+creating /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/launch
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/launch/detection_node.launch.py -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/launch
+creating /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/config
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/config/oak_camera.yaml -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/config
+creating /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/resource
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/resource/best.pt -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/resource
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/resource/best416.onnx -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/resource
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/resource/best640.onnx -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/resource
+symbolically linking /home/strohmo/autonomous-system/build/onnx_cone_detect/resource/v11n_416x416.onnx -> /home/strohmo/autonomous-system/install/onnx_cone_detect/share/onnx_cone_detect/resource

@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/build/depthai_ros_msgs/rosidl_generator_py/depthai_ros_msgs/__init__.py

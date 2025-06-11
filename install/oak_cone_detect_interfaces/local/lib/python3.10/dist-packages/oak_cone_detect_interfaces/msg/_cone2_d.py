@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_generator_py/oak_cone_detect_interfaces/msg/_cone2_d.py

@@ -1,0 +1,33 @@
+[4.489s] Invoking command in '/home/strohmo/autonomous-system/build/pytorch_cone_detect': CMAKE_PREFIX_PATH=/home/strohmo/autonomous-system/install/depthai_ros_driver:/home/strohmo/autonomous-system/install/depthai_bridge:/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces:/home/strohmo/autonomous-system/install/depthai_ros_msgs:/home/strohmo/autonomous-system/install/descriptions:/home/strohmo/autonomous-system/install/depthai-ros LD_LIBRARY_PATH=/home/strohmo/autonomous-system/install/depthai_ros_driver/lib:/home/strohmo/autonomous-system/install/depthai_bridge/lib:/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib:/home/strohmo/autonomous-system/install/depthai_ros_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda/lib64:/opt/onnxruntime/lib PYTHONPATH=/home/strohmo/autonomous-system/build/pytorch_cone_detect/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/strohmo/autonomous-system/build/pytorch_cone_detect/build --no-deps symlink_data
+[5.408s] running develop
+[5.948s] running egg_info
+[5.954s] creating pytorch_cone_detect.egg-info
+[5.955s] writing pytorch_cone_detect.egg-info/PKG-INFO
+[5.955s] writing dependency_links to pytorch_cone_detect.egg-info/dependency_links.txt
+[5.955s] writing entry points to pytorch_cone_detect.egg-info/entry_points.txt
+[5.956s] writing requirements to pytorch_cone_detect.egg-info/requires.txt
+[5.961s] writing top-level names to pytorch_cone_detect.egg-info/top_level.txt
+[5.967s] writing manifest file 'pytorch_cone_detect.egg-info/SOURCES.txt'
+[5.971s] reading manifest file 'pytorch_cone_detect.egg-info/SOURCES.txt'
+[5.973s] writing manifest file 'pytorch_cone_detect.egg-info/SOURCES.txt'
+[5.981s] running build_ext
+[5.983s] Creating /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/python3.10/site-packages/pytorch-cone-detect.egg-link (link to .)
+[5.987s] Installing depth_node script to /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/pytorch_cone_detect
+[5.988s] Installing detection_node script to /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/pytorch_cone_detect
+[5.989s] Installing imu_viz_node script to /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/pytorch_cone_detect
+[5.990s] Installing multi_node_main script to /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/pytorch_cone_detect
+[5.993s] Installing pathfinding_node script to /home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/pytorch_cone_detect
+[5.997s] 
+[5.998s] Installed /home/strohmo/autonomous-system/build/pytorch_cone_detect
+[6.000s] running symlink_data
+[6.004s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/package.xml -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect
+[6.004s] creating /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/launch
+[6.005s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/launch/detection_node.launch.py -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/launch
+[6.006s] creating /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/config
+[6.007s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/config/oak_camera.yaml -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/config
+[6.008s] creating /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/resource
+[6.011s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/resource/best.pt -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/resource
+[6.016s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/resource/best416.onnx -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/resource
+[6.017s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/resource/best640.onnx -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/resource
+[6.018s] symbolically linking /home/strohmo/autonomous-system/build/pytorch_cone_detect/resource/v11n_416x416.onnx -> /home/strohmo/autonomous-system/install/pytorch_cone_detect/share/pytorch_cone_detect/resource
+[6.226s] Invoked command in '/home/strohmo/autonomous-system/build/pytorch_cone_detect' returned '0': CMAKE_PREFIX_PATH=/home/strohmo/autonomous-system/install/depthai_ros_driver:/home/strohmo/autonomous-system/install/depthai_bridge:/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces:/home/strohmo/autonomous-system/install/depthai_ros_msgs:/home/strohmo/autonomous-system/install/descriptions:/home/strohmo/autonomous-system/install/depthai-ros LD_LIBRARY_PATH=/home/strohmo/autonomous-system/install/depthai_ros_driver/lib:/home/strohmo/autonomous-system/install/depthai_bridge/lib:/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib:/home/strohmo/autonomous-system/install/depthai_ros_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda/lib64:/opt/onnxruntime/lib PYTHONPATH=/home/strohmo/autonomous-system/build/pytorch_cone_detect/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/strohmo/autonomous-system/build/pytorch_cone_detect/build --no-deps symlink_data

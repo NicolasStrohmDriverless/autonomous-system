@@ -1,0 +1,128 @@
+site_name: Strohm und Söhne Autonomous System
+docs_dir: docs
+site_dir: documents/
+
+#Navigation and site alignment
+nav:
+  - Home: index.md
+  - Onboarding: 
+    - onboarding/index.md
+    - Formula Student: onboarding/formula_student.md
+    - Driverless Disciplines: onboarding/driverless_disciplines.md
+    - Hardware: onboarding/hardware.md
+    - Software: 
+      - onboarding/software/index.md
+      - Git: onboarding/software/git.md
+      - Gitlab: onboarding/software/gitlab.md
+      - Docker: onboarding/software/docker.md
+      - ROS2: 
+        - onboarding/software/ros2/index.md
+        - 0. Setup: onboarding/software/ros2/setup.md
+        - 1. Turtlesim: onboarding/software/ros2/turtlesim.md
+        - 2. Nodes: onboarding/software/ros2/nodes.md
+        - 3. Topics: onboarding/software/ros2/topics.md
+        - 4. Services: onboarding/software/ros2/services.md
+        - 5. Parameters: onboarding/software/ros2/parameters.md
+        - 6. Rosbag: onboarding/software/ros2/rosbag.md
+    - Autonomous System: onboarding/autonomous_system.md
+  - Guides:
+    - guides/index.md
+    - Install: 
+      - guides/installation/index.md
+      - Install DevContainer on Linux and MacOS: guides/installation/install_devcontainer.md
+      - Install Devcontainer on Windows: guides/installation/install_devcontainer_windows.md
+      - Install Local: guides/installation/install_local.md
+    - ROS2:
+      - guides/ros2/index.md
+      - Creating a ROS2 package: guides/ros2/creating_a_ros2_package.md
+    - Updating a fork: guides/update_fork.md
+  - Development and Standards:
+    - development_and_standards/index.md
+    - Contributing: development_and_standards/contributing.md
+    - Commits: development_and_standards/commits.md
+    - Cheatsheet: development_and_standards/cheatsheet.md
+    - Forks: development_and_standards/forks.md
+  - Testing: 
+    - testing/index.md
+    - Unit Tests: testing/unit_tests.md
+    # - Integration Tests: 
+    # - System Tests:
+    - Linting and Formatting: testing/linting_and_formatting.md
+  - Software:
+    - software/index.md
+    - Autonomous System Repository: software/autonomous_system_repo.md
+  - Hardware:
+    - hardware/index.md
+    - Sensors:
+      - hardware/sensors/index.md
+      - VectorNav vn-300:
+        - hardware/sensors/vn-300/index.md
+
+
+#GitLab Reference
+repo_url: https://gitlab.com/strohm-und-soehne/driverless/autonomous-system
+repo_name: autonomous-system
+
+#theme
+theme: 
+  name: material
+  #toggling between light and dark mode
+  palette:
+    #palette toggle for light mode
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    #palette toggle for dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode 
+  #enabling in build features
+  features:
+    - search.suggest
+    - search.highlight
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+  #customizing the logo and icon
+  logo: assets/logo.png
+  icon:
+    repo: fontawesome/brands/gitlab
+
+#plugins
+plugins:
+  - search
+
+#custom colors 
+extra_css:
+  - stylesheets/extra.css
+
+#markdown rendering
+markdown_extensions:
+  #code highlighting
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  #chart rendering
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences

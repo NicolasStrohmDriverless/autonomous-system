@@ -1,0 +1,48 @@
+{
+  "objects": [
+    { "id": "startL", "X_mm": -1500, "Y_mm": 0, "Z_cm": 200, "color": "orange" },
+    { "id": "startR", "X_mm": 1500, "Y_mm": 0, "Z_cm": 200, "color": "orange" },
+
+    { "id": "y3", "X_mm": -1500, "Y_mm": 0, "Z_cm": 400, "color": "blue" },
+    { "id": "b3", "X_mm": 1500, "Y_mm": 0, "Z_cm": 400, "color": "yellow" },
+
+    { "id": "y5", "X_mm": -1500, "Y_mm": 0, "Z_cm": 600, "color": "blue" },
+    { "id": "b5", "X_mm": 1500, "Y_mm": 0, "Z_cm": 600, "color": "yellow" },
+
+    { "id": "y7", "X_mm": -1500, "Y_mm": 0, "Z_cm": 800, "color": "blue" },
+    { "id": "b7", "X_mm": 1500, "Y_mm": 0, "Z_cm": 800, "color": "yellow" },
+
+    { "id": "y9", "X_mm": -1500, "Y_mm": 0, "Z_cm": 1000, "color": "blue" },
+    { "id": "b9", "X_mm": 1500, "Y_mm": 0, "Z_cm": 1000, "color": "yellow" },
+
+    { "id": "y11", "X_mm": -1500, "Y_mm": 0, "Z_cm": 1200, "color": "blue" },
+    { "id": "b11", "X_mm": 1500, "Y_mm": 0, "Z_cm": 1200, "color": "yellow" },
+
+    { "id": "y13", "X_mm": -1500, "Y_mm": 0, "Z_cm": 1400, "color": "blue" },
+    { "id": "b13", "X_mm": 1500, "Y_mm": 0, "Z_cm": 1400, "color": "yellow" },
+
+    { "id": "y15", "X_mm": -1500, "Y_mm": 0, "Z_cm": 1600, "color": "blue" },
+    { "id": "b15", "X_mm": 1500, "Y_mm": 0, "Z_cm": 1600, "color": "yellow" },
+
+    { "id": "y17", "X_mm": -1500, "Y_mm": 0, "Z_cm": 1800, "color": "blue" },
+    { "id": "b17", "X_mm": 1500, "Y_mm": 0, "Z_cm": 1800, "color": "yellow" },
+
+    { "id": "y19", "X_mm": -1500, "Y_mm": 0, "Z_cm": 2000, "color": "blue" },
+    { "id": "b19", "X_mm": 1500, "Y_mm": 0, "Z_cm": 2000, "color": "yellow" },
+
+    { "id": "y21", "X_mm": -1500, "Y_mm": 0, "Z_cm": 2200, "color": "blue" },
+    { "id": "b21", "X_mm": 1500, "Y_mm": 0, "Z_cm": 2200, "color": "yellow" },
+
+    { "id": "y23", "X_mm": -1500, "Y_mm": 0, "Z_cm": 2400, "color": "blue" },
+    { "id": "b23", "X_mm": 1500, "Y_mm": 0, "Z_cm": 2400, "color": "yellow" },
+
+    { "id": "y25", "X_mm": -1500, "Y_mm": 0, "Z_cm": 2600, "color": "blue" },
+    { "id": "b25", "X_mm": 1500, "Y_mm": 0, "Z_cm": 2600, "color": "yellow" },
+
+    { "id": "y27", "X_mm": -1500, "Y_mm": 0, "Z_cm": 2800, "color": "blue" },
+    { "id": "b27", "X_mm": 1500, "Y_mm": 0, "Z_cm": 2800, "color": "yellow" },
+
+    { "id": "endL", "X_mm": -1500, "Y_mm": 0, "Z_cm": 3000, "color": "orange" },
+    { "id": "endR", "X_mm": 1500, "Y_mm": 0, "Z_cm": 3000, "color": "orange" }
+  ]
+}

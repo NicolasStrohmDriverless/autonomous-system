@@ -1,0 +1,9 @@
+source;share/pytorch_cone_detect/hook/pythonpath.ps1
+source;share/pytorch_cone_detect/hook/pythonpath.dsv
+source;share/pytorch_cone_detect/hook/pythonpath.sh
+source;share/pytorch_cone_detect/hook/ament_prefix_path.ps1
+source;share/pytorch_cone_detect/hook/ament_prefix_path.dsv
+source;share/pytorch_cone_detect/hook/ament_prefix_path.sh
+source;../../build/pytorch_cone_detect/share/pytorch_cone_detect/hook/pythonpath_develop.ps1
+source;../../build/pytorch_cone_detect/share/pytorch_cone_detect/hook/pythonpath_develop.dsv
+source;../../build/pytorch_cone_detect/share/pytorch_cone_detect/hook/pythonpath_develop.sh

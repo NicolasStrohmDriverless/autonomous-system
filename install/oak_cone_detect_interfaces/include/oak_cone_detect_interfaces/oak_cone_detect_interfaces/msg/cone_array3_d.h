@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_generator_c/oak_cone_detect_interfaces/msg/cone_array3_d.h

@@ -1,0 +1,233 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-765e8291b6f367e8c893.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17
+					]
+				},
+				{
+					"build" : "oak_cone_detect_interfaces__py",
+					"jsonFile" : "directory-oak_cone_detect_interfaces__py-Debug-ed63a4a1f741366be7cb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/oak_cone_detect_interfaces__py",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "oak_cone_detect_interfaces",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_build_oak_cone_detect_interfaces_egg::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_build_oak_cone_detect_interfaces_egg-Debug-d0f448680af7b28d91cf.json",
+					"name" : "ament_cmake_python_build_oak_cone_detect_interfaces_egg",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_symlink_oak_cone_detect_interfaces::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_symlink_oak_cone_detect_interfaces-Debug-908d932ebf72799f4438.json",
+					"name" : "ament_cmake_python_symlink_oak_cone_detect_interfaces",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces-Debug-704e729e8b010757eff2.json",
+					"name" : "oak_cone_detect_interfaces",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__cpp-Debug-947142cfdf9e3262773d.json",
+					"name" : "oak_cone_detect_interfaces__cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "oak_cone_detect_interfaces__py::@9bd31ac884d8c3573625",
+					"jsonFile" : "target-oak_cone_detect_interfaces__py-Debug-5bda5545f1789ac95a48.json",
+					"name" : "oak_cone_detect_interfaces__py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_generator_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_generator_c-Debug-57c07b512c9e07ede1e1.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_generator_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_generator_py::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_generator_py-Debug-4e674470499283d46e97.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_generator_py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_c-Debug-3c1342aad6da2c24a1b2.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_c__pyext-Debug-4d3577a48fc65bd0986b.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_cpp-Debug-2f0d62bdc8fffa4d5e9b.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c-Debug-ec6919ac7279f80ac62d.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c__pyext-Debug-ef1e2672327cbf4e3417.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp-Debug-803febbf8905ab692561.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_introspection_c-Debug-5eaabcfd90d4bf47a650.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_c__pyext::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_introspection_c__pyext-Debug-65323d064d4564f8d75d.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_c__pyext",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp-Debug-2ede9359475b8b52661c.json",
+					"name" : "oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "oak_cone_detect_interfaces_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-oak_cone_detect_interfaces_uninstall-Debug-1a2dd9a838332738f0a0.json",
+					"name" : "oak_cone_detect_interfaces_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-Debug-7deb466e6219041a6fa4.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces",
+		"source" : "/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

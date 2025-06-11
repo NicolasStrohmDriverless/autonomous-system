@@ -1,0 +1,30 @@
+# Parameter-Definitionen für OAK-Kamera und Cone-Detection
+
+# Namespace = Launch-Argument 'name' (Standard: 'oak')
+oak:
+  ros__parameters:
+    # Kamera-Einstellungen
+    color_width: 1920           # Breite des RGB-Bildes
+    color_height: 1080          # Höhe des RGB-Bildes
+    mono_width: 1280            # Breite des Monochrom-Bildes
+    mono_height: 720            # Höhe des Monochrom-Bildes
+    fps: 60.0                   # Bilder pro Sekunde
+    rectify_rgb: false           # Ob das RGB-Bild korrigiert werden soll
+    queue_size: 30              # Tiefe des Message-Queues
+
+# Parameter für den Cone-Detect-Node
+oak_cone_detect_node:
+  ros__parameters:
+    # Pfad relativ zum Paket-Share (wird im Code automatisch ergänzt)
+    model_path: "resources/best640.onnx"
+
+    # Eingabegröße für das ONNX-Modell
+    input_width: 640
+    input_height: 640
+
+    # Schwellwerte für die Detektion
+    confidence_threshold: 0.5
+    nms_threshold: 0.4
+
+    # Skalierungsfaktor zur Umrechnung der Tiefendaten in Meter
+    depth_scale: 0.001

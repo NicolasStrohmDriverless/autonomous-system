@@ -1,0 +1,74 @@
+:root {
+    --md-primary-fg-color:        #C72426;
+    --md-primary-fg-color--light: #ECB7B7;
+    --md-primary-fg-color--dark:  #C72426;
+
+    --md-accent-fg-color:         #F4A08A;
+  }
+[data-md-color-scheme="slate"] {
+    --md-default-bg-color: hsla(0, 0%, 14.51%, 0.74);
+    --md-code-bg-color:    hsla(0, 0%, 18.82%, 1);
+    }
+
+/* Onboarding */
+
+/* Formula Student */
+img[alt="FSG Disciplines"] { display: block; margin: auto;}
+img[alt="Team Photo"] { width: 400px; display: block; margin: auto;}
+
+/* Driverless Disciplines */
+img[alt="Acceleration Track"] { display: block; margin: auto;}
+img[alt="Skidpad"] { width: 500px; display: block; margin: auto;}
+img[alt="Trackdrive"] { display: block; margin: auto;}
+
+/* Hardware */
+img[alt="Oak-D"] { width: 400px; display: block; margin: auto;}
+img[alt="Perception Pipeline"] { width: 500px; display: block; margin: auto;}
+img[alt="Simulator Cone Detect"] { width: 350px; display: block; margin: auto;}
+img[alt="Jetson Nano"] { width: 400px; display: block; margin: auto;}
+img[alt="Jetson Orin AGX"] { width: 400px; display: block; margin: auto;}
+img[alt="RES"] { display: block; margin: auto;}
+
+/* Software - Git */
+img[alt="Example Commit"] { width: 200px; display: block; margin: auto;}
+img[alt="Repository Graph"] { width: 500px; display: block; margin: auto;}
+img[alt="Git Meme"] { width: 300px; display: block; margin: auto;}
+img[alt="Main"] { display: block; margin: auto;}
+img[alt="Source Control"] { display: block; margin: auto;}
+
+/* Software - Gitlab */
+img[alt="Structure N11"] { display: block; margin: auto;}
+img[alt="Structure DV"] { display: block; margin: auto;}
+img[alt="Merge Request"] { width: 200px; display: block; margin: auto;}
+img[alt="Merge Request Overview"] { display: block; margin: auto;}
+img[alt="Merge Select Branch"] { display: block; margin: auto;}
+
+/* Software - Docker */
+img[alt="My Machine Meme"] { width: 400px; display: block; margin: auto;}
+img[alt="Container VM"] { display: block; margin: auto;}
+img[alt="Docker Meme"] { width: 400px; display: block; margin: auto;}
+
+/* Software- ROS2 - Setup */
+img[alt="Setup"] { width: 400px; display: block; margin: auto;}
+
+/* Software - ROS2 - Turtlesim */
+img[alt="Turtle Sim"] { width: 400px; display: block; margin: auto;}
+img[alt="Turtle Teleop"] { width: 400px; display: block; margin: auto;}
+
+/* Software - ROS2 - Nodes */
+img[alt="Nodes Topic Service"] { width: 700px; display: block; margin: auto;}
+
+/* Software - ROS2 - Topics */
+img[alt="Topic Publisher Subscriber"] { width: 700px; display: block; margin: auto;}
+img[alt="RQT Graph"] {display: block; margin: auto;}
+img[alt="RQT Debug"] {width: 700px; display: block; margin: auto;}
+
+/* Software - ROS2 - Services */
+img[alt="Services"] {width: 700px; display: block; margin: auto;}
+img[alt="Spawn Turtle"] { width: 400px; display: block; margin: auto;}
+
+/* Software - ROS2 - Parameters */
+img[alt="Set Background Color"] { width: 400px; display: block; margin: auto;}
+
+/* Contributing */
+img[alt="Testing Pyramid"] { width: 500px; display: block; margin: auto;}

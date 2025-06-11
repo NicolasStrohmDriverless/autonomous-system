@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver/scripts/obj_pub.py

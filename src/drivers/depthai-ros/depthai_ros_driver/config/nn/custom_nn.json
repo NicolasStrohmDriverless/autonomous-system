@@ -1,0 +1,29 @@
+{
+    "model": {
+        "model_name": "best_openvino_2022.1_6shave",
+        "zoo": "depthai_examples"
+    },
+    "nn_config": {
+        "output_format": "detection",
+        "NN_family": "YOLO",
+        "input_size": "416x416",
+        "NN_specific_metadata": {
+            "classes": 5,
+            "coordinates": 4,
+            "anchors": [],
+            "anchor_masks": {},
+            "iou_threshold": 0.5,
+            "confidence_threshold": 0.5
+        }
+    },
+    "mappings": {
+        "labels": [
+            "blue_cone",
+            "large_orange_cone",
+            "orange_cone",
+            "unknown_cone",
+            "yellow_cone"
+        ]
+    },
+    "version": 1
+}

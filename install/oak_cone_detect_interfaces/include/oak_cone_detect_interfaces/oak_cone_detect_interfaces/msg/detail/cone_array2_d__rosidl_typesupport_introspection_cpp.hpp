@@ -1,0 +1,1 @@
+/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_typesupport_introspection_cpp/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_introspection_cpp.hpp

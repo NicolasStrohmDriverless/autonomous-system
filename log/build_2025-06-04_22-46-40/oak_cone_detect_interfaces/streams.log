@@ -1,0 +1,280 @@
+[0.047s] Invoking command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake /home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces -DCMAKE_BUILD_TYPE=Debug -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces
+[0.205s] -- The C compiler identification is GNU 11.4.0
+[0.367s] -- The CXX compiler identification is GNU 11.4.0
+[0.387s] -- Detecting C compiler ABI info
+[0.577s] -- Detecting C compiler ABI info - done
+[0.601s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.603s] -- Detecting C compile features
+[0.603s] -- Detecting C compile features - done
+[0.611s] -- Detecting CXX compiler ABI info
+[0.821s] -- Detecting CXX compiler ABI info - done
+[0.846s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.847s] -- Detecting CXX compile features
+[0.850s] -- Detecting CXX compile features - done
+[0.855s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[1.311s] -- Found Python3: /usr/local/python/current/bin/python3 (found version "3.10.12") found components: Interpreter 
+[1.512s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[1.599s] -- Found std_msgs: 4.8.0 (/opt/ros/humble/share/std_msgs/cmake)
+[1.704s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[1.721s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[1.753s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[1.797s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.853s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.940s] -- Found geometry_msgs: 4.8.0 (/opt/ros/humble/share/geometry_msgs/cmake)
+[1.988s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[2.956s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[4.221s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[4.788s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[4.859s] -- Found PythonInterp: /usr/local/python/current/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[4.866s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[4.941s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[4.941s] -- Using PYTHON_EXECUTABLE: /usr/local/python/current/bin/python3
+[4.941s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[4.941s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[5.008s] -- Found PythonExtra: .so  
+[5.206s] -- Configuring done
+[5.322s] -- Generating done
+[5.352s] -- Build files have been written to: /home/strohmo/autonomous-system/build/oak_cone_detect_interfaces
+[5.371s] Invoked command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake /home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces -DCMAKE_BUILD_TYPE=Debug -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces
+[5.373s] Invoking command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake --build /home/strohmo/autonomous-system/build/oak_cone_detect_interfaces -- -j8 -l8
+[5.518s] [  1%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[7.002s] [  1%] Built target oak_cone_detect_interfaces__cpp
+[7.071s] [  1%] Built target ament_cmake_python_symlink_oak_cone_detect_interfaces
+[7.101s] [  3%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[8.425s] [  5%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support.cpp.o[0m
+[9.484s] [  7%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support.cpp.o[0m
+[10.677s] [  9%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support.cpp.o[0m
+[11.486s] [ 10%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support.cpp.o[0m
+[12.420s] [ 12%] [32m[1mLinking CXX shared library liboak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.so[0m
+[12.602s] [ 12%] Built target oak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp
+[13.406s] running egg_info
+[13.409s] creating oak_cone_detect_interfaces.egg-info
+[13.414s] writing oak_cone_detect_interfaces.egg-info/PKG-INFO
+[13.414s] writing dependency_links to oak_cone_detect_interfaces.egg-info/dependency_links.txt
+[13.415s] writing top-level names to oak_cone_detect_interfaces.egg-info/top_level.txt
+[13.417s] writing manifest file 'oak_cone_detect_interfaces.egg-info/SOURCES.txt'
+[13.419s] reading manifest file 'oak_cone_detect_interfaces.egg-info/SOURCES.txt'
+[13.423s] writing manifest file 'oak_cone_detect_interfaces.egg-info/SOURCES.txt'
+[13.561s] [ 12%] Built target ament_cmake_python_build_oak_cone_detect_interfaces_egg
+[13.612s] [ 14%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[15.326s] [ 16%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/detail/dds_fastrtps/cone3_d__type_support.cpp.o[0m
+[16.537s] [ 18%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/detail/dds_fastrtps/cone_array2_d__type_support.cpp.o[0m
+[17.733s] [ 20%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/detail/dds_fastrtps/cone2_d__type_support.cpp.o[0m
+[19.184s] [ 21%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/detail/dds_fastrtps/cone_array3_d__type_support.cpp.o[0m
+[20.995s] [ 23%] [32m[1mLinking CXX shared library liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.so[0m
+[21.402s] [ 23%] Built target oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp
+[21.439s] [ 25%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[22.959s] [ 27%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/oak_cone_detect_interfaces/msg/cone3_d__type_support.cpp.o[0m
+[24.436s] [ 29%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/oak_cone_detect_interfaces/msg/cone_array2_d__type_support.cpp.o[0m
+[25.672s] [ 30%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/oak_cone_detect_interfaces/msg/cone2_d__type_support.cpp.o[0m
+[26.682s] [ 32%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/oak_cone_detect_interfaces/msg/cone_array3_d__type_support.cpp.o[0m
+[27.819s] [ 34%] [32m[1mLinking CXX shared library liboak_cone_detect_interfaces__rosidl_typesupport_cpp.so[0m
+[28.032s] [ 34%] Built target oak_cone_detect_interfaces__rosidl_typesupport_cpp
+[28.090s] [ 36%] [34m[1mGenerating C code for ROS interfaces[0m
+[30.788s] [ 38%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_c.dir/rosidl_generator_c/oak_cone_detect_interfaces/msg/detail/cone3_d__functions.c.o[0m
+[31.062s] [ 40%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_c.dir/rosidl_generator_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__functions.c.o[0m
+[31.259s] [ 41%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_c.dir/rosidl_generator_c/oak_cone_detect_interfaces/msg/detail/cone2_d__functions.c.o[0m
+[31.420s] [ 43%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_c.dir/rosidl_generator_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__functions.c.o[0m
+[31.593s] [ 45%] [32m[1mLinking C shared library liboak_cone_detect_interfaces__rosidl_generator_c.so[0m
+[31.733s] [ 45%] Built target oak_cone_detect_interfaces__rosidl_generator_c
+[31.774s] [ 47%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[33.256s] [ 49%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support_c.cpp.o[0m
+[34.381s] [ 50%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support_c.cpp.o[0m
+[35.526s] [ 52%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support_c.cpp.o[0m
+[36.577s] [ 54%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support_c.cpp.o[0m
+[37.534s] [ 56%] [32m[1mLinking CXX shared library liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.so[0m
+[37.777s] [ 56%] Built target oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c
+[37.811s] [ 58%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[38.792s] [ 60%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/oak_cone_detect_interfaces/msg/cone3_d__type_support.cpp.o[0m
+[38.874s] [ 61%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/oak_cone_detect_interfaces/msg/cone_array2_d__type_support.cpp.o[0m
+[38.956s] [ 63%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/oak_cone_detect_interfaces/msg/cone2_d__type_support.cpp.o[0m
+[39.036s] [ 65%] [32mBuilding CXX object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/oak_cone_detect_interfaces/msg/cone_array3_d__type_support.cpp.o[0m
+[39.119s] [ 67%] [32m[1mLinking CXX shared library liboak_cone_detect_interfaces__rosidl_typesupport_c.so[0m
+[39.231s] [ 67%] Built target oak_cone_detect_interfaces__rosidl_typesupport_c
+[39.259s] [ 69%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[40.452s] [ 70%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support.c.o[0m
+[40.541s] [ 72%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support.c.o[0m
+[40.640s] [ 74%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support.c.o[0m
+[40.736s] [ 76%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support.c.o[0m
+[40.842s] [ 78%] [32m[1mLinking C shared library liboak_cone_detect_interfaces__rosidl_typesupport_introspection_c.so[0m
+[40.943s] [ 78%] Built target oak_cone_detect_interfaces__rosidl_typesupport_introspection_c
+[41.005s] [ 78%] Built target oak_cone_detect_interfaces
+[41.060s] [ 80%] [34m[1mGenerating Python code for ROS interfaces[0m
+[43.074s] [ 80%] Built target oak_cone_detect_interfaces__py
+[43.161s] [ 81%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_py.dir/rosidl_generator_py/oak_cone_detect_interfaces/msg/_cone3_d_s.c.o[0m
+[43.513s] [ 83%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_py.dir/rosidl_generator_py/oak_cone_detect_interfaces/msg/_cone_array2_d_s.c.o[0m
+[43.899s] [ 85%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_py.dir/rosidl_generator_py/oak_cone_detect_interfaces/msg/_cone2_d_s.c.o[0m
+[44.355s] [ 87%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_generator_py.dir/rosidl_generator_py/oak_cone_detect_interfaces/msg/_cone_array3_d_s.c.o[0m
+[44.725s] [ 89%] [32m[1mLinking C shared library rosidl_generator_py/oak_cone_detect_interfaces/liboak_cone_detect_interfaces__rosidl_generator_py.so[0m
+[44.920s] [ 89%] Built target oak_cone_detect_interfaces__rosidl_generator_py
+[45.009s] [ 90%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[45.353s] [ 92%] [32m[1mLinking C shared library rosidl_generator_py/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[45.482s] [ 92%] Built target oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c__pyext
+[45.558s] [ 94%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_c.c.o[0m
+[45.923s] [ 96%] [32m[1mLinking C shared library rosidl_generator_py/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[46.060s] [ 96%] Built target oak_cone_detect_interfaces__rosidl_typesupport_c__pyext
+[46.136s] [ 98%] [32mBuilding C object CMakeFiles/oak_cone_detect_interfaces__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[46.525s] [100%] [32m[1mLinking C shared library rosidl_generator_py/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[46.674s] [100%] Built target oak_cone_detect_interfaces__rosidl_typesupport_introspection_c__pyext
+[46.719s] Invoked command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake --build /home/strohmo/autonomous-system/build/oak_cone_detect_interfaces -- -j8 -l8
+[46.721s] Invoking command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake --install /home/strohmo/autonomous-system/build/oak_cone_detect_interfaces
+[46.755s] -- Install configuration: "Debug"
+[46.756s] -- Execute custom install script
+[46.758s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/ament_index/resource_index/rosidl_interfaces/oak_cone_detect_interfaces
+[46.790s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone2_d.h
+[46.826s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone3_d.h
+[46.857s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone_array2_d.h
+[46.890s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone_array3_d.h
+[46.922s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__functions.h
+[46.954s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__struct.h
+[46.986s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support.h
+[47.016s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__functions.h
+[47.050s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__struct.h
+[47.082s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support.h
+[47.118s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__functions.h
+[47.152s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__struct.h
+[47.187s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support.h
+[47.211s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__functions.h
+[47.258s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__struct.h
+[47.292s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support.h
+[47.326s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/rosidl_generator_c__visibility_control.h
+[47.360s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/library_path.sh
+[47.405s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/library_path.dsv
+[47.435s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_fastrtps_c.h
+[47.476s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__rosidl_typesupport_fastrtps_c.h
+[47.508s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_fastrtps_c.h
+[47.544s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__rosidl_typesupport_fastrtps_c.h
+[47.576s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[47.617s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone2_d.hpp
+[47.650s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone3_d.hpp
+[47.685s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone_array2_d.hpp
+[47.719s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/cone_array3_d.hpp
+[47.743s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__builder.hpp
+[47.787s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__struct.hpp
+[47.810s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__traits.hpp
+[47.857s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__type_support.hpp
+[47.891s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__builder.hpp
+[47.931s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__struct.hpp
+[47.964s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__traits.hpp
+[48.005s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__type_support.hpp
+[48.038s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__builder.hpp
+[48.071s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__struct.hpp
+[48.103s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__traits.hpp
+[48.138s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__type_support.hpp
+[48.170s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__builder.hpp
+[48.206s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__struct.hpp
+[48.259s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__traits.hpp
+[48.307s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__type_support.hpp
+[48.338s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp
+[48.374s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_fastrtps_cpp.hpp
+[48.411s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__rosidl_typesupport_fastrtps_cpp.hpp
+[48.457s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_fastrtps_cpp.hpp
+[48.505s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__rosidl_typesupport_fastrtps_cpp.hpp
+[48.541s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[48.583s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_introspection_c.h
+[48.622s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__rosidl_typesupport_introspection_c.h
+[48.653s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_introspection_c.h
+[48.687s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__rosidl_typesupport_introspection_c.h
+[48.718s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[48.752s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_introspection_cpp.hpp
+[48.786s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone3_d__rosidl_typesupport_introspection_cpp.hpp
+[48.813s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array2_d__rosidl_typesupport_introspection_cpp.hpp
+[48.834s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/include/oak_cone_detect_interfaces/oak_cone_detect_interfaces/msg/detail/cone_array3_d__rosidl_typesupport_introspection_cpp.hpp
+[48.858s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/pythonpath.sh
+[48.882s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/pythonpath.dsv
+[48.906s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces-0.0.1-py3.10.egg-info/PKG-INFO
+[48.927s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces-0.0.1-py3.10.egg-info/SOURCES.txt
+[48.950s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces-0.0.1-py3.10.egg-info/dependency_links.txt
+[48.974s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces-0.0.1-py3.10.egg-info/top_level.txt
+[48.997s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/__init__.py
+[49.024s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_c.c
+[49.043s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c
+[49.065s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_introspection_c.c
+[49.088s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/liboak_cone_detect_interfaces__rosidl_generator_py.so
+[49.110s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/__init__.py
+[49.131s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone2_d.py
+[49.152s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone2_d_s.c
+[49.174s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone3_d.py
+[49.198s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone3_d_s.c
+[49.226s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array2_d.py
+[49.245s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array2_d_s.c
+[49.266s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array3_d.py
+[49.288s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array3_d_s.c
+[49.309s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[49.328s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[49.351s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[49.375s] -- Up-to-date symlink: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[49.376s] -- Up-to-date symlink: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[49.376s] -- Up-to-date symlink: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/oak_cone_detect_interfaces_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[49.378s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/Cone3D.idl
+[49.410s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/ConeArray3D.idl
+[49.441s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/Cone2D.idl
+[49.471s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/ConeArray2D.idl
+[49.499s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/Cone3D.msg
+[49.524s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/ConeArray3D.msg
+[49.554s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/Cone2D.msg
+[49.583s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/msg/ConeArray2D.msg
+[49.615s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/ament_index/resource_index/package_run_dependencies/oak_cone_detect_interfaces
+[49.643s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/ament_index/resource_index/parent_prefix_path/oak_cone_detect_interfaces
+[49.676s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/ament_prefix_path.sh
+[49.710s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/ament_prefix_path.dsv
+[49.743s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/path.sh
+[49.776s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/environment/path.dsv
+[49.810s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/local_setup.bash
+[49.852s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/local_setup.sh
+[49.916s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/local_setup.zsh
+[49.960s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/local_setup.dsv
+[50.004s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/package.dsv
+[50.037s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/ament_index/resource_index/packages/oak_cone_detect_interfaces
+[50.075s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/rosidl_cmake-extras.cmake
+[50.118s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/ament_cmake_export_dependencies-extras.cmake
+[50.157s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/ament_cmake_export_include_directories-extras.cmake
+[50.193s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/ament_cmake_export_libraries-extras.cmake
+[50.229s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/ament_cmake_export_targets-extras.cmake
+[50.272s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[50.307s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[50.340s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfacesConfig.cmake
+[50.386s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfacesConfig-version.cmake
+[50.422s] -- Symlinking: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/package.xml
+[50.451s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_generator_c.so
+[50.454s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_generator_c.so" to ""
+[50.457s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.so
+[50.460s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_c.so" to ""
+[50.463s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.so
+[50.467s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cpp.so" to ""
+[50.468s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_introspection_c.so
+[50.472s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_introspection_c.so" to ""
+[50.474s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_c.so
+[50.477s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_c.so" to ""
+[50.478s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.so
+[50.483s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_introspection_cpp.so" to ""
+[50.484s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_cpp.so
+[50.490s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_typesupport_cpp.so" to ""
+[50.664s] Listing '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces'...
+[50.667s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/__init__.py'...
+[50.672s] Listing '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg'...
+[50.673s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/__init__.py'...
+[50.674s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone2_d.py'...
+[50.677s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone3_d.py'...
+[50.678s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array2_d.py'...
+[50.680s] Compiling '/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages/oak_cone_detect_interfaces/msg/_cone_array3_d.py'...
+[50.701s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_generator_py.so
+[50.703s] -- Set runtime path of "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/lib/liboak_cone_detect_interfaces__rosidl_generator_py.so" to ""
+[50.704s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_generator_cExport.cmake
+[50.709s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_generator_cExport-debug.cmake
+[50.710s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cExport.cmake
+[50.711s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cExport-debug.cmake
+[50.717s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_generator_cppExport.cmake
+[50.720s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cppExport.cmake
+[50.724s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_typesupport_fastrtps_cppExport-debug.cmake
+[50.725s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cExport.cmake
+[50.725s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cExport-debug.cmake
+[50.725s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_cExport.cmake
+[50.726s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_cExport-debug.cmake
+[50.728s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cppExport.cmake
+[50.730s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_introspection_cppExport-debug.cmake
+[50.734s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_cppExport.cmake
+[50.734s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/oak_cone_detect_interfaces__rosidl_typesupport_cppExport-debug.cmake
+[50.735s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_generator_pyExport.cmake
+[50.737s] -- Installing: /home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/share/oak_cone_detect_interfaces/cmake/export_oak_cone_detect_interfaces__rosidl_generator_pyExport-debug.cmake
+[50.757s] Invoked command in '/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/strohmo/autonomous-system/install/tensorrt_cone_detect:/home/strohmo/autonomous-system/install/random_cone_detect:/home/strohmo/autonomous-system/install/pytorch_cone_detect:/home/strohmo/autonomous-system/install/onnx_cone_detect:/home/strohmo/autonomous-system/install/array_cone_detect:/opt/ros/humble /usr/bin/cmake --install /home/strohmo/autonomous-system/build/oak_cone_detect_interfaces

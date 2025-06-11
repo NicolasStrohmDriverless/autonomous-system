@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot name="nora11" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- BASE LINK (CoG) -->
+  <link name="base-link"/>
+
+  <!-- IMU -->
+  <link name="vn300-imu"/>
+  <joint name="vn300-imu-joint" type="fixed">
+    <parent link="base-link"/>
+    <child link="vn300-imu"/>
+    <origin xyz="0.1 0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- LIDAR -->
+  <link name="placeholder-link"/>
+  <joint name="placeholder-joint" type="fixed">
+    <parent link="base-link"/>
+    <child link="placeholder-link"/>
+    <origin xyz="0.2 0 0.4" rpy="0 0 0"/>
+  </joint>
+
+  <!-- CAMERA -->
+  <link name="oak-d-base-frame"/>
+  <joint name="camera-joint" type="fixed">
+    <parent link="base-link"/>
+    <child link="oak-d-base-frame"/>
+    <origin xyz="-0.2 0 1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- GPS -->
+  <link name="vn300-antenna-1"/>
+  <joint name="gps-joint-1" type="fixed">
+    <parent link="base-link"/>
+    <child link="vn300-antenna-1"/>
+    <origin xyz="0 0.4 0.03" rpy="0 0 0"/>
+  </joint>
+
+  <link name="vn300-antenna-2"/>
+  <joint name="gps-joint-2" type="fixed">
+    <parent link="base-link"/>
+    <child link="vn300-antenna-2"/>
+    <origin xyz="0 -0.4 0.03" rpy="0 0 0"/>
+  </joint>
+
+</robot>
