@@ -16,8 +16,8 @@ def generate_launch_description():
             output='screen'
         ),
         Node(
-            package='tensorrt_cone_detect',
-            executable='depth_annotation_node',
+            package='depth_tracking',
+            executable='depth_node',
             name='depth_annotation_node',
             output='screen'
         ),

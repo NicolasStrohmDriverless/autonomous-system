@@ -10,7 +10,7 @@ def generate_launch_description():
             output='screen'
         ),
         Node(
-            package='onnx_cone_detect',
+            package='depth_tracking',
             executable='depth_node',
             name='depth_annotation_node',
             output='screen'

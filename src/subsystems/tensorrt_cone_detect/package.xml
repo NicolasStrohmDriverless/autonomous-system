@@ -15,6 +15,7 @@
   <depend>std_msgs</depend>
   <depend>oak_cone_detect_interfaces</depend>
   <depend>pathfinding</depend>
+  <depend>depth_tracking</depend>
 
   <export>
     <build_type>ament_python</build_type>

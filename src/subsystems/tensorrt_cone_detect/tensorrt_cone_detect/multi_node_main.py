@@ -7,7 +7,7 @@ from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
 from tensorrt_cone_detect.detection_node import DepthAIDriver
-from tensorrt_cone_detect.depth_node import DepthTrackingNode
+from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
 from tensorrt_cone_detect.imu_viz_node import ImuVizNode
 
