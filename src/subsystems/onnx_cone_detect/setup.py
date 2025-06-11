@@ -60,7 +60,6 @@ setup(
             'detection_node = onnx_cone_detect.detection_node:main',
             'imu_viz_node = onnx_cone_detect.imu_viz_node:main',
             'multi_node_main = onnx_cone_detect.multi_node_main:main',
-            'pathfinding_node = onnx_cone_detect.pathfinding_node:main',
         ],
     },
 )

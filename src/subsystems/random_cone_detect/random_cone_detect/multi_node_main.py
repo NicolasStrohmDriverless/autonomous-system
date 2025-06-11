@@ -11,7 +11,7 @@ from std_msgs.msg import Float32
 # Deine ROS-Nodes
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import ConeArrayPublisher
-from random_cone_detect.pathfinding_node import PathNode
+from pathfinding.pathfinding_node import PathNode
 
 class SystemUsageNode(Node):
     def __init__(self):

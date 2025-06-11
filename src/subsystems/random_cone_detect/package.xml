@@ -14,6 +14,7 @@
   <depend>depthai_ros_driver</depend>
   <depend>std_msgs</depend>
   <depend>oak_cone_detect_interfaces</depend>
+  <depend>pathfinding</depend>
 
   <export>
     <build_type>ament_python</build_type>
