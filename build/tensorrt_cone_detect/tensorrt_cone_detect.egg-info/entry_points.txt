@@ -1,7 +1,0 @@
-[console_scripts]
-depth_node = tensorrt_cone_detect.depth_node:main
-detection_node = tensorrt_cone_detect.detection_node:main
-imu_viz_node = tensorrt_cone_detect.imu_viz_node:main
-multi_node_main = tensorrt_cone_detect.multi_node_main:main
-pathfinding_node = tensorrt_cone_detect.pathfinding_node:main
-

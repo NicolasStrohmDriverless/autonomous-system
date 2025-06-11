@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/tensorrt_cone_detect/launch/detection_node.launch.py

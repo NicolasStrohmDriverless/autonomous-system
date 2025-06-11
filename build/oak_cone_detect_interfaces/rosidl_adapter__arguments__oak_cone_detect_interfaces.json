@@ -1,9 +1,0 @@
-{
-  "package_name": "oak_cone_detect_interfaces",
-  "non_idl_tuples": [
-    "/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces:msg/Cone3D.msg",
-    "/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces:msg/ConeArray3D.msg",
-    "/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces:msg/Cone2D.msg",
-    "/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces:msg/ConeArray2D.msg"
-  ]
-}

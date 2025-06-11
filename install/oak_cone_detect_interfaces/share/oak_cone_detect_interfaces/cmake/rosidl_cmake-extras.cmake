@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_cmake/rosidl_cmake-extras.cmake

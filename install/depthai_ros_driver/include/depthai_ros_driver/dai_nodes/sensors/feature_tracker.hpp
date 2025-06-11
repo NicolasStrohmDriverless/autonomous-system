@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver/include/depthai_ros_driver/dai_nodes/sensors/feature_tracker.hpp

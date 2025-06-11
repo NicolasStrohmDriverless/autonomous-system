@@ -1,0 +1,36 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/strohmo/autonomous-system/build/tensorrt_cone_detect",
+        "/home/strohmo/autonomous-system/install/tensorrt_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/random_cone_detect",
+        "/home/strohmo/autonomous-system/install/random_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/pytorch_cone_detect",
+        "/home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/onnx_cone_detect",
+        "/home/strohmo/autonomous-system/install/onnx_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/array_cone_detect",
+        "/home/strohmo/autonomous-system/install/array_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages",
+        "/home/strohmo/autonomous-system/install/depthai_ros_driver/local/lib/python3.10/dist-packages",
+        "/home/strohmo/autonomous-system/install/depthai_ros_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/strohmo/autonomous-system/build/tensorrt_cone_detect",
+        "/home/strohmo/autonomous-system/install/tensorrt_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/random_cone_detect",
+        "/home/strohmo/autonomous-system/install/random_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/pytorch_cone_detect",
+        "/home/strohmo/autonomous-system/install/pytorch_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/onnx_cone_detect",
+        "/home/strohmo/autonomous-system/install/onnx_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/build/array_cone_detect",
+        "/home/strohmo/autonomous-system/install/array_cone_detect/lib/python3.10/site-packages",
+        "/home/strohmo/autonomous-system/install/oak_cone_detect_interfaces/local/lib/python3.10/dist-packages",
+        "/home/strohmo/autonomous-system/install/depthai_ros_driver/local/lib/python3.10/dist-packages",
+        "/home/strohmo/autonomous-system/install/depthai_ros_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

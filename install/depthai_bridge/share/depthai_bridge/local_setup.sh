@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/depthai_bridge/ament_cmake_environment_hooks/local_setup.sh

@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/depthai_ros_msgs/rosidl_generator_py/depthai_ros_msgs/msg/_tracked_feature_s.c

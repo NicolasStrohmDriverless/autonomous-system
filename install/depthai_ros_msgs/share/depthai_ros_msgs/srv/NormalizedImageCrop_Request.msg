@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/depthai_ros_msgs/rosidl_cmake/srv/NormalizedImageCrop_Request.msg

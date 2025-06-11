@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/ament_cmake_export_libraries/ament_cmake_export_libraries-extras.cmake

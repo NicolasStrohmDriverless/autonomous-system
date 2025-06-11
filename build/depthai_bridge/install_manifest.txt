@@ -1,5 +1,0 @@
-/home/strohmo/autonomous-system/install/depthai_bridge/lib/libdepthai_bridge.so
-/home/strohmo/autonomous-system/install/depthai_bridge/share/depthai_bridge/cmake/depthai_bridgeTargets.cmake
-/home/strohmo/autonomous-system/install/depthai_bridge/share/depthai_bridge/cmake/depthai_bridgeTargets-debug.cmake
-/home/strohmo/autonomous-system/install/depthai_bridge/share/depthai_bridge/cmake/depthai_bridgeTargetsExport.cmake
-/home/strohmo/autonomous-system/install/depthai_bridge/share/depthai_bridge/cmake/depthai_bridgeTargetsExport-debug.cmake

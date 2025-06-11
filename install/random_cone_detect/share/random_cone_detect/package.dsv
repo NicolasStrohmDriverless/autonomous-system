@@ -1,9 +1,0 @@
-source;share/random_cone_detect/hook/pythonpath.ps1
-source;share/random_cone_detect/hook/pythonpath.dsv
-source;share/random_cone_detect/hook/pythonpath.sh
-source;share/random_cone_detect/hook/ament_prefix_path.ps1
-source;share/random_cone_detect/hook/ament_prefix_path.dsv
-source;share/random_cone_detect/hook/ament_prefix_path.sh
-source;../../build/random_cone_detect/share/random_cone_detect/hook/pythonpath_develop.ps1
-source;../../build/random_cone_detect/share/random_cone_detect/hook/pythonpath_develop.dsv
-source;../../build/random_cone_detect/share/random_cone_detect/hook/pythonpath_develop.sh

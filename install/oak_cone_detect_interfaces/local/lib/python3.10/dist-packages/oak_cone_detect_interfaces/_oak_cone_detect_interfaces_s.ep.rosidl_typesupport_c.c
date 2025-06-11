@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_generator_py/oak_cone_detect_interfaces/_oak_cone_detect_interfaces_s.ep.rosidl_typesupport_c.c

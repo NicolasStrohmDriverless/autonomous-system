@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/descriptions/ament_cmake_core/descriptionsConfig.cmake

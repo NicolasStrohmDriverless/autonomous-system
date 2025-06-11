@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h

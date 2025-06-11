@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_typesupport_fastrtps_cpp/oak_cone_detect_interfaces/msg/detail/cone2_d__rosidl_typesupport_fastrtps_cpp.hpp

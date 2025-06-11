@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge/include/depthai_bridge/TrackSpatialDetectionConverter.hpp

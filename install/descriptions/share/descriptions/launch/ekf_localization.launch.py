@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/src/subsystems/descriptions/launch/ekf_localization.launch.py

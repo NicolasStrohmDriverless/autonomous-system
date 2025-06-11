@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/oak_cone_detect_interfaces/rosidl_generator_cpp/oak_cone_detect_interfaces/msg/detail/cone_array3_d__builder.hpp

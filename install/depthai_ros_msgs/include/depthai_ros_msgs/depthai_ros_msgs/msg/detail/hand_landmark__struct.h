@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/build/depthai_ros_msgs/rosidl_generator_c/depthai_ros_msgs/msg/detail/hand_landmark__struct.h

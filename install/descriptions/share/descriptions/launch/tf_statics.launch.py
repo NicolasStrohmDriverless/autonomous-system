@@ -1,1 +1,0 @@
-/home/strohmo/autonomous-system/src/subsystems/descriptions/launch/tf_statics.launch.py

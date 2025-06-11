@@ -1,0 +1,530 @@
+[0.662s] colcon DEBUG Command line arguments: ['/usr/bin/colcon', 'list', '-p', '--base-paths', '/home/strohmo/autonomous-system']
+[0.662s] colcon DEBUG Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='list', build_base='build', ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['/home/strohmo/autonomous-system'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, topological_order=False, names_only=False, paths_only=True, topological_graph=False, topological_graph_dot=False, topological_graph_density=False, topological_graph_legend=False, topological_graph_dot_cluster=False, topological_graph_dot_include_skipped=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x7d4b7f34a470>, verb_extension=<colcon_package_information.verb.list.ListVerb object at 0x7d4b7f349510>, main=<bound method ListVerb.main of <colcon_package_information.verb.list.ListVerb object at 0x7d4b7f349510>>, mixin_verb=('list',))
+[1.482s] colcon.colcon_core.package_discovery Level 1 discover_packages(colcon_meta) check parameters
+[1.482s] colcon.colcon_core.package_discovery Level 1 discover_packages(recursive) check parameters
+[1.482s] colcon.colcon_core.package_discovery Level 1 discover_packages(ignore) check parameters
+[1.483s] colcon.colcon_core.package_discovery Level 1 discover_packages(path) check parameters
+[1.483s] colcon.colcon_core.package_discovery Level 1 discover_packages(recursive) discover
+[1.483s] colcon.colcon_core.package_discovery INFO Crawling recursively for packages in '/home/strohmo/autonomous-system'
+[1.484s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['ignore', 'ignore_ament_install']
+[1.484s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'ignore'
+[1.485s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'ignore_ament_install'
+[1.485s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['colcon_pkg']
+[1.485s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'colcon_pkg'
+[1.486s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['colcon_meta']
+[1.486s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'colcon_meta'
+[1.486s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['ros']
+[1.486s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'ros'
+[1.533s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['cmake', 'python']
+[1.533s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'cmake'
+[1.533s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'python'
+[1.533s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extensions ['python_setup_py']
+[1.533s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system) by extension 'python_setup_py'
+[1.534s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['ignore', 'ignore_ament_install']
+[1.534s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'ignore'
+[1.534s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'ignore_ament_install'
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['colcon_pkg']
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'colcon_pkg'
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['colcon_meta']
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'colcon_meta'
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['ros']
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'ros'
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['cmake', 'python']
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'cmake'
+[1.535s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'python'
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extensions ['python_setup_py']
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docker) by extension 'python_setup_py'
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['ignore', 'ignore_ament_install']
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'ignore'
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'ignore_ament_install'
+[1.536s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['colcon_pkg']
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'colcon_pkg'
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['colcon_meta']
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'colcon_meta'
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['ros']
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'ros'
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['cmake', 'python']
+[1.537s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'cmake'
+[1.538s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'python'
+[1.538s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extensions ['python_setup_py']
+[1.538s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs) by extension 'python_setup_py'
+[1.538s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.539s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'ignore'
+[1.539s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'ignore_ament_install'
+[1.540s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['colcon_pkg']
+[1.540s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'colcon_pkg'
+[1.540s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['colcon_meta']
+[1.540s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'colcon_meta'
+[1.541s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['ros']
+[1.541s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'ros'
+[1.542s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['cmake', 'python']
+[1.542s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'cmake'
+[1.543s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'python'
+[1.544s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extensions ['python_setup_py']
+[1.544s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/assets) by extension 'python_setup_py'
+[1.545s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['ignore', 'ignore_ament_install']
+[1.546s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'ignore'
+[1.546s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'ignore_ament_install'
+[1.546s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['colcon_pkg']
+[1.546s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'colcon_pkg'
+[1.547s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['colcon_meta']
+[1.547s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'colcon_meta'
+[1.547s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['ros']
+[1.547s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'ros'
+[1.547s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['cmake', 'python']
+[1.548s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'cmake'
+[1.548s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'python'
+[1.548s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extensions ['python_setup_py']
+[1.548s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/development_and_standards) by extension 'python_setup_py'
+[1.549s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['ignore', 'ignore_ament_install']
+[1.549s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'ignore'
+[1.550s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'ignore_ament_install'
+[1.550s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['colcon_pkg']
+[1.550s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'colcon_pkg'
+[1.550s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['colcon_meta']
+[1.550s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'colcon_meta'
+[1.551s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['ros']
+[1.551s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'ros'
+[1.551s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['cmake', 'python']
+[1.551s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'cmake'
+[1.552s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'python'
+[1.552s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extensions ['python_setup_py']
+[1.552s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides) by extension 'python_setup_py'
+[1.552s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['ignore', 'ignore_ament_install']
+[1.553s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'ignore'
+[1.553s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'ignore_ament_install'
+[1.553s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['colcon_pkg']
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'colcon_pkg'
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['colcon_meta']
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'colcon_meta'
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['ros']
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'ros'
+[1.554s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['cmake', 'python']
+[1.555s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'cmake'
+[1.555s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'python'
+[1.555s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extensions ['python_setup_py']
+[1.555s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/installation) by extension 'python_setup_py'
+[1.556s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['ignore', 'ignore_ament_install']
+[1.556s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'ignore'
+[1.557s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'ignore_ament_install'
+[1.557s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['colcon_pkg']
+[1.558s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'colcon_pkg'
+[1.558s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['colcon_meta']
+[1.558s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'colcon_meta'
+[1.559s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['ros']
+[1.560s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'ros'
+[1.561s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['cmake', 'python']
+[1.561s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'cmake'
+[1.562s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'python'
+[1.562s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extensions ['python_setup_py']
+[1.562s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/guides/ros2) by extension 'python_setup_py'
+[1.563s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['ignore', 'ignore_ament_install']
+[1.563s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'ignore'
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'ignore_ament_install'
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['colcon_pkg']
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'colcon_pkg'
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['colcon_meta']
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'colcon_meta'
+[1.564s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['ros']
+[1.565s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'ros'
+[1.565s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['cmake', 'python']
+[1.565s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'cmake'
+[1.565s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'python'
+[1.566s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extensions ['python_setup_py']
+[1.566s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware) by extension 'python_setup_py'
+[1.566s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['ignore', 'ignore_ament_install']
+[1.567s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'ignore'
+[1.567s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'ignore_ament_install'
+[1.567s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['colcon_pkg']
+[1.567s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'colcon_pkg'
+[1.567s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['colcon_meta']
+[1.568s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'colcon_meta'
+[1.568s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['ros']
+[1.568s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'ros'
+[1.569s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['cmake', 'python']
+[1.569s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'cmake'
+[1.569s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'python'
+[1.569s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extensions ['python_setup_py']
+[1.569s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors) by extension 'python_setup_py'
+[1.570s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['ignore', 'ignore_ament_install']
+[1.570s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'ignore'
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'ignore_ament_install'
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['colcon_pkg']
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'colcon_pkg'
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['colcon_meta']
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'colcon_meta'
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['ros']
+[1.571s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'ros'
+[1.572s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['cmake', 'python']
+[1.572s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'cmake'
+[1.572s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'python'
+[1.572s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extensions ['python_setup_py']
+[1.572s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300) by extension 'python_setup_py'
+[1.573s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.574s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'ignore'
+[1.574s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'ignore_ament_install'
+[1.575s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['colcon_pkg']
+[1.575s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'colcon_pkg'
+[1.576s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['colcon_meta']
+[1.576s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'colcon_meta'
+[1.577s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['ros']
+[1.578s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'ros'
+[1.578s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['cmake', 'python']
+[1.579s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'cmake'
+[1.579s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'python'
+[1.579s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extensions ['python_setup_py']
+[1.579s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/hardware/sensors/vn-300/assets) by extension 'python_setup_py'
+[1.579s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['ignore', 'ignore_ament_install']
+[1.580s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'ignore'
+[1.580s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'ignore_ament_install'
+[1.580s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['colcon_pkg']
+[1.580s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'colcon_pkg'
+[1.581s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['colcon_meta']
+[1.581s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'colcon_meta'
+[1.581s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['ros']
+[1.581s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'ros'
+[1.582s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['cmake', 'python']
+[1.582s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'cmake'
+[1.582s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'python'
+[1.582s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extensions ['python_setup_py']
+[1.582s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding) by extension 'python_setup_py'
+[1.583s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.583s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'ignore'
+[1.584s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'ignore_ament_install'
+[1.584s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['colcon_pkg']
+[1.584s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'colcon_pkg'
+[1.584s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['colcon_meta']
+[1.584s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'colcon_meta'
+[1.585s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['ros']
+[1.585s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'ros'
+[1.585s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['cmake', 'python']
+[1.585s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'cmake'
+[1.586s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'python'
+[1.586s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extensions ['python_setup_py']
+[1.586s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/assets) by extension 'python_setup_py'
+[1.586s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['ignore', 'ignore_ament_install']
+[1.587s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'ignore'
+[1.587s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'ignore_ament_install'
+[1.587s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['colcon_pkg']
+[1.587s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'colcon_pkg'
+[1.587s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['colcon_meta']
+[1.588s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'colcon_meta'
+[1.588s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['ros']
+[1.588s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'ros'
+[1.588s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['cmake', 'python']
+[1.588s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'cmake'
+[1.589s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'python'
+[1.589s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extensions ['python_setup_py']
+[1.589s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software) by extension 'python_setup_py'
+[1.590s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.591s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'ignore'
+[1.591s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'ignore_ament_install'
+[1.592s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['colcon_pkg']
+[1.592s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'colcon_pkg'
+[1.593s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['colcon_meta']
+[1.593s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'colcon_meta'
+[1.594s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['ros']
+[1.594s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'ros'
+[1.595s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['cmake', 'python']
+[1.595s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'cmake'
+[1.596s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'python'
+[1.596s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extensions ['python_setup_py']
+[1.596s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/assets) by extension 'python_setup_py'
+[1.597s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['ignore', 'ignore_ament_install']
+[1.597s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'ignore'
+[1.597s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'ignore_ament_install'
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['colcon_pkg']
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'colcon_pkg'
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['colcon_meta']
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'colcon_meta'
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['ros']
+[1.598s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'ros'
+[1.599s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['cmake', 'python']
+[1.599s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'cmake'
+[1.599s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'python'
+[1.599s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extensions ['python_setup_py']
+[1.600s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2) by extension 'python_setup_py'
+[1.600s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.601s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'ignore'
+[1.601s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'ignore_ament_install'
+[1.601s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['colcon_pkg']
+[1.601s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'colcon_pkg'
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['colcon_meta']
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'colcon_meta'
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['ros']
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'ros'
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['cmake', 'python']
+[1.602s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'cmake'
+[1.603s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'python'
+[1.603s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extensions ['python_setup_py']
+[1.603s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/onboarding/software/ros2/assets) by extension 'python_setup_py'
+[1.603s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['ignore', 'ignore_ament_install']
+[1.604s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'ignore'
+[1.604s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'ignore_ament_install'
+[1.604s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['colcon_pkg']
+[1.605s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'colcon_pkg'
+[1.605s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['colcon_meta']
+[1.605s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'colcon_meta'
+[1.605s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['ros']
+[1.605s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'ros'
+[1.606s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['cmake', 'python']
+[1.606s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'cmake'
+[1.606s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'python'
+[1.607s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extensions ['python_setup_py']
+[1.607s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/software) by extension 'python_setup_py'
+[1.608s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['ignore', 'ignore_ament_install']
+[1.609s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'ignore'
+[1.609s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'ignore_ament_install'
+[1.610s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['colcon_pkg']
+[1.611s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'colcon_pkg'
+[1.611s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['colcon_meta']
+[1.612s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'colcon_meta'
+[1.612s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['ros']
+[1.612s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'ros'
+[1.613s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['cmake', 'python']
+[1.613s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'cmake'
+[1.613s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'python'
+[1.613s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extensions ['python_setup_py']
+[1.613s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/stylesheets) by extension 'python_setup_py'
+[1.614s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['ignore', 'ignore_ament_install']
+[1.614s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'ignore'
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'ignore_ament_install'
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['colcon_pkg']
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'colcon_pkg'
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['colcon_meta']
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'colcon_meta'
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['ros']
+[1.615s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'ros'
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['cmake', 'python']
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'cmake'
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'python'
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extensions ['python_setup_py']
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing) by extension 'python_setup_py'
+[1.616s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['ignore', 'ignore_ament_install']
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'ignore'
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'ignore_ament_install'
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['colcon_pkg']
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'colcon_pkg'
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['colcon_meta']
+[1.617s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'colcon_meta'
+[1.618s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['ros']
+[1.618s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'ros'
+[1.618s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['cmake', 'python']
+[1.618s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'cmake'
+[1.618s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'python'
+[1.619s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extensions ['python_setup_py']
+[1.619s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/docs/testing/assets) by extension 'python_setup_py'
+[1.619s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/log) by extensions ['ignore', 'ignore_ament_install']
+[1.619s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/log) by extension 'ignore'
+[1.620s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/log) ignored
+[1.620s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['ignore', 'ignore_ament_install']
+[1.620s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'ignore'
+[1.620s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'ignore_ament_install'
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['colcon_pkg']
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'colcon_pkg'
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['colcon_meta']
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'colcon_meta'
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['ros']
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'ros'
+[1.621s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['cmake', 'python']
+[1.622s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'cmake'
+[1.622s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'python'
+[1.622s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extensions ['python_setup_py']
+[1.622s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src) by extension 'python_setup_py'
+[1.622s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['ignore', 'ignore_ament_install']
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'ignore'
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'ignore_ament_install'
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['colcon_pkg']
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'colcon_pkg'
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['colcon_meta']
+[1.623s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'colcon_meta'
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['ros']
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'ros'
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['cmake', 'python']
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'cmake'
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'python'
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extensions ['python_setup_py']
+[1.624s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers) by extension 'python_setup_py'
+[1.625s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['ignore', 'ignore_ament_install']
+[1.625s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'ignore'
+[1.626s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'ignore_ament_install'
+[1.626s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['colcon_pkg']
+[1.626s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'colcon_pkg'
+[1.626s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['colcon_meta']
+[1.626s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'colcon_meta'
+[1.627s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['ros']
+[1.627s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'ros'
+[1.628s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['cmake', 'python']
+[1.628s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'cmake'
+[1.628s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'python'
+[1.629s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extensions ['python_setup_py']
+[1.629s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros) by extension 'python_setup_py'
+[1.629s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['ignore', 'ignore_ament_install']
+[1.630s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'ignore'
+[1.630s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'ignore_ament_install'
+[1.630s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['colcon_pkg']
+[1.630s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'colcon_pkg'
+[1.630s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['colcon_meta']
+[1.631s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'colcon_meta'
+[1.631s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['ros']
+[1.631s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'ros'
+[1.631s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['cmake', 'python']
+[1.631s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'cmake'
+[1.632s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'python'
+[1.632s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extensions ['python_setup_py']
+[1.632s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/calibration) by extension 'python_setup_py'
+[1.632s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extensions ['ignore', 'ignore_ament_install']
+[1.632s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extension 'ignore'
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extension 'ignore_ament_install'
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extensions ['colcon_pkg']
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extension 'colcon_pkg'
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extensions ['colcon_meta']
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extension 'colcon_meta'
+[1.633s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extensions ['ros']
+[1.634s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros) by extension 'ros'
+[1.644s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai-ros' with type 'ros.ament_cmake' and name 'depthai-ros'
+[1.645s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extensions ['ignore', 'ignore_ament_install']
+[1.646s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extension 'ignore'
+[1.646s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extension 'ignore_ament_install'
+[1.646s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extensions ['colcon_pkg']
+[1.646s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extension 'colcon_pkg'
+[1.646s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extensions ['colcon_meta']
+[1.647s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extension 'colcon_meta'
+[1.647s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extensions ['ros']
+[1.647s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge) by extension 'ros'
+[1.653s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_bridge' with type 'ros.ament_cmake' and name 'depthai_bridge'
+[1.654s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extensions ['ignore', 'ignore_ament_install']
+[1.654s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extension 'ignore'
+[1.654s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extension 'ignore_ament_install'
+[1.655s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extensions ['colcon_pkg']
+[1.655s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extension 'colcon_pkg'
+[1.655s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extensions ['colcon_meta']
+[1.655s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extension 'colcon_meta'
+[1.655s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extensions ['ros']
+[1.656s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver) by extension 'ros'
+[1.667s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_driver' with type 'ros.ament_cmake' and name 'depthai_ros_driver'
+[1.667s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extensions ['ignore', 'ignore_ament_install']
+[1.668s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extension 'ignore'
+[1.668s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extension 'ignore_ament_install'
+[1.668s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extensions ['colcon_pkg']
+[1.668s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extension 'colcon_pkg'
+[1.668s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extensions ['colcon_meta']
+[1.669s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extension 'colcon_meta'
+[1.669s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extensions ['ros']
+[1.669s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs) by extension 'ros'
+[1.671s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/drivers/depthai-ros/depthai_ros_msgs' with type 'ros.ament_cmake' and name 'depthai_ros_msgs'
+[1.672s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['ignore', 'ignore_ament_install']
+[1.673s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'ignore'
+[1.673s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'ignore_ament_install'
+[1.674s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['colcon_pkg']
+[1.674s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'colcon_pkg'
+[1.675s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['colcon_meta']
+[1.675s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'colcon_meta'
+[1.676s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['ros']
+[1.676s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'ros'
+[1.678s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['cmake', 'python']
+[1.678s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'cmake'
+[1.679s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'python'
+[1.679s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extensions ['python_setup_py']
+[1.679s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems) by extension 'python_setup_py'
+[1.680s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extensions ['ignore', 'ignore_ament_install']
+[1.680s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extension 'ignore'
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extension 'ignore_ament_install'
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extensions ['colcon_pkg']
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extension 'colcon_pkg'
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extensions ['colcon_meta']
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extension 'colcon_meta'
+[1.681s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extensions ['ros']
+[1.682s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/array_cone_detect) by extension 'ros'
+[1.685s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/array_cone_detect' with type 'ros.ament_python' and name 'array_cone_detect'
+[1.686s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extensions ['ignore', 'ignore_ament_install']
+[1.686s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extension 'ignore'
+[1.686s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extension 'ignore_ament_install'
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extensions ['colcon_pkg']
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extension 'colcon_pkg'
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extensions ['colcon_meta']
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extension 'colcon_meta'
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extensions ['ros']
+[1.687s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/depth_tracking) by extension 'ros'
+[1.698s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/depth_tracking' with type 'ros.ament_python' and name 'depth_tracking'
+[1.698s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extensions ['ignore', 'ignore_ament_install']
+[1.699s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extension 'ignore'
+[1.699s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extension 'ignore_ament_install'
+[1.699s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extensions ['colcon_pkg']
+[1.699s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extension 'colcon_pkg'
+[1.700s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extensions ['colcon_meta']
+[1.700s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extension 'colcon_meta'
+[1.700s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extensions ['ros']
+[1.700s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/descriptions) by extension 'ros'
+[1.702s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/descriptions' with type 'ros.ament_cmake' and name 'descriptions'
+[1.703s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extensions ['ignore', 'ignore_ament_install']
+[1.703s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extension 'ignore'
+[1.703s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extension 'ignore_ament_install'
+[1.703s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extensions ['colcon_pkg']
+[1.703s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extension 'colcon_pkg'
+[1.704s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extensions ['colcon_meta']
+[1.704s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extension 'colcon_meta'
+[1.704s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extensions ['ros']
+[1.704s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces) by extension 'ros'
+[1.706s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/oak_cone_detect_interfaces' with type 'ros.ament_cmake' and name 'oak_cone_detect_interfaces'
+[1.707s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extensions ['ignore', 'ignore_ament_install']
+[1.708s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extension 'ignore'
+[1.708s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extension 'ignore_ament_install'
+[1.709s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extensions ['colcon_pkg']
+[1.710s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extension 'colcon_pkg'
+[1.711s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extensions ['colcon_meta']
+[1.711s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extension 'colcon_meta'
+[1.712s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extensions ['ros']
+[1.712s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect) by extension 'ros'
+[1.716s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect' with type 'ros.ament_python' and name 'onnx_cone_detect'
+[1.717s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extensions ['ignore', 'ignore_ament_install']
+[1.717s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extension 'ignore'
+[1.717s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extension 'ignore_ament_install'
+[1.717s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extensions ['colcon_pkg']
+[1.718s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extension 'colcon_pkg'
+[1.718s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extensions ['colcon_meta']
+[1.718s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extension 'colcon_meta'
+[1.718s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extensions ['ros']
+[1.718s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pathfinding) by extension 'ros'
+[1.720s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/pathfinding' with type 'ros.ament_python' and name 'pathfinding'
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extensions ['ignore', 'ignore_ament_install']
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extension 'ignore'
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extension 'ignore_ament_install'
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extensions ['colcon_pkg']
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extension 'colcon_pkg'
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extensions ['colcon_meta']
+[1.721s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extension 'colcon_meta'
+[1.722s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extensions ['ros']
+[1.722s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect) by extension 'ros'
+[1.754s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect' with type 'ros.ament_python' and name 'pytorch_cone_detect'
+[1.755s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extensions ['ignore', 'ignore_ament_install']
+[1.755s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extension 'ignore'
+[1.756s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extension 'ignore_ament_install'
+[1.756s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extensions ['colcon_pkg']
+[1.756s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extension 'colcon_pkg'
+[1.757s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extensions ['colcon_meta']
+[1.757s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extension 'colcon_meta'
+[1.757s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extensions ['ros']
+[1.758s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/random_cone_detect) by extension 'ros'
+[1.765s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/random_cone_detect' with type 'ros.ament_python' and name 'random_cone_detect'
+[1.766s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extensions ['ignore', 'ignore_ament_install']
+[1.766s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extension 'ignore'
+[1.766s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extension 'ignore_ament_install'
+[1.767s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extensions ['colcon_pkg']
+[1.767s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extension 'colcon_pkg'
+[1.767s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extensions ['colcon_meta']
+[1.767s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extension 'colcon_meta'
+[1.768s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extensions ['ros']
+[1.768s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect) by extension 'ros'
+[1.774s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect' with type 'ros.ament_python' and name 'tensorrt_cone_detect'
+[1.775s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extensions ['ignore', 'ignore_ament_install']
+[1.776s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extension 'ignore'
+[1.776s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extension 'ignore_ament_install'
+[1.777s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extensions ['colcon_pkg']
+[1.778s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extension 'colcon_pkg'
+[1.778s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extensions ['colcon_meta']
+[1.778s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extension 'colcon_meta'
+[1.778s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extensions ['ros']
+[1.779s] colcon.colcon_core.package_identification Level 1 _identify(/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp) by extension 'ros'
+[1.783s] colcon.colcon_core.package_identification DEBUG Package '/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect_cpp' with type 'ros.ament_cmake' and name 'tensorrt_cone_detect_cpp'
+[1.783s] colcon.colcon_core.package_discovery Level 1 discover_packages(recursive) using defaults
