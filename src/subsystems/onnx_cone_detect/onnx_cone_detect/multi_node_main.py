@@ -8,7 +8,7 @@ from rclpy.executors import MultiThreadedExecutor
 
 from onnx_cone_detect.detection_node import DepthAIDriver
 from onnx_cone_detect.depth_node import DepthTrackingNode
-from onnx_cone_detect.pathfinding_node import PathNode
+from pathfinding.pathfinding_node import PathNode
 from onnx_cone_detect.imu_viz_node import ImuVizNode
 
 import psutil

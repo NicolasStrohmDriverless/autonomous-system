@@ -10,7 +10,7 @@ from std_msgs.msg import Float32
 
 from pytorch_cone_detect.detection_node import DepthAIDriver
 from pytorch_cone_detect.depth_node import DepthTrackingNode
-from pytorch_cone_detect.pathfinding_node import PathNode
+from pathfinding.pathfinding_node import PathNode
 from pytorch_cone_detect.imu_viz_node import ImuVizNode
 
 class SystemUsageNode(Node):

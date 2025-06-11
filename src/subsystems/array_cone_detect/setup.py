@@ -60,7 +60,6 @@ setup(
             'depth_node = array_cone_detect.depth_node:main',
             'imu_viz_node = array_cone_detect.imu_viz_node:main',
             'multi_node_main = array_cone_detect.multi_node_main:main',
-            'pathfinding_node = array_cone_detect.pathfinding_node:main',
         ],
     },
 )
