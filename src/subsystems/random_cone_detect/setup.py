@@ -42,6 +42,10 @@ setup(
     license='MIT',
 
     data_files=[
+        (
+            'share/ament_index/resource_index/packages',
+            [f'resource/{package_name}'],
+        ),
         # 2) package.xml
         (f'share/{package_name}', ['package.xml']),
         # 3) launch files

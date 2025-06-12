@@ -32,6 +32,10 @@ setup(
     description='OAK-D basierte Kegelerkennung mit DepthAI und YOLO in Python',
     license='MIT',
     data_files=[
+        (
+            'share/ament_index/resource_index/packages',
+            [f'resource/{package_name}'],
+        ),
         # 2) package.xml
         (
             f'share/{package_name}',
