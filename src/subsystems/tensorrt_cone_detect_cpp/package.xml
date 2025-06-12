@@ -14,9 +14,9 @@
   <depend>image_transport</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>OpenCV</build_depend>
+  <build_depend>opencv</build_depend>
 
-  <exec_depend>OpenCV</exec_depend>
+  <exec_depend>opencv</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

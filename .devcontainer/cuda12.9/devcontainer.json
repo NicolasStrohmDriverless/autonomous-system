@@ -1,8 +1,9 @@
-// devcontainer.json
+// .devcontainer/cuda12.9/devcontainer.json
 {
-  "name": "Default",
+  "name": "Autonomous System (CUDA12.9)",
   "remoteUser": "strohmo",
   "build": {
+    // vom Ordner .devcontainer/cuda12.9 zwei Ebenen hoch → /home/.../autonomous-system
     "context": "../..",
     "dockerfile": "../../docker/Dockerfile.cuda12.9",
     "target": "default",
@@ -24,7 +25,7 @@
     "-e DISPLAY=host.docker.internal:0.0",
     "-e LIBGL_ALWAYS_INDIRECT=0",
     "--device-cgroup-rule=c 189:* rmw",
-    "--cpus=8"   
+    "--cpus=8"
   ],
   "customizations": {
     "vscode": {
@@ -85,5 +86,5 @@
     }
   },
   "postCreateCommand": "rm -rf build/ install/ log/ && sudo chown -R strohmo ~/autonomous-system/ && rosdep update && rosdep install --from-paths src --ignore-src --rosdistro humble -y && colcon build --symlink-install --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Debug",
-  "postStartCommand":  "cp src/drivers/depthai-ros/calibration/calibration.json /tmp/"
+  "postStartCommand": "cp src/drivers/depthai-ros/calibration/calibration.json /tmp/"
 }

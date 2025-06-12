@@ -1,6 +1,5 @@
-# --- DEFAULT STAGE ---
+# docker/Dockerfile.cuda12.9
 FROM osrf/ros:humble-desktop-full AS default
-
 ARG USERNAME=strohmo
 ARG UID=1000
 ARG GID=$UID
@@ -22,7 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       unzip \
       wget \
       git \
-      # ROS-Core + wichtige Erweiterungen
       ros-${ROS_DISTRO}-ros-base \
       ros-${ROS_DISTRO}-cv-bridge \
       ros-${ROS_DISTRO}-image-transport \
@@ -73,13 +71,12 @@ RUN groupadd -g "$GID" "$USERNAME" \
  && useradd -lm -u "$UID" -g "$USERNAME" -s /bin/bash "$USERNAME" \
  && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+# *** COPY AND CHMOD BEFORE SWITCHING USER ***
+COPY --chown=root:root .devcontainer/ros_entrypoint.sh /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh
+
 USER $USERNAME
 WORKDIR /home/$USERNAME/autonomous-system
-
-# 5) ROS-Setup in .bashrc
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/$USERNAME/.bashrc \
- && echo "[ -f \"/home/$USERNAME/autonomous-system/install/setup.bash\" ] && source \"/home/$USERNAME/autonomous-system/install/setup.bash\"" >> /home/$USERNAME/.bashrc \
- && echo "export PATH=\"/home/$USERNAME/.local/bin:\$PATH\"" >> /home/$USERNAME/.bashrc
 
 # 6) Python-Pakete (u.a. mkdocs, OpenCV, ONNX)
 RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
@@ -103,7 +100,11 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
       gpxpy \
  && pip check
 
-# colcon defaults
+
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> $HOME/.bashrc \
+  && echo '[ -f "$HOME/autonomous-system/install/setup.bash" ] && source "$HOME/autonomous-system/install/setup.bash"' >> $HOME/.bashrc \
+  && echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
+
 RUN mkdir -p $HOME/.colcon \
   && cat <<EOF > $HOME/.colcon/defaults.yaml
 {

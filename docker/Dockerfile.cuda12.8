@@ -1,6 +1,5 @@
-# --- DEFAULT STAGE ---
+# docker/Dockerfile.cuda12.8
 FROM osrf/ros:humble-desktop-full AS default
-
 ARG USERNAME=strohmo
 ARG UID=1000
 ARG GID=$UID
@@ -21,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libopencv-dev \
       unzip \
       wget \
+      git \
       ros-${ROS_DISTRO}-ros-base \
       ros-${ROS_DISTRO}-cv-bridge \
       ros-${ROS_DISTRO}-image-transport \
@@ -56,17 +56,17 @@ RUN mkdir -p /opt/onnxruntime \
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/onnxruntime/lib:$LD_LIBRARY_PATH \
     CPATH=/opt/onnxruntime/include:$CPATH
 
-# 4) Entrypoint kopieren und ausführbar machen – noch als root!
-COPY --chown=root:root .devcontainer/ros_entrypoint.sh /ros_entrypoint.sh
-RUN chmod +x /ros_entrypoint.sh
-
-# 5) Nicht-Root-User anlegen und wechseln
+# 4) Nicht-Root-User anlegen und wechseln
 RUN groupadd -g "$GID" "$USERNAME" \
  && useradd -lm -u "$UID" -g "$USERNAME" -s /bin/bash "$USERNAME" \
  && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER $USERNAME
 WORKDIR /home/$USERNAME/autonomous-system
+
+# 5) Entrypoint kopieren (jetzt korrekt)
+COPY --chown=root:root .devcontainer/ros_entrypoint.sh /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh
 
 # 6) Python-Pakete (UL YOLO, TRT-Bindings, …)
 RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
