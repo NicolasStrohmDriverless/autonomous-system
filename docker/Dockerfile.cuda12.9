@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential \
       cmake \
       pkg-config \
-      python3-numpy \
-      python3-opencv \
       xauth \
       libpcl-dev \
       libopencv-dev \
@@ -90,6 +88,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
       pyserial \
       depthai \
       colcon-common-extensions \
+      numpy==1.24.4 \        
       scipy \
       filterpy \
       tensorrt \
@@ -99,6 +98,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip wheel \
       PyYAML \
       gpxpy \
  && pip check
+
 
 
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> $HOME/.bashrc \

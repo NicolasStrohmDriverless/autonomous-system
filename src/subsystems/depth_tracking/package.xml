@@ -12,7 +12,7 @@
   <depend>oak_cone_detect_interfaces</depend>
   <depend>std_msgs</depend>
   <depend>filterpy</depend>
-  <depend>numpy</depend>
+  <depend>python3-numpy</depend>
   <depend>python3-opencv</depend>
 
   <export>

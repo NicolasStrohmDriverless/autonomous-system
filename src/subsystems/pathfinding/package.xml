@@ -7,7 +7,7 @@
   <license>MIT</license>
 
   <depend>rclpy</depend>
-  <depend>numpy</depend>
+  <depend>python3-numpy</depend>
   <depend>python3-scipy</depend>
   <depend>geometry_msgs</depend>
   <depend>visualization_msgs</depend>
