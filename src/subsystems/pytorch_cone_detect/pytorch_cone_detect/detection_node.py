@@ -29,7 +29,9 @@ from ultralytics import YOLO  # Ultralytics-PyTorch
 import time  
 
 # === Modell- und Hardware-Konfiguration ===
-MODEL_PATH = "/home/strohmo/autonomous-system/src/subsystems/tensorrt_cone_detect/resource/best.pt"
+# Ort der Gewichtsdateien innerhalb des Devcontainers
+RESOURCE_DIR = "/home/strohmo/autonomous-system/.devcontainer/resource"
+MODEL_PATH = os.path.join(RESOURCE_DIR, "best.pt")
 PREFERRED_DEVICE = 'cuda:0'  # GPU-ID für PyTorch
 CONF_THRESHOLD = 0.6         # Konfidenz-Schwelle
 IOU_THRESHOLD = 0.65         # NMS IoU-Schwelle
