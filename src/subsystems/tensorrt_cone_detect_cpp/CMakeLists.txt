@@ -36,4 +36,11 @@ target_link_libraries(detection_node ${ONNXRUNTIME_LIB})
 install(TARGETS detection_node
   DESTINATION lib/${PROJECT_NAME})
 
+# Install the Python-based multi-node launcher so it can be invoked via
+# ``ros2 run tensorrt_cone_detect_cpp multi_node_main.py``
+install(
+  PROGRAMS src/multi_node_main.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
