@@ -104,7 +104,7 @@ class DepthAIDriver(Node):
         self.create_timer(0.01, self.on_timer)
 
         # ONNX Runtime laden (416×416 Modell)
-        resource_dir = "/home/strohmo/autonomous-system/.devcontainer/resource"
+        resource_dir = "/home/strohmo/autonomous-system/resource"
         onnx_path = os.path.join(resource_dir, "v11n_416x416.onnx")
         so = ort.SessionOptions()
         so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
