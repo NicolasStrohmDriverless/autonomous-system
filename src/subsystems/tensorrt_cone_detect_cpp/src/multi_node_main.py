@@ -6,7 +6,6 @@ from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import Float32
 
-from tensorrt_cone_detect.detection_node import DepthAIDriver
 from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
 from tensorrt_cone_detect.imu_viz_node import ImuVizNode
@@ -40,7 +39,6 @@ def main():
     rclpy.init()
     detection_proc = subprocess.Popen(['ros2', 'run', 'tensorrt_cone_detect_cpp', 'detection_node'])
     nodes = [
-        DepthAIDriver(),
         DepthTrackingNode(),
         PathNode(),
         ImuVizNode(),
