@@ -243,7 +243,18 @@ class DepthAIDriver(Node):
         self.last_inference_time = t_now
 
         h0, w0 = frame.shape[:2]
-        results = self.model(frame, device=self.device_name, conf=CONF_THRESHOLD, iou=IOU_THRESHOLD)
+        try:
+            results = self.model(frame, device=self.device_name, conf=CONF_THRESHOLD, iou=IOU_THRESHOLD)
+        except RuntimeError as e:
+            if 'no kernel image is available' in str(e).lower():
+                self.get_logger().error(
+                    f"CUDA inference failed: {e}. Falling back to CPU."
+                )
+                self.device_name = 'cpu'
+                self.model.to('cpu')
+                results = self.model(frame, device='cpu', conf=CONF_THRESHOLD, iou=IOU_THRESHOLD)
+            else:
+                raise
         dets = []
         overlay = frame.copy()
         for box in results[0].boxes:
