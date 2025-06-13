@@ -29,8 +29,8 @@ from ultralytics import YOLO  # Ultralytics-PyTorch
 import time  
 
 # === Modell- und Hardware-Konfiguration ===
-# Ort der Gewichtsdateien innerhalb des Devcontainers
-RESOURCE_DIR = "/home/strohmo/autonomous-system/.devcontainer/resource"
+# Ort der Gewichtsdateien auf dem Fahrzeug
+RESOURCE_DIR = "/home/strohmo/autonomous-system/resource"
 MODEL_PATH = os.path.join(RESOURCE_DIR, "best.pt")
 PREFERRED_DEVICE = 'cuda:0'  # GPU-ID für PyTorch
 CONF_THRESHOLD = 0.6         # Konfidenz-Schwelle
