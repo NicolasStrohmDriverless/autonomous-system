@@ -21,6 +21,7 @@ import depthai as dai
 import numpy as np
 import cv2
 import onnxruntime as ort
+import os
 
 # Farbzuordnung
 CLASS_TO_COLOR = {
@@ -103,7 +104,8 @@ class DepthAIDriver(Node):
         self.create_timer(0.01, self.on_timer)
 
         # ONNX Runtime laden (416×416 Modell)
-        onnx_path = "/home/strohmo/autonomous-system/src/subsystems/onnx_cone_detect/resource/v11n_416x416.onnx"
+        resource_dir = "/home/strohmo/autonomous-system/.devcontainer/resource"
+        onnx_path = os.path.join(resource_dir, "v11n_416x416.onnx")
         so = ort.SessionOptions()
         so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         self.session = ort.InferenceSession(

@@ -20,6 +20,7 @@ import numpy as np
 import cv2
 import onnxruntime as ort
 import tensorrt  # TensorRT library added
+import os
 
 # === GPU-Konfiguration (zum globalen Anpassen) ===
 # GPU ID und Provider-Optionen können hier verändert werden
@@ -98,7 +99,8 @@ class DepthAIDriver(Node):
         self.create_timer(0.01, self.on_timer)
 
         # ONNX Runtime Laden mit TensorRT- und CUDA-Execution-Providern
-        onnx_path = "/home/strohmo/autonomous-system/src/subsystems/pytorch_cone_detect/resource/v11n_416x416.onnx"
+        resource_dir = "/home/strohmo/autonomous-system/.devcontainer/resource"
+        onnx_path = os.path.join(resource_dir, "v11n_416x416.onnx")
         so = ort.SessionOptions()
         so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
