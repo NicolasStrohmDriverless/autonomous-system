@@ -17,6 +17,7 @@
   <depend>pathfinding</depend>
   <depend>depth_tracking</depend>
   <depend>sort_tracking</depend>
+  <depend>art_slam</depend>
 
   <export>
     <build_type>ament_python</build_type>
