@@ -30,6 +30,12 @@ class ArtSlamNode(Node):
         self.pose_x = 0.0
         self.pose_y = 0.0
         self.pose_yaw = 0.0
+        self.vel_x = 0.0
+        self.vel_y = 0.0
+        self.last_imu_time = None
+
+        self.last_path = []
+        self.ideal_path = []
 
         self.cone_map = {}
         self.paths = []
@@ -59,6 +65,25 @@ class ArtSlamNode(Node):
         cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
         self.pose_yaw = math.atan2(siny_cosp, cosy_cosp)
 
+        now = self.get_clock().now().nanoseconds / 1e9
+        if self.last_imu_time is None:
+            dt = 0.0
+        else:
+            dt = now - self.last_imu_time
+        self.last_imu_time = now
+
+        ax = msg.linear_acceleration.x
+        ay = msg.linear_acceleration.y
+
+        # rotate acceleration into map frame
+        ax_world = math.cos(self.pose_yaw) * ax - math.sin(self.pose_yaw) * ay
+        ay_world = math.sin(self.pose_yaw) * ax + math.cos(self.pose_yaw) * ay
+
+        self.vel_x += ax_world * dt
+        self.vel_y += ay_world * dt
+        self.pose_x += self.vel_x * dt
+        self.pose_y += self.vel_y * dt
+
     def cone_callback(self, msg: ConeArray3D):
         # transform cones to map frame and cluster duplicates
         for c in msg.cones:
@@ -82,9 +107,13 @@ class ArtSlamNode(Node):
             if not merged:
                 self.cone_map[c.id] = (gx, gy, c.color)
 
-        self.current_path = self.compute_path()
-        if self.current_path:
-            self.paths.append(list(self.current_path))
+        new_path = self.compute_path()
+        if new_path:
+            self.update_ideal_path(new_path)
+            self.paths.append(list(self.ideal_path))
+            self.current_path = list(self.ideal_path)
+        else:
+            self.current_path = []
 
         self.publish_markers(msg.header)
 
@@ -118,6 +147,30 @@ class ArtSlamNode(Node):
 
         path.sort(key=lambda p: p[1])
         return path
+
+    def update_ideal_path(self, new_path, alpha: float = 0.8):
+        """Blend new_path with last ideal path."""
+        if not self.ideal_path:
+            self.ideal_path = list(new_path)
+            self.last_path = list(new_path)
+            return
+
+        m = min(len(new_path), len(self.ideal_path))
+        updated = []
+        for i in range(m):
+            ox, oy = self.ideal_path[i]
+            nx, ny = new_path[i]
+            x = alpha * ox + (1 - alpha) * nx
+            y = alpha * oy + (1 - alpha) * ny
+            updated.append((x, y))
+
+        if len(new_path) > m:
+            updated.extend(new_path[m:])
+        else:
+            updated.extend(self.ideal_path[m:])
+
+        self.ideal_path = updated
+        self.last_path = list(new_path)
 
     def publish_markers(self, header: Header):
         all_markers = MarkerArray()
