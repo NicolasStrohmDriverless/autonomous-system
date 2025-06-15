@@ -61,6 +61,9 @@ class ArtSlamNode(Node):
         self.path_pub = self.create_publisher(MarkerArray, '/art_slam/paths', 10)
         self.cloud_pub = self.create_publisher(PointCloud2, '/art_slam/cone_cloud', 10)
 
+        # Confirm initialization
+        self.get_logger().info('ArtSlamNode started')
+
     def lap_callback(self, msg: Bool):
         if msg.data and not self.lap_done:
             self.get_logger().info('Lap completed: publishing stored map.')

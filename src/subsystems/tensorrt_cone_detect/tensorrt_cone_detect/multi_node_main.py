@@ -24,6 +24,9 @@ class SystemUsageNode(Node):
         # alle 1s
         self.create_timer(1.0, self.publish_usage)
 
+        # Confirm initialization
+        self.get_logger().info('SystemUsageNode started')
+
     def publish_usage(self):
         # CPU-Auslastung
         cpu_percent = psutil.cpu_percent(interval=None)
@@ -63,6 +66,9 @@ def main():
     executor = MultiThreadedExecutor(num_threads=len(nodes))
     for node in nodes:
         executor.add_node(node)
+        rclpy.logging.get_logger('multi_node_main').info(
+            f'{node.get_name()} added to executor')
+    rclpy.logging.get_logger('multi_node_main').info('All nodes started')
     try:
         executor.spin()
     finally:

@@ -79,6 +79,9 @@ class PathNode(Node):
         self.fps_pub    = self.create_publisher(Float32,     '/path_inference_fps', 10)
         self.angle_pub  = self.create_publisher(Float32,     '/path_to_y_axis_angle', 10)
 
+        # Confirm initialization
+        self.get_logger().info('PathNode started')
+
         # interne Puffer
         self._frame_times    = []
         self.prev_bg         = None

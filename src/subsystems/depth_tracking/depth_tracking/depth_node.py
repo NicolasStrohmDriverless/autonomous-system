@@ -49,6 +49,9 @@ class DepthTrackingNode(Node):
         self.last_time = time.time()
         self.fps = 0.0
 
+        # Confirm initialization
+        self.get_logger().info('DepthTrackingNode started')
+
     def detections_cb(self, msg: ConeArray2D):
         self.latest_detections = msg
 
