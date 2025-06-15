@@ -5,8 +5,10 @@
   <description>Simple Online and Realtime Tracking utilities</description>
   <maintainer email="noreply@example.com">AutoBot</maintainer>
   <license>MIT</license>
-  <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>python3</exec_depend>
   <exec_depend>scipy</exec_depend>
   <exec_depend>filterpy</exec_depend>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
 </package>
