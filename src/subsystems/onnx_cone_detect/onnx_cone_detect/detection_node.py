@@ -16,6 +16,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image, Imu
 from std_msgs.msg import Float32
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D
+from sort_tracking.sort import Sort, iou
 from cv_bridge import CvBridge
 import depthai as dai
 import numpy as np
@@ -117,6 +118,9 @@ class DepthAIDriver(Node):
         self.conf_threshold = 0.6
         self.iou_threshold  = 0.65
 
+        # Tracker for 2D detections
+        self.tracker = Sort(max_age=5, min_hits=1, iou_threshold=0.3)
+
         self.get_logger().info("DepthAIDriver: v11n_416x416.onnx geladen, starte Inferenz auf GPU")
 
     def on_timer(self):
@@ -133,6 +137,13 @@ class DepthAIDriver(Node):
 
             # 1.2) Detection + Overlay + Inferenz-FPS-Berechnung
             dets, overlay, fps = self.run_yolo_and_draw(frame)
+            # Update tracker with bounding boxes
+            boxes = []
+            for d in dets:
+                if d.get('bbox'):
+                    boxes.append(d['bbox'])
+            boxes = np.array(boxes) if len(boxes) > 0 else np.empty((0, 4))
+            tracks = self.tracker.update(boxes)
 
             # 1.3) FPS in Overlay einzeichnen
             fps_text = f"{fps:.1f} FPS"
@@ -154,17 +165,33 @@ class DepthAIDriver(Node):
             # 1.5) ConeArray2D publishen
             arr2d = ConeArray2D()
             arr2d.header.stamp = t
-            for i, d in enumerate(dets):
+            for tr in tracks:
+                x1, y1, x2, y2, tid = tr
+                cx = (x1 + x2) / 2.0
+                cy = (y1 + y2) / 2.0
+                best = None
+                best_iou = 0.0
+                for d in dets:
+                    if d.get('bbox') is None:
+                        continue
+                    iou_val = iou(d['bbox'], [x1, y1, x2, y2])
+                    if iou_val > best_iou:
+                        best_iou = iou_val
+                        best = d
                 c = Cone2D()
-                c.id    = str(i)
-                c.label = d['label']
-                c.conf  = d['conf']
-                c.x     = d['cx']
-                c.y     = d['cy']
-                c.color = d['color']
+                c.id = str(int(tid))
+                if best:
+                    c.label = best['label']
+                    c.conf = best['conf']
+                    c.color = best['color']
+                else:
+                    c.label = ''
+                    c.conf = 0.0
+                    c.color = 'blue'
+                c.x = float(cx)
+                c.y = float(cy)
                 arr2d.cones.append(c)
             self.pub_det2d.publish(arr2d)
-
             # 1.6) Inferenz-FPS publishen
             fps_msg = Float32()
             fps_msg.data = float(fps)
@@ -247,12 +274,18 @@ class DepthAIDriver(Node):
         sy   = h0 / self.input_shape[1]
         dets = []
         for d in dets_small:
+            bbox = d.get('bbox')
+            if bbox is not None:
+                scaled_bbox = [bbox[0]*sx, bbox[1]*sy, bbox[2]*sx, bbox[3]*sy]
+            else:
+                scaled_bbox = None
             dets.append({
                 'label': d['label'],
                 'conf':  d['conf'],
                 'cx':    d['cx'] * sx,
                 'cy':    d['cy'] * sy,
-                'color': d['color']
+                'color': d['color'],
+                'bbox':  scaled_bbox
             })
 
         fps = 1e9 / (self.get_clock().now().nanoseconds - t0 + 1)  # Nanosec → Hz
@@ -289,7 +322,12 @@ class DepthAIDriver(Node):
                 cv2.circle(   out, (int(cx), int(cy)), 4, col, -1)
                 cv2.putText(out, f"{lbl} {conf:.2f}", (x1, y1 - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1)
-                dets.append({'label': lbl, 'conf': conf, 'cx': cx, 'cy': cy, 'color': lbl})
+                dets.append({'label': lbl,
+                             'conf': conf,
+                             'cx': cx,
+                             'cy': cy,
+                             'color': lbl,
+                             'bbox': [x1, y1, x2, y2]})
             return dets, out
 
         # --- FALL 2: klassisches Grid-Format (1,C,H,W) ---
@@ -350,7 +388,12 @@ class DepthAIDriver(Node):
             cv2.circle(   out, (int(cx), int(cy)), 4, col, -1)
             cv2.putText(out, f"{lbl} {conf:.2f}", (xx1, yy1 - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1)
-            dets.append({'label': lbl, 'conf': conf, 'cx': cx, 'cy': cy, 'color': lbl})
+            dets.append({'label': lbl,
+                         'conf': conf,
+                         'cx': cx,
+                         'cy': cy,
+                         'color': lbl,
+                         'bbox': [xx1, yy1, xx2, yy2]})
 
         return dets, out
 

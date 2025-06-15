@@ -20,6 +20,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image, Imu
 from std_msgs.msg import Float32
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D
+from sort_tracking.sort import Sort, iou
 from cv_bridge import CvBridge
 import depthai as dai
 import numpy as np
@@ -65,6 +66,7 @@ class DepthAIDriver(Node):
         # FPS-Variablen für YOLO-Inferencing
         self.last_inference_time = None
         self.current_fps = 0.0
+        self.tracker = Sort(max_age=5, min_hits=1, iou_threshold=0.3)
 
         # DepthAI-Pipeline Setup
         pipeline = dai.Pipeline()
@@ -165,6 +167,10 @@ class DepthAIDriver(Node):
 
             # Detection + Overlay
             dets, overlay, fps = self.run_yolo_and_draw(frame)
+            boxes = np.array([d['bbox'] for d in dets if d.get('bbox') is not None])
+            if boxes.size == 0:
+                boxes = np.empty((0,4))
+            tracks = self.tracker.update(boxes)
 
             # FPS-Overlay direkt ins Bild (optional, kann entfernt werden)
             cv2.putText(overlay, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,255,0), 2)
@@ -174,17 +180,33 @@ class DepthAIDriver(Node):
             ov_msg.header.stamp = t
             self.pub_overlay.publish(ov_msg)
 
-            # Publish ConeArray2D
             arr2d = ConeArray2D()
             arr2d.header.stamp = t
-            for i, d in enumerate(dets):
+            for tr in tracks:
+                x1,y1,x2,y2,tid = tr
+                cx = (x1+x2)/2.0
+                cy = (y1+y2)/2.0
+                best=None
+                best_i=0.0
+                for d in dets:
+                    if d.get('bbox') is None:
+                        continue
+                    iv = iou(d['bbox'], [x1,y1,x2,y2])
+                    if iv>best_i:
+                        best_i=iv
+                        best=d
                 c = Cone2D()
-                c.id    = str(i)
-                c.label = d['label']
-                c.conf  = d['conf']
-                c.x     = d['cx']
-                c.y     = d['cy']
-                c.color = d['color']
+                c.id = str(int(tid))
+                if best:
+                    c.label=best['label']
+                    c.conf=best['conf']
+                    c.color=best['color']
+                else:
+                    c.label=''
+                    c.conf=0.0
+                    c.color='blue'
+                c.x=float(cx)
+                c.y=float(cy)
                 arr2d.cones.append(c)
             self.pub_det2d.publish(arr2d)
 
@@ -268,7 +290,12 @@ class DepthAIDriver(Node):
             cv2.circle(overlay, (int(cx), int(cy)), 4, col, -1)
             cv2.putText(overlay, f"{label} {conf:.2f}", (x1, y1-5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1)
-            dets.append({'label': label, 'conf': conf, 'cx': cx, 'cy': cy, 'color': label})
+            dets.append({'label': label,
+                         'conf': conf,
+                         'cx': cx,
+                         'cy': cy,
+                         'color': label,
+                         'bbox': [x1, y1, x2, y2]})
         # FPS aus dem Statusfeld des Objekts
         return dets, overlay, self.current_fps
 
