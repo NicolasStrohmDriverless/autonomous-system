@@ -10,7 +10,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu, PointCloud2, PointField
 from geometry_msgs.msg import Point
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Bool
 from visualization_msgs.msg import Marker, MarkerArray
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
@@ -41,6 +41,9 @@ class ArtSlamNode(Node):
         self.paths = []
         self.current_path = []
 
+        self.lap_done = False
+        self.create_subscription(Bool, '/lap_completed', self.lap_callback, 10)
+
         self.sub_cones = self.create_subscription(
             ConeArray3D,
             '/cone_detections_3d',
@@ -57,6 +60,11 @@ class ArtSlamNode(Node):
         self.range_pub = self.create_publisher(MarkerArray, '/art_slam/range_map', 10)
         self.path_pub = self.create_publisher(MarkerArray, '/art_slam/paths', 10)
         self.cloud_pub = self.create_publisher(PointCloud2, '/art_slam/cone_cloud', 10)
+
+    def lap_callback(self, msg: Bool):
+        if msg.data and not self.lap_done:
+            self.get_logger().info('Lap completed: publishing stored map.')
+            self.lap_done = True
 
     def imu_callback(self, msg: Imu):
         q = msg.orientation
@@ -115,7 +123,8 @@ class ArtSlamNode(Node):
         else:
             self.current_path = []
 
-        self.publish_markers(msg.header)
+        if self.lap_done:
+            self.publish_markers(msg.header)
 
     def compute_path(self):
         # use KD-tree to efficiently find matching cones
