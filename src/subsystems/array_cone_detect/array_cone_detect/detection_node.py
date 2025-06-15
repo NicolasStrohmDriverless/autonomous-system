@@ -51,8 +51,11 @@ class ConeArrayPublisher(Node):
             cone.label = ''
             cone.conf = 1.0
             cone.x = obj['X_mm'] / 1000.0  # Umrechnung mm -> m
-            cone.y = obj['Y_mm'] / 1000.0
-            cone.z = obj['Z_cm'] / 100.0   # Umrechnung cm -> m
+            # In den gelieferten Datensätzen steht die Tiefe in Z_cm. Diese
+            # soll als y-Koordinate interpretiert werden, während z auf 0.0
+            # gesetzt wird, um einen ebenen Boden (true ground) zu gewährleisten.
+            cone.y = obj['Z_cm'] / 100.0   # Tiefe -> y
+            cone.z = 0.0
             cone.color = obj['color']
             cone_array.cones.append(cone)
 
