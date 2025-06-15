@@ -13,6 +13,201 @@
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 
+#include <algorithm>
+
+// --- Simple SORT tracker implementation (ported from Python) ---
+static float iou(const cv::Rect2f &a, const cv::Rect2f &b) {
+  float xx1 = std::max(a.x, b.x);
+  float yy1 = std::max(a.y, b.y);
+  float xx2 = std::min(a.x + a.width, b.x + b.width);
+  float yy2 = std::min(a.y + a.height, b.y + b.height);
+  float w = std::max(0.f, xx2 - xx1);
+  float h = std::max(0.f, yy2 - yy1);
+  float inter = w * h;
+  float uni = a.width * a.height + b.width * b.height - inter + 1e-6f;
+  return inter / uni;
+}
+
+static cv::Mat convert_bbox_to_z(const cv::Rect2f &bbox) {
+  float w = bbox.width;
+  float h = bbox.height;
+  float x = bbox.x + w / 2.0f;
+  float y = bbox.y + h / 2.0f;
+  float s = w * h;
+  float r = w / (h + 1e-6f);
+  cv::Mat z(4, 1, CV_32F);
+  z.at<float>(0) = x;
+  z.at<float>(1) = y;
+  z.at<float>(2) = s;
+  z.at<float>(3) = r;
+  return z;
+}
+
+static cv::Rect2f convert_x_to_bbox(const cv::Mat &x) {
+  float w = std::sqrt(x.at<float>(2) * x.at<float>(3));
+  float h = x.at<float>(2) / (w + 1e-6f);
+  float cx = x.at<float>(0);
+  float cy = x.at<float>(1);
+  return cv::Rect2f(cx - w / 2.f, cy - h / 2.f, w, h);
+}
+
+class KalmanBoxTracker {
+public:
+  KalmanBoxTracker(const cv::Rect2f &bbox) : kf_(7, 4, 0) {
+    float dt = 1.f;
+    kf_.transitionMatrix = (cv::Mat_<float>(7, 7) <<
+      1,0,0,0,dt,0,0,
+      0,1,0,0,0,dt,0,
+      0,0,1,0,0,0,dt,
+      0,0,0,1,0,0,0,
+      0,0,0,0,1,0,0,
+      0,0,0,0,0,1,0,
+      0,0,0,0,0,0,1);
+    kf_.measurementMatrix = (cv::Mat_<float>(4,7) <<
+      1,0,0,0,0,0,0,
+      0,1,0,0,0,0,0,
+      0,0,1,0,0,0,0,
+      0,0,0,1,0,0,0);
+    setIdentity(kf_.processNoiseCov, cv::Scalar::all(1e-2));
+    kf_.processNoiseCov.at<float>(6,6) *= 0.01f;
+    for(int i=4;i<7;i++) kf_.processNoiseCov.at<float>(i,i) *= 0.01f;
+    setIdentity(kf_.measurementNoiseCov, cv::Scalar::all(1));
+    kf_.measurementNoiseCov.at<float>(2,2) *= 10.f;
+    kf_.measurementNoiseCov.at<float>(3,3) *= 10.f;
+    setIdentity(kf_.errorCovPost, cv::Scalar::all(1));
+    for(int i=4;i<7;i++) kf_.errorCovPost.at<float>(i,i) *= 1000.f;
+    kf_.errorCovPost *= 10.f;
+    cv::Mat z = convert_bbox_to_z(bbox);
+    kf_.statePost.at<float>(0) = z.at<float>(0);
+    kf_.statePost.at<float>(1) = z.at<float>(1);
+    kf_.statePost.at<float>(2) = z.at<float>(2);
+    kf_.statePost.at<float>(3) = z.at<float>(3);
+    kf_.statePost.at<float>(4) = 0;
+    kf_.statePost.at<float>(5) = 0;
+    kf_.statePost.at<float>(6) = 0;
+    time_since_update_ = 0;
+    id_ = count_++;
+    hits_ = 1;
+    hit_streak_ = 1;
+    age_ = 0;
+  }
+
+  void update(const cv::Rect2f &bbox) {
+    cv::Mat z = convert_bbox_to_z(bbox);
+    kf_.correct(z);
+    time_since_update_ = 0;
+    hits_++;
+    hit_streak_++;
+  }
+
+  cv::Rect2f predict() {
+    if ((kf_.statePost.at<float>(6) + kf_.statePost.at<float>(2)) <= 0)
+      kf_.statePost.at<float>(6) = 0;
+    cv::Mat p = kf_.predict();
+    age_++;
+    if (time_since_update_ > 0)
+      hit_streak_ = 0;
+    time_since_update_++;
+    return convert_x_to_bbox(p);
+  }
+
+  cv::Rect2f get_state() const { return convert_x_to_bbox(kf_.statePost); }
+
+  int id_{0};
+  int time_since_update_{0};
+  int hits_{0};
+  int hit_streak_{0};
+  int age_{0};
+
+private:
+  cv::KalmanFilter kf_;
+  static int count_;
+};
+
+int KalmanBoxTracker::count_ = 0;
+
+class SortTracker {
+public:
+  SortTracker(int max_age = 1, int min_hits = 3, float iou_threshold = 0.3f)
+      : max_age_(max_age), min_hits_(min_hits), iou_threshold_(iou_threshold),
+        frame_count_(0) {}
+
+  std::vector<std::array<float, 5>> update(const std::vector<cv::Rect2f> &dets) {
+    frame_count_++;
+    std::vector<cv::Rect2f> trks(trackers_.size());
+    for (size_t i = 0; i < trackers_.size(); ++i)
+      trks[i] = trackers_[i]->predict();
+
+    std::vector<int> to_del;
+    for (size_t i = 0; i < trks.size(); ++i) {
+      if (std::isnan(trks[i].x))
+        to_del.push_back(i);
+    }
+    for (int i = to_del.size() - 1; i >= 0; --i) {
+      trackers_.erase(trackers_.begin() + to_del[i]);
+      trks.erase(trks.begin() + to_del[i]);
+    }
+
+    size_t D = dets.size(), T = trks.size();
+    std::vector<std::vector<float>> iou_mat(D, std::vector<float>(T, 0.f));
+    for (size_t d = 0; d < D; ++d)
+      for (size_t t = 0; t < T; ++t)
+        iou_mat[d][t] = iou(dets[d], trks[t]);
+
+    std::vector<int> det_assign(D, -1), trk_assign(T, -1);
+    while (true) {
+      float best = -1.f;
+      size_t bi = 0, bj = 0;
+      for (size_t d = 0; d < D; ++d)
+        if (det_assign[d] == -1)
+          for (size_t t = 0; t < T; ++t)
+            if (trk_assign[t] == -1 && iou_mat[d][t] > best) {
+              best = iou_mat[d][t];
+              bi = d;
+              bj = t;
+            }
+      if (best < iou_threshold_)
+        break;
+      det_assign[bi] = bj;
+      trk_assign[bj] = bi;
+    }
+
+    std::vector<int> unmatched_dets, unmatched_trks;
+    for (size_t d = 0; d < D; ++d)
+      if (det_assign[d] == -1)
+        unmatched_dets.push_back(d);
+    for (size_t t = 0; t < T; ++t)
+      if (trk_assign[t] == -1)
+        unmatched_trks.push_back(t);
+
+    for (size_t t = 0; t < T; ++t)
+      if (trk_assign[t] != -1)
+        trackers_[t]->update(dets[trk_assign[t]]);
+
+    for (int idx : unmatched_dets)
+      trackers_.push_back(std::make_unique<KalmanBoxTracker>(dets[idx]));
+
+    std::vector<std::array<float, 5>> ret;
+    for (int i = trackers_.size() - 1; i >= 0; --i) {
+      auto box = trackers_[i]->get_state();
+      if (trackers_[i]->time_since_update_ < 1 &&
+          (trackers_[i]->hit_streak_ >= min_hits_ || frame_count_ <= min_hits_))
+        ret.push_back({box.x, box.y, box.x + box.width, box.y + box.height,
+                       static_cast<float>(trackers_[i]->id_)});
+      if (trackers_[i]->time_since_update_ > max_age_)
+        trackers_.erase(trackers_.begin() + i);
+    }
+    return ret;
+  }
+
+private:
+  int max_age_;
+  int min_hits_;
+  float iou_threshold_;
+  int frame_count_;
+  std::vector<std::unique_ptr<KalmanBoxTracker>> trackers_;
+};
+
 static const std::map<int, std::string> CLASS_TO_COLOR{
     {0, "yellow"}, {1, "orange"}, {2, "orange"}, {3, "red"}, {4, "blue"}
 };
@@ -26,7 +221,7 @@ static const std::vector<cv::Scalar> COLORS{
 
 class ConeDetectorNode : public rclcpp::Node {
 public:
-  ConeDetectorNode() : Node("cone_detector_cpp") {
+  ConeDetectorNode() : Node("cone_detector_cpp"), tracker_(5, 1, 0.3f) {
     declare_parameter<std::string>("onnx_path", "");
     get_parameter("onnx_path", onnx_model_path_);
 
@@ -121,6 +316,15 @@ private:
     auto arr2d = oak_cone_detect_interfaces::msg::ConeArray2D();
     arr2d.header = msg->header;
 
+    struct DetInfo {
+      cv::Rect2f box;
+      std::string label;
+      float conf;
+      std::string color;
+    };
+    std::vector<DetInfo> dets;
+    std::vector<cv::Rect2f> boxes;
+
     for (auto &out : output_tensors) {
       const float *data = out.GetTensorData<float>();
       auto shape = out.GetTensorTypeAndShapeInfo().GetShape();
@@ -136,16 +340,34 @@ private:
         cv::circle(overlay, cv::Point((x1+x2)/2,(y1+y2)/2),4,COLORS[class_id],-1);
         cv::putText(overlay, CLASS_TO_COLOR.at(class_id), cv::Point(x1,y1-5), cv::FONT_HERSHEY_SIMPLEX, 0.5, COLORS[class_id],1);
 
-        oak_cone_detect_interfaces::msg::Cone2D c;
-        c.id = std::to_string(arr2d.cones.size());
-        c.label = CLASS_TO_COLOR.at(class_id);
-        c.conf = conf;
-        c.x = (x1+x2)/2;
-        c.y = (y1+y2)/2;
-        c.color = CLASS_TO_COLOR.at(class_id);
-        arr2d.cones.push_back(c);
+        DetInfo d{cv::Rect2f(x1,y1,x2-x1,y2-y1), CLASS_TO_COLOR.at(class_id), conf, CLASS_TO_COLOR.at(class_id)};
+        dets.push_back(d);
+        boxes.push_back(d.box);
       }
     }
+
+    auto tracks = tracker_.update(boxes);
+    for (auto &tr : tracks) {
+      float x1=tr[0], y1=tr[1], x2=tr[2], y2=tr[3];
+      int tid = static_cast<int>(tr[4]);
+      cv::Rect2f tbox(x1,y1,x2-x1,y2-y1);
+      DetInfo *best=nullptr; float best_i=0.f;
+      for(auto &d:dets){
+        float iv=iou(tbox,d.box);
+        if(iv>best_i){best_i=iv;best=&d;}
+      }
+      oak_cone_detect_interfaces::msg::Cone2D c;
+      c.id = std::to_string(tid);
+      if(best){
+        c.label=best->label; c.conf=best->conf; c.color=best->color;
+      }else{
+        c.label=""; c.conf=0.0f; c.color="blue";
+      }
+      c.x=(x1+x2)/2.0f;
+      c.y=(y1+y2)/2.0f;
+      arr2d.cones.push_back(c);
+    }
+
     pub_detections_->publish(arr2d);
 
     auto overlay_msg = cv_bridge::CvImage(msg->header, "bgr8", overlay).toImageMsg();
@@ -176,6 +398,7 @@ private:
   Ort::SessionOptions session_options_;
   Ort::Session session_{nullptr};
   Ort::MemoryInfo memory_info_{nullptr};
+  SortTracker tracker_;
 };
 
 int main(int argc, char **argv) {
