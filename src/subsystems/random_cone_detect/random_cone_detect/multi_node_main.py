@@ -12,6 +12,7 @@ from std_msgs.msg import Float32
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
+from art_slam.art_slam_node import ArtSlamNode
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -60,6 +61,7 @@ def main():
         nodes = [
             ConeArrayPublisher(mode="accel", max_laps=1),
             PathNode(),
+            ArtSlamNode(),
             SystemUsageNode()
         ]
     elif mode == "endu":
@@ -67,6 +69,7 @@ def main():
             TrackPublisher(),
             ConeArrayPublisher(mode="autox", max_laps=22),
             PathNode(),
+            ArtSlamNode(),
             SystemUsageNode()
         ]
     else:  # autox
@@ -74,6 +77,7 @@ def main():
             TrackPublisher(),
             ConeArrayPublisher(mode="autox", max_laps=2),
             PathNode(),
+            ArtSlamNode(),
             SystemUsageNode()
         ]
 

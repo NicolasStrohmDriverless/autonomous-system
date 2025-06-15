@@ -34,6 +34,7 @@ setup(
         'scipy',
         'shapely',
         'gpxpy',
+        'art_slam',
     ],
     zip_safe=True,
     maintainer='Nicolas Müller',
