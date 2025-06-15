@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import subprocess
+import os
 import psutil
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import Float32
+from ament_index_python.packages import get_package_share_directory
 
 from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
@@ -38,7 +40,12 @@ class SystemUsageNode(Node):
 
 def main():
     rclpy.init()
-    detection_proc = subprocess.Popen(['ros2', 'run', 'tensorrt_cone_detect_cpp', 'detection_node'])
+    pkg_share = get_package_share_directory('tensorrt_cone_detect_cpp')
+    model_path = os.path.join(pkg_share, 'resource', 'v11n_416x416.onnx')
+    detection_proc = subprocess.Popen([
+        'ros2', 'run', 'tensorrt_cone_detect_cpp', 'detection_node',
+        '--ros-args', '-p', f'onnx_path:={model_path}'
+    ])
     nodes = [
         DepthTrackingNode(),
         PathNode(),
