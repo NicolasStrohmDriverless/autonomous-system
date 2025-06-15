@@ -22,6 +22,7 @@ COLOR_PREFIX = {
 BASELINE_M = 0.075         # Meter (75 mm)
 FOCAL_LENGTH_PX = 870.0    # Pixel (siehe OAK-D Datenblatt)
 MIN_DISP = 0.1             # Minimalwert Disparität, sonst ungültig
+ROI_RADIUS_PX = 10         # Radius um Mittelpunkt für Tiefenberechnung
 
 # --- BILDGRÖßE für KAMERA-Hauptpunkt ---
 IMG_WIDTH = 640
@@ -121,10 +122,18 @@ class DepthTrackingNode(Node):
         for c in self.latest_detections.cones:
             xi, yi = int(round(c.x)), int(round(c.y))
             if 0 <= xi < w and 0 <= yi < h:
-                disp = float(disp_img[yi, xi])
-                if disp < MIN_DISP:
+                x0 = max(0, xi - ROI_RADIUS_PX)
+                x1 = min(w, xi + ROI_RADIUS_PX + 1)
+                y0 = max(0, yi - ROI_RADIUS_PX)
+                y1 = min(h, yi + ROI_RADIUS_PX + 1)
+                patch = disp_img[y0:y1, x0:x1].astype(float)
+                patch = patch[patch >= MIN_DISP]
+                if patch.size == 0:
                     continue
-                z = (FOCAL_LENGTH_PX * BASELINE_M) / disp
+                disp_med = float(np.median(patch))
+                if disp_med < MIN_DISP:
+                    continue
+                z = (FOCAL_LENGTH_PX * BASELINE_M) / disp_med
                 measurements.append((xi, yi, z, c.color, c))
 
         # predict existing tracks
