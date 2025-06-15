@@ -56,6 +56,8 @@ def main():
         ImuVizNode(),
         SystemUsageNode(),
     ]
+    rclpy.logging.get_logger('multi_node_main').info(
+        'Using SORT-based tracking in detection node')
     executor = MultiThreadedExecutor(num_threads=len(nodes))
     for node in nodes:
         executor.add_node(node)
