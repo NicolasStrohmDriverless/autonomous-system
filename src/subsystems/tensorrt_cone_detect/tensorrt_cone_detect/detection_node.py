@@ -136,6 +136,9 @@ class DepthAIDriver(Node):
             f"DepthAIDriver: ONNX Runtime geladen mit Providern {provider_names}, starte Inferenz"
         )
 
+        # Signal that the node has been fully initialized
+        self.get_logger().info('DepthAIDriver started')
+
     def on_timer(self):
         # === RGB-Frame + Detection + Overlay + 2D-Publish ===
         in_rgb = self.q_rgb.tryGet()

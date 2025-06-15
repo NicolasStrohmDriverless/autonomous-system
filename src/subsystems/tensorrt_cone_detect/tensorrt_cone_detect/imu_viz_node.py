@@ -16,6 +16,9 @@ class ImuVizNode(Node):
         # Initialisierung für FPS-Berechnung
         self.last_time = None
 
+        # Confirm initialization
+        self.get_logger().info('ImuVizNode started')
+
     def cb(self, msg: Imu):
         now = self.get_clock().now()
         # FPS nur berechnen, wenn wir schon einen vorherigen Zeitstempel haben
