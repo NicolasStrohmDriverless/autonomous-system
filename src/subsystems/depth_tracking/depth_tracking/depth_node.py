@@ -194,7 +194,9 @@ class DepthTrackingNode(Node):
             msg3d.cones.append(c3)
 
             # draw overlay markers
-            cv2.circle(overlay, (int(x_px), int(y_px)), 5, (0, 0, 255), -1)
+            # visualize the area used for the depth median
+            cv2.circle(overlay, (int(x_px), int(y_px)), ROI_RADIUS_PX,
+                       (0, 0, 255), 1)
             cv2.putText(overlay, f"{trk.id} {Z_m:.2f}m", (int(x_px)+5, int(y_px)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 

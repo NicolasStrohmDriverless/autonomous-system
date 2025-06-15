@@ -37,7 +37,8 @@ CONE_POSITION_SCALE     = (1.0, 1.0, 1.0)
 COLOR_MAP = {
     'blue':   [0.0, 0.0, 1.0, 1.0],
     'yellow': [1.0, 1.0, 0.0, 1.0],
-    'orange': [1.0, 0.5, 0.0, 1.0]
+    'orange': [1.0, 0.5, 0.0, 1.0],
+    'red':    [1.0, 0.0, 0.0, 1.0],
 }
 MIDPOINT_COLOR    = [0.5, 0.5, 0.5, 1.0]
 SIDE_CHECK_RADIUS = 2.0
@@ -92,6 +93,9 @@ class PathNode(Node):
         cones = {col: [] for col in COLOR_MAP}
         for c in msg.cones:
             if c.y < 0:
+                continue
+            if c.color not in cones:
+                # ignore unknown colors
                 continue
             p = np.array([c.x, c.y, c.z]) * np.array(CONE_POSITION_SCALE)
             cones[c.color].append(p)
