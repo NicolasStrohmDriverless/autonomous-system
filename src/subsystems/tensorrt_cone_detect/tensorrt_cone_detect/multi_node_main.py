@@ -54,12 +54,12 @@ class SystemUsageNode(Node):
 def main():
     rclpy.init()
     nodes = [
-        DepthAIDriver(),
         DepthTrackingNode(),
         PathNode(),
         ArtSlamNode(),
         ImuVizNode(),
         SystemUsageNode(),
+        DepthAIDriver(),
     ]
     rclpy.logging.get_logger('multi_node_main').info(
         'Using SORT-based tracking in detection node')

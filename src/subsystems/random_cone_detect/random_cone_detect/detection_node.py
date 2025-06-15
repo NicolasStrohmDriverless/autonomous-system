@@ -220,7 +220,7 @@ class ConeArrayPublisher(Node):
             x_, y_ = apply_deviation(x, y)
             c = Cone3D(
                 id=f'L{i}', label='left', conf=1.0,
-                x=float(x_), y=float(y_), z=0.0,
+                x=float(x_), y=0.0, z=float(y_),
                 color=str(color)
             )
             msg.cones.append(c)
@@ -229,7 +229,7 @@ class ConeArrayPublisher(Node):
             x_, y_ = apply_deviation(x, y)
             c = Cone3D(
                 id=f'R{i}', label='right', conf=1.0,
-                x=float(x_), y=float(y_), z=0.0,
+                x=float(x_), y=0.0, z=float(y_),
                 color=str(color)
             )
             msg.cones.append(c)
