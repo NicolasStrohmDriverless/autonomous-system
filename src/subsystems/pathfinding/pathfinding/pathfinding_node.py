@@ -97,7 +97,7 @@ class PathNode(Node):
             if c.color not in cones:
                 # ignore unknown colors
                 continue
-            p = np.array([c.x, c.y, c.z]) * np.array(CONE_POSITION_SCALE)
+            p = np.array([c.x, c.z, 0]) * np.array(CONE_POSITION_SCALE)
             cones[c.color].append(p)
 
         # 2) Kegel-Marker
