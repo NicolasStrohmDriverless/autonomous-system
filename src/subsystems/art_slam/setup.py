@@ -14,6 +14,7 @@ setup(
         'setuptools',
         'rclpy',
         'numpy',
+        'scipy',
     ],
     zip_safe=True,
     maintainer='Nicolas Müller',

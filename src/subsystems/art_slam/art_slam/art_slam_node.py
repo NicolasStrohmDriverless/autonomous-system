@@ -2,11 +2,13 @@
 
 import math
 import numpy as np
+import struct
 from collections import deque
+from scipy.spatial import cKDTree
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Imu
+from sensor_msgs.msg import Imu, PointCloud2, PointField
 from geometry_msgs.msg import Point
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker, MarkerArray
@@ -21,7 +23,9 @@ class ArtSlamNode(Node):
         super().__init__('art_slam_node')
 
         self.declare_parameter('publish_range', 30.0)
+        self.declare_parameter('cluster_radius', 0.3)
         self.publish_range = float(self.get_parameter('publish_range').value)
+        self.cluster_radius = float(self.get_parameter('cluster_radius').value)
 
         self.pose_x = 0.0
         self.pose_y = 0.0
@@ -46,6 +50,7 @@ class ArtSlamNode(Node):
         self.map_pub = self.create_publisher(MarkerArray, '/art_slam/map', 10)
         self.range_pub = self.create_publisher(MarkerArray, '/art_slam/range_map', 10)
         self.path_pub = self.create_publisher(MarkerArray, '/art_slam/paths', 10)
+        self.cloud_pub = self.create_publisher(PointCloud2, '/art_slam/cone_cloud', 10)
 
     def imu_callback(self, msg: Imu):
         q = msg.orientation
@@ -55,11 +60,27 @@ class ArtSlamNode(Node):
         self.pose_yaw = math.atan2(siny_cosp, cosy_cosp)
 
     def cone_callback(self, msg: ConeArray3D):
-        # transform cones to map frame
+        # transform cones to map frame and cluster duplicates
         for c in msg.cones:
             gx = (math.cos(self.pose_yaw) * c.x - math.sin(self.pose_yaw) * c.y) + self.pose_x
             gy = (math.sin(self.pose_yaw) * c.x + math.cos(self.pose_yaw) * c.y) + self.pose_y
-            self.cone_map[c.id] = (gx, gy, c.color)
+
+            # update by id or cluster with nearby cones of same color
+            if c.id in self.cone_map:
+                self.cone_map[c.id] = (gx, gy, c.color)
+                continue
+
+            merged = False
+            for cid, (px, py, col) in self.cone_map.items():
+                if col == c.color and (px - gx) ** 2 + (py - gy) ** 2 <= self.cluster_radius ** 2:
+                    mx = (px + gx) / 2.0
+                    my = (py + gy) / 2.0
+                    self.cone_map[cid] = (mx, my, col)
+                    merged = True
+                    break
+
+            if not merged:
+                self.cone_map[c.id] = (gx, gy, c.color)
 
         self.current_path = self.compute_path()
         if self.current_path:
@@ -68,7 +89,7 @@ class ArtSlamNode(Node):
         self.publish_markers(msg.header)
 
     def compute_path(self):
-        # naive midpoint path between blue and yellow cones sorted by y
+        # use KD-tree to efficiently find matching cones
         left = []
         right = []
         for cid, (x, y, color) in self.cone_map.items():
@@ -76,18 +97,25 @@ class ArtSlamNode(Node):
                 left.append((x, y))
             elif color == 'yellow':
                 right.append((x, y))
+
+        if not left or not right:
+            return []
+
         left.sort(key=lambda p: p[1])
-        right.sort(key=lambda p: p[1])
+        right_arr = np.array(right)
+        tree = cKDTree(right_arr)
 
         path = []
         for lx, ly in left:
-            cand = [r for r in right if abs(r[1] - ly) < 1.0]
-            if not cand:
+            idxs = tree.query_ball_point([lx, ly], r=1.0)
+            if not idxs:
                 continue
-            rx, ry = min(cand, key=lambda p: abs(p[1] - ly))
+            best_idx = min(idxs, key=lambda i: abs(right_arr[i][1] - ly))
+            rx, ry = right_arr[best_idx]
             mx = (lx + rx) / 2.0
             my = (ly + ry) / 2.0
             path.append((mx, my))
+
         path.sort(key=lambda p: p[1])
         return path
 
@@ -148,6 +176,35 @@ class ArtSlamNode(Node):
         self.map_pub.publish(all_markers)
         self.range_pub.publish(range_markers)
         self.path_pub.publish(path_markers)
+        self.publish_cloud(header)
+
+    def publish_cloud(self, header: Header):
+        pc = PointCloud2()
+        pc.header = header
+        pc.height = 1
+        pc.width = len(self.cone_map)
+        pc.is_dense = True
+        pc.is_bigendian = False
+        pc.point_step = 16
+        pc.row_step = pc.point_step * pc.width
+        pc.fields = [
+            PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+            PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+            PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+            PointField(name='intensity', offset=12, datatype=PointField.FLOAT32, count=1),
+        ]
+
+        data = bytearray()
+        for x, y, color in self.cone_map.values():
+            intensity = 0.0
+            if color == 'yellow':
+                intensity = 1.0
+            elif color not in ('blue', 'yellow'):
+                intensity = 2.0
+            data.extend(struct.pack('ffff', float(x), float(y), 0.0, intensity))
+
+        pc.data = bytes(data)
+        self.cloud_pub.publish(pc)
 
 
 def main(args=None):
