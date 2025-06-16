@@ -44,6 +44,7 @@ MIDPOINT_COLOR    = [0.5, 0.5, 0.5, 1.0]
 SIDE_CHECK_RADIUS = 2.0
 MAX_STEP_DIST     = 2.0
 GEGENCHECK        = 1
+FALLBACK_DIST     = 1.0  # Mindestpfadlänge, falls keine Punkte gefunden werden
 SMOOTH_ALPHA      = 0.4   # Faktor für exponentielle Glättung des Pfades
 
 # Neuer Winkel-Filter: größere Fenster, höhere Toleranz und EMA-Glättung
@@ -231,7 +232,10 @@ class PathNode(Node):
 
         def find_greedy_path(mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST):
             if not mids:
-                return [], 0.0, last_vec
+                # Fallback: ohne erkannte Mittelpunkte einen kurzen Pfad nach vorn erzeugen
+                fallback_len = min(max_len, FALLBACK_DIST)
+                fallback_pt = tuple((np.array(start_pt) + last_vec * fallback_len).tolist())
+                return [tuple(start_pt), fallback_pt], fallback_len, last_vec
             arr  = np.array(mids)
             path = [tuple(start_pt)]
             used = set()
