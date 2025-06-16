@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
+
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "oak_cone_detect_interfaces/msg/cone2_d.hpp"
@@ -224,6 +226,14 @@ public:
   ConeDetectorNode() : Node("cone_detector_cpp"), tracker_(5, 1, 0.3f) {
     declare_parameter<std::string>("onnx_path", "");
     get_parameter("onnx_path", onnx_model_path_);
+    if (onnx_model_path_.empty()) {
+      onnx_model_path_ =
+          ament_index_cpp::get_package_share_directory("tensorrt_cone_detect_cpp") +
+          "/resource/v11n_416x416.onnx";
+      RCLCPP_WARN(get_logger(),
+                  "Parameter 'onnx_path' not set. Using default: %s",
+                  onnx_model_path_.c_str());
+    }
 
     declare_parameter<std::vector<std::string>>("onnx_input_names", std::vector<std::string>{"images"});
     get_parameter("onnx_input_names", onnx_input_names_str_);
