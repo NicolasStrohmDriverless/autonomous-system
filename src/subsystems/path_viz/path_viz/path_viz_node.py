@@ -5,7 +5,31 @@ from rclpy.node import Node
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 import math
-from tf_transformations import euler_from_quaternion
+
+
+def euler_from_quaternion(quat):
+    """Convert quaternion to Euler angles.
+
+    Args:
+        quat (list or tuple): [x, y, z, w]
+
+    Returns:
+        tuple: roll, pitch, yaw in radians
+    """
+    x, y, z, w = quat
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + y * y)
+    roll_x = math.atan2(t0, t1)
+
+    t2 = +2.0 * (w * y - z * x)
+    t2 = max(min(t2, 1.0), -1.0)
+    pitch_y = math.asin(t2)
+
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (y * y + z * z)
+    yaw_z = math.atan2(t3, t4)
+
+    return roll_x, pitch_y, yaw_z
 from sensor_msgs.msg import Imu
 
 
