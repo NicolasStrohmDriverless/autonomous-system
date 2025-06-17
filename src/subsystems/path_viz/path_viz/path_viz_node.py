@@ -4,9 +4,9 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
-from tf2_ros import Buffer, TransformListener
-import tf2_ros
-from rclpy.time import Time
+import math
+from tf_transformations import euler_from_quaternion
+from sensor_msgs.msg import Imu
 
 
 class PathVizNode(Node):
@@ -18,30 +18,32 @@ class PathVizNode(Node):
         self.world_frame = self.get_parameter('world_frame').value
         self.camera_frame = self.get_parameter('camera_frame').value
 
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
-
         self.marker_pub = self.create_publisher(MarkerArray, '/camera_path_markers', 10)
+
+        # Subscribe to calibrated IMU data
+        self.sub_imu = self.create_subscription(
+            Imu,
+            '/sensor/imu',
+            self.imu_callback,
+            10)
+
+        # Internal state for simple dead reckoning
+        self.position = [0.0, 0.0, 0.0]
+        self.velocity = [0.0, 0.0, 0.0]
+        self.orientation = None
+        self.last_imu_time = None
         self.path_points = []
 
         self.timer = self.create_timer(0.1, self.timer_callback)
         self.get_logger().info('PathVizNode started')
 
     def timer_callback(self):
-        try:
-            trans = self.tf_buffer.lookup_transform(
-                self.world_frame,
-                self.camera_frame,
-                Time())
-        except (tf2_ros.LookupException, tf2_ros.ExtrapolationException) as e:
-            self.get_logger().warn(f'Transform not available: {e}')
+        if self.orientation is None:
             return
 
-        p = Point(
-            x=trans.transform.translation.x,
-            y=trans.transform.translation.y,
-            z=0.0,
-        )
+        p = Point(x=float(self.position[0]),
+                   y=float(self.position[1]),
+                   z=float(self.position[2]))
         self.path_points.append(p)
 
         arr = MarkerArray()
@@ -56,10 +58,10 @@ class PathVizNode(Node):
         cube.id = 0
         cube.type = Marker.CUBE
         cube.action = Marker.ADD
-        cube.pose.position.x = trans.transform.translation.x
-        cube.pose.position.y = trans.transform.translation.y
-        cube.pose.position.z = trans.transform.translation.z
-        cube.pose.orientation = trans.transform.rotation
+        cube.pose.position.x = float(self.position[0])
+        cube.pose.position.y = float(self.position[1])
+        cube.pose.position.z = float(self.position[2])
+        cube.pose.orientation = self.orientation
         cube.scale.x = 0.1
         cube.scale.y = 0.1
         cube.scale.z = 0.1
@@ -85,6 +87,36 @@ class PathVizNode(Node):
         arr.markers.append(line)
 
         self.marker_pub.publish(arr)
+
+    def imu_callback(self, msg: Imu):
+        now = self.get_clock().now().nanoseconds / 1e9
+        if self.last_imu_time is None:
+            self.last_imu_time = now
+            self.orientation = msg.orientation
+            return
+
+        dt = now - self.last_imu_time
+        self.last_imu_time = now
+
+        self.orientation = msg.orientation
+
+        q = msg.orientation
+        _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+
+        ax = msg.linear_acceleration.x
+        ay = msg.linear_acceleration.y
+        az = msg.linear_acceleration.z
+
+        global_ax = ax * math.cos(yaw) - ay * math.sin(yaw)
+        global_ay = ax * math.sin(yaw) + ay * math.cos(yaw)
+
+        self.velocity[0] += global_ax * dt
+        self.velocity[1] += global_ay * dt
+        self.velocity[2] += az * dt
+
+        self.position[0] += self.velocity[0] * dt
+        self.position[1] += self.velocity[1] * dt
+        self.position[2] += self.velocity[2] * dt
 
 
 def main(args=None):
