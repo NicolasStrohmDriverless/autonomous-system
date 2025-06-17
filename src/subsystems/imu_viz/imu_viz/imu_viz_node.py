@@ -32,15 +32,15 @@ class ImuVizNode(Node):
         self.bias_gyro  = [0.0, 0.0, 0.0]
         self.is_calibrated = False
 
-        # Schwellenwert: Nur Schwankungen >= 0.1 werden weitergegeben
-        self.fluctuation_threshold = 0.1
+        # Schwellenwert für Änderungen relativ zum vorherigen IMU-Wert
+        self.fluctuation_threshold = 0.05
 
         # Für FPS-Berechnung
         self.last_time = None
 
-        # Zum Glätten (Vorherige ausgegebene Werte speichern)
-        self.prev_accel = [0.0, 0.0, 0.0]
-        self.prev_gyro  = [0.0, 0.0, 0.0]
+        # Vorherige ungefilterte Werte speichern, um Änderungen zu bestimmen
+        self.prev_raw_accel = None
+        self.prev_raw_gyro = None
 
         self.get_logger().info('ImuVizNode gestartet, sammle Rohdaten für Kalibrierung (5 Sekunden)...')
 
@@ -123,24 +123,26 @@ class ImuVizNode(Node):
         ay_corr = ay_raw - self.bias_accel[1]
         az_corr = az_raw - self.bias_accel[2]
 
-        # Nur starke Schwankungen (Fluktuationen >= Threshold) veröffentlichen:
-        def smooth_and_threshold(raw_value, prev_value):
-            if abs(raw_value - prev_value) >= self.fluctuation_threshold:
-                return raw_value
-            else:
-                return prev_value
+        # Nur Änderungen über dem Schwellenwert weitergeben
+        def threshold_current(curr_value, prev_value):
+            if abs(curr_value - prev_value) < self.fluctuation_threshold:
+                return 0.0
+            return curr_value
 
-        ax_out = smooth_and_threshold(ax_corr, self.prev_accel[0])
-        ay_out = smooth_and_threshold(ay_corr, self.prev_accel[1])
-        az_out = smooth_and_threshold(az_corr, self.prev_accel[2])
+        if self.prev_raw_accel is None:
+            self.prev_raw_accel = [ax_corr, ay_corr, az_corr]
+
+        ax_out = threshold_current(ax_corr, self.prev_raw_accel[0])
+        ay_out = threshold_current(ay_corr, self.prev_raw_accel[1])
+        az_out = threshold_current(az_corr, self.prev_raw_accel[2])
 
         calibrated_msg.linear_acceleration.x = ax_out
         calibrated_msg.linear_acceleration.y = ay_out
         calibrated_msg.linear_acceleration.z = az_out
         calibrated_msg.linear_acceleration_covariance = msg.linear_acceleration_covariance
 
-        # Update prev_accel
-        self.prev_accel = [ax_out, ay_out, az_out]
+        # Rohwerte für nächste Iteration speichern
+        self.prev_raw_accel = [ax_corr, ay_corr, az_corr]
 
         # ----- Winkelgeschwindigkeit korrigieren und glätten -----
         gx_raw = msg.angular_velocity.x
@@ -151,17 +153,19 @@ class ImuVizNode(Node):
         gy_corr = gy_raw - self.bias_gyro[1]
         gz_corr = gz_raw - self.bias_gyro[2]
 
-        gx_out = smooth_and_threshold(gx_corr, self.prev_gyro[0])
-        gy_out = smooth_and_threshold(gy_corr, self.prev_gyro[1])
-        gz_out = smooth_and_threshold(gz_corr, self.prev_gyro[2])
+        if self.prev_raw_gyro is None:
+            self.prev_raw_gyro = [gx_corr, gy_corr, gz_corr]
+
+        gx_out = threshold_current(gx_corr, self.prev_raw_gyro[0])
+        gy_out = threshold_current(gy_corr, self.prev_raw_gyro[1])
+        gz_out = threshold_current(gz_corr, self.prev_raw_gyro[2])
 
         calibrated_msg.angular_velocity.x = gx_out
         calibrated_msg.angular_velocity.y = gy_out
         calibrated_msg.angular_velocity.z = gz_out
         calibrated_msg.angular_velocity_covariance = msg.angular_velocity_covariance
 
-        # Update prev_gyro
-        self.prev_gyro = [gx_out, gy_out, gz_out]
+        self.prev_raw_gyro = [gx_corr, gy_corr, gz_corr]
 
         # 4) Publizieren, falls Abonnenten existieren
         if self.pub.get_subscription_count() > 0:
