@@ -9,7 +9,7 @@ from rclpy.executors import MultiThreadedExecutor
 from tensorrt_cone_detect.detection_node import DepthAIDriver
 from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
-from tensorrt_cone_detect.imu_viz_node import ImuVizNode
+from imu_viz.imu_viz_node import ImuVizNode
 from art_slam.art_slam_node import ArtSlamNode
 
 import psutil
