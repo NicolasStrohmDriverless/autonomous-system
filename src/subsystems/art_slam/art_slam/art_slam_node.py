@@ -32,6 +32,8 @@ class ArtSlamNode(Node):
         self.pose_yaw = 0.0
         self.vel_x = 0.0
         self.vel_y = 0.0
+        self.pose_z = 0.0
+        self.vel_z = 0.0
         self.last_imu_time = None
 
         self.last_path = []
@@ -52,7 +54,7 @@ class ArtSlamNode(Node):
 
         self.sub_imu = self.create_subscription(
             Imu,
-            '/imu',
+            '/sensor/imu',
             self.imu_callback,
             10)
 
@@ -70,11 +72,7 @@ class ArtSlamNode(Node):
             self.lap_done = True
 
     def imu_callback(self, msg: Imu):
-        q = msg.orientation
-        # yaw from quaternion
-        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
-        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-        self.pose_yaw = math.atan2(siny_cosp, cosy_cosp)
+        """Update pose using only angular_velocity.y and linear_acceleration.z."""
 
         now = self.get_clock().now().nanoseconds / 1e9
         if self.last_imu_time is None:
@@ -83,17 +81,11 @@ class ArtSlamNode(Node):
             dt = now - self.last_imu_time
         self.last_imu_time = now
 
-        ax = msg.linear_acceleration.x
-        ay = msg.linear_acceleration.y
+        self.pose_yaw += msg.angular_velocity.y * dt
 
-        # rotate acceleration into map frame
-        ax_world = math.cos(self.pose_yaw) * ax - math.sin(self.pose_yaw) * ay
-        ay_world = math.sin(self.pose_yaw) * ax + math.cos(self.pose_yaw) * ay
-
-        self.vel_x += ax_world * dt
-        self.vel_y += ay_world * dt
-        self.pose_x += self.vel_x * dt
-        self.pose_y += self.vel_y * dt
+        az = msg.linear_acceleration.z
+        self.vel_z += az * dt
+        self.pose_z += self.vel_z * dt
 
     def cone_callback(self, msg: ConeArray3D):
         # transform cones to map frame and cluster duplicates
