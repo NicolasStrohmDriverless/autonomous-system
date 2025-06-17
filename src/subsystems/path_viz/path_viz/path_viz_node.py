@@ -29,8 +29,9 @@ class PathVizNode(Node):
 
         self.marker_pub = self.create_publisher(MarkerArray, '/camera_path_markers', 10)
 
-        # Subscribe to calibrated IMU data
-        self.sub_imu = self.create_subscription(
+        # Subscribe to calibrated IMU data. The subscription handle is stored
+        # in ``self.pub`` as requested so it does not get garbage collected.
+        self.pub = self.create_subscription(
             Imu,
             '/sensor/imu',
             self.imu_callback,
