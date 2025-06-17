@@ -12,6 +12,7 @@ from depth_tracking.depth_node import DepthTrackingNode
 from pathfinding.pathfinding_node import PathNode
 from imu_viz.imu_viz_node import ImuVizNode
 from art_slam.art_slam_node import ArtSlamNode
+from path_viz.path_viz_node import PathVizNode
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -49,6 +50,7 @@ def main():
     nodes = [
         DepthTrackingNode(),
         PathNode(),
+        PathVizNode(),
         ArtSlamNode(),
         ImuVizNode(),
         SystemUsageNode(),
