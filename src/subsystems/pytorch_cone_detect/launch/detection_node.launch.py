@@ -22,7 +22,7 @@ def generate_launch_description():
             output='screen'
         ),
         Node(
-            package='onnx_cone_detect',
+            package='imu_viz',
             executable='imu_viz_node',
             name='imu_viz_node',
             output='screen'

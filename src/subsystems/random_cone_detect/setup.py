@@ -61,7 +61,6 @@ setup(
         'console_scripts': [
             'detection_node        = random_cone_detect.detection_node:main',
             'depth_node            = random_cone_detect.depth_node:main',
-            'imu_viz_node          = random_cone_detect.imu_viz_node:main',
             'multi_node_main       = random_cone_detect.multi_node_main:main',
             'track_publisher_node  = random_cone_detect.track_publisher_node:main',
         ],
