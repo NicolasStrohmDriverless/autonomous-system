@@ -148,8 +148,27 @@ class PathNode(Node):
             except:
                 pass
 
-        mids_bg = sorted(set(mids_bg), key=lambda x:x[0])
-        mids_or = sorted(set(mids_or), key=lambda x:x[0])
+        # Erstes Sortieren, bevor Zusatzpunkte ergänzt werden
+        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_or = sorted(set(mids_or), key=lambda x: x[0])
+
+        # Zusätzliche Mittelpunkte zwischen Ursprung und erstem blauen
+        # sowie erstem gelben Kegel erzeugen. Dadurch existieren gerade
+        # zu Beginn mehr valide Punkte zwischen links/blau und rechts/gelb.
+        if cones['blue'] and cones['yellow']:
+            # naheliegendste Kegel bestimmen (Distanz zum Ursprung)
+            first_blue = min(cones['blue'], key=lambda p: np.linalg.norm(p[:2]))
+            first_yellow = min(cones['yellow'], key=lambda p: np.linalg.norm(p[:2]))
+            mid_first = (first_blue[:2] + first_yellow[:2]) / 2
+            # mehrere Punkte auf der Strecke Ursprung -> Mittelpunkt einfügen
+            steps = 4
+            for i in range(1, steps + 1):
+                frac = i / (steps + 1)
+                extra = tuple(np.round(mid_first * frac, 4))
+                if extra[1] > 0:
+                    mids_bg.append(extra)
+
+        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
 
         # Mittelpunkte markieren
         for idx,(mx,my) in enumerate(mids_bg):
