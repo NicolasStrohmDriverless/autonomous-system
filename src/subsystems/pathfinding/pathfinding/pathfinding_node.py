@@ -720,14 +720,16 @@ class PathNode(Node):
             )
         else:
             speed = 0.0
-        if self.desired_speed is not None:
-            speed = min(self.desired_speed, self.max_speed)
+        speed = min(speed, self.max_speed)
         if self.speed is not None:
             speed = min(speed, self.speed)
 
         if not self.stop_braked and self.dist_since_update >= self.green_len and self.green_len > 0:
             speed = 0.0
             self.stop_braked = True
+
+        # store newly calculated speed as desired speed
+        self.desired_speed = speed
 
         angle_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
         cv2.putText(angle_img, f"{angle_val:.1f} Grad", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
