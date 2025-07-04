@@ -80,35 +80,38 @@ class SystemUsageNode(Node):
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.Event):
-    nodes = []
+    """Start all nodes for the selected mode.
+
+    CompletionWatcher and IdleMonitorNode are started first so they receive
+    initial lap information from the publishers."""
+    nodes = [
+        CompletionWatcher(on_complete=stop_event.set),
+        IdleMonitorNode(on_timeout=stop_event.set),
+    ]
+
     if mode == "accel":
-        nodes = [
+        nodes.extend([
             ConeArrayPublisher(mode="accel", max_laps=1),
             PathNode(),
             ArtSlamNode(),
             LapCounterNode(max_laps=1),
-        ]
+        ])
     elif mode == "endu":
-        nodes = [
+        nodes.extend([
             TrackPublisher(),
             ConeArrayPublisher(mode="autox", max_laps=22),
             PathNode(),
             ArtSlamNode(),
             LapCounterNode(max_laps=22),
-        ]
+        ])
     else:  # autox
-        nodes = [
+        nodes.extend([
             TrackPublisher(),
             ConeArrayPublisher(mode="autox", max_laps=2),
             PathNode(),
             ArtSlamNode(),
             LapCounterNode(max_laps=2),
-        ]
-
-    nodes.extend([
-        CompletionWatcher(on_complete=stop_event.set),
-        IdleMonitorNode(on_timeout=stop_event.set),
-    ])
+        ])
 
     for node in nodes:
         executor.add_node(node)
