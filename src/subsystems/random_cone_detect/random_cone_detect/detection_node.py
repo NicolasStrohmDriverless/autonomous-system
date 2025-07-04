@@ -252,6 +252,8 @@ class ConeArrayPublisher(Node):
         vis_r = visible(self.cones_right)
 
         idx = np.searchsorted(self.cumlen, d0, side='right')
+
+        # default transform using centerline orientation
         if idx == 0:
             origin = self.centerline[0]
             v      = self.centerline[1] - origin
@@ -266,19 +268,35 @@ class ConeArrayPublisher(Node):
             v      = p1 - p0
 
         phi = math.atan2(v[0], v[1])
+        scale = 1.0
+
+        # align track so that nearest cones are at x=±1.5, y=0
+        if vis_l.shape[0] > 0 and vis_r.shape[0] > 0:
+            vis_l_xy = vis_l[:, :2].astype(float)
+            vis_r_xy = vis_r[:, :2].astype(float)
+            l_near = vis_l_xy[np.argmin(np.linalg.norm(vis_l_xy - origin, axis=1))]
+            r_near = vis_r_xy[np.argmin(np.linalg.norm(vis_r_xy - origin, axis=1))]
+            origin = (l_near + r_near) / 2.0
+            lr_vec = r_near - l_near
+            width = np.linalg.norm(lr_vec)
+            if width > 0:
+                scale = 3.0 / width
+            phi = math.atan2(lr_vec[1], lr_vec[0]) + math.pi / 2.0
+
         if self.external_angle is not None:
             phi = math.radians(self.external_angle)
+
         c_, s = math.cos(phi), math.sin(phi)
         R = np.array([[ c_, -s],
                       [ s,  c_]])
 
         vis_l_xy = vis_l[:, :2].astype(float)
         vis_l_colors = vis_l[:, 2]
-        vis_l_tf = (vis_l_xy - origin) @ R.T
+        vis_l_tf = ((vis_l_xy - origin) @ R.T) * scale
 
         vis_r_xy = vis_r[:, :2].astype(float)
         vis_r_colors = vis_r[:, 2]
-        vis_r_tf = (vis_r_xy - origin) @ R.T
+        vis_r_tf = ((vis_r_xy - origin) @ R.T) * scale
 
         msg = ConeArray3D()
         msg.header = Header()
