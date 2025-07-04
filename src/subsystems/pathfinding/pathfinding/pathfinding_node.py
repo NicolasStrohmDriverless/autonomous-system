@@ -82,8 +82,10 @@ class PathNode(Node):
         self.marker_pub = self.create_publisher(MarkerArray, '/cone_markers', 10)
         self.path_pub   = self.create_publisher(MarkerArray, '/best_path_marker', 10)
         self.fps_pub    = self.create_publisher(Float32,     '/path_inference_fps', 10)
-        self.angle_pub  = self.create_publisher(Float32,     '/path_to_y_axis_angle', 10)
-        self.image_pub  = self.create_publisher(Image,       '/path_status/image', 1)
+        self.angle_pub       = self.create_publisher(Float32, '/path_to_y_axis_angle', 10)
+        self.angle_image_pub = self.create_publisher(Image,   '/path_status/angle_image', 1)
+        self.speed_image_pub = self.create_publisher(Image,   '/path_status/speed_image', 1)
+        self.track_image_pub = self.create_publisher(Image,   '/path_status/track_image', 1)
 
         self.declare_parameter('max_speed', MAX_SPEED)
         self.max_speed = float(self.get_parameter('max_speed').value)
@@ -99,6 +101,8 @@ class PathNode(Node):
         self.angle_shared_sub = self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_shared_callback, 10)
         self.desired_speed = None
         self.shared_angle = None
+        # used to ignore speed command messages originating from this node
+        self._ignore_next_speed_msg = False
 
         self.bridge = CvBridge()
 
@@ -116,6 +120,10 @@ class PathNode(Node):
         self.speed = float(msg.data)
 
     def speed_cmd_callback(self, msg: Float32):
+        if self._ignore_next_speed_msg:
+            # ignore messages resulting from this node's own publication
+            self._ignore_next_speed_msg = False
+            return
         self.desired_speed = float(msg.data)
 
     def angle_shared_callback(self, msg: Float32):
@@ -447,6 +455,29 @@ class PathNode(Node):
                     m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
             path_markers.markers.append(m)
 
+            # Track also as simple image
+            pts_np = np.array(combined)
+            min_x, max_x = pts_np[:,0].min(), pts_np[:,0].max()
+            min_y, max_y = pts_np[:,1].min(), pts_np[:,1].max()
+            span = max(max_x - min_x, max_y - min_y, 1e-3)
+            scale = 360.0 / span
+            offset_x = (400 - (max_x - min_x) * scale) / 2 - min_x * scale
+            offset_y = (400 - (max_y - min_y) * scale) / 2 - min_y * scale
+            track_img = np.ones((400, 400, 3), dtype=np.uint8) * 255
+            for a, b in zip(pts_np[:-1], pts_np[1:]):
+                ax = int(a[0] * scale + offset_x)
+                ay = int(400 - (a[1] * scale + offset_y))
+                bx = int(b[0] * scale + offset_x)
+                by = int(400 - (b[1] * scale + offset_y))
+                cv2.line(track_img, (ax, ay), (bx, by), (0, 0, 0), 1)
+            for x, y in pts_np:
+                xi = int(x * scale + offset_x)
+                yi = int(400 - (y * scale + offset_y))
+                cv2.circle(track_img, (xi, yi), 3, (0, 0, 255), -1)
+            track_msg = self.bridge.cv2_to_imgmsg(track_img, 'bgr8')
+            track_msg.header.stamp = msg.header.stamp
+            self.track_image_pub.publish(track_msg)
+
         # Geschwindigkeit anhand Pfadlänge und Lenkwinkel berechnen
         if len(combined) >= 2:
             path_len = sum(
@@ -460,20 +491,25 @@ class PathNode(Node):
         length_factor = min(1.0, path_len / PATH_LENGTH)
         angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
         speed_est = self.max_speed * length_factor * angle_factor
+        speed = speed_est
         if self.desired_speed is not None:
             speed = min(self.desired_speed, self.max_speed)
-        elif self.speed is not None:
-            speed = min(self.speed, self.max_speed)
-        else:
-            speed = speed_est
+        if self.speed is not None:
+            speed = min(speed, self.speed)
 
-        img = np.ones((60, 180, 3), dtype=np.uint8) * 255
-        cv2.putText(img, f"{angle_val:.1f}\u00B0", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-        cv2.putText(img, f"{speed:.2f} m/s", (10, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-        img_msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
-        img_msg.header.stamp = msg.header.stamp
-        self.image_pub.publish(img_msg)
+        angle_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
+        cv2.putText(angle_img, f"{angle_val:.1f} Grad", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        angle_msg = self.bridge.cv2_to_imgmsg(angle_img, 'bgr8')
+        angle_msg.header.stamp = msg.header.stamp
+        self.angle_image_pub.publish(angle_msg)
+
+        speed_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
+        cv2.putText(speed_img, f"{speed:.2f} m/s", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        speed_msg = self.bridge.cv2_to_imgmsg(speed_img, 'bgr8')
+        speed_msg.header.stamp = msg.header.stamp
+        self.speed_image_pub.publish(speed_msg)
         if self.speed_cmd_pub.get_subscription_count() > 0:
+            self._ignore_next_speed_msg = True
             self.speed_cmd_pub.publish(Float32(data=float(speed)))
 
         # 8) FPS berechnen & publizieren

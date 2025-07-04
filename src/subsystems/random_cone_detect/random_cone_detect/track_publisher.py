@@ -4,6 +4,8 @@ import random
 import numpy as np
 from scipy import signal, spatial, interpolate
 from shapely.geometry import Point as ShapelyPoint, LineString, Polygon, MultiPolygon  # <--- MultiPolygon import
+import cv2
+from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
@@ -13,6 +15,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point as MsgPoint
+from sensor_msgs.msg import Image
 
 # Hilfsfunktionen (aus utils.py)
 from random_cone_detect.utils import closest_node, clockwise_sort, curvature
@@ -168,6 +171,8 @@ class TrackPublisher(Node):
         self.cone_pub  = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos_cone_pub)
         # Publisher für Track-Marker (Visualisierung)
         self.track_pub = self.create_publisher(MarkerArray, '/track_markers', qos_marker_pub)
+        self.image_pub = self.create_publisher(Image, '/track/image', 1)
+        self.bridge = CvBridge()
 
         self.get_logger().info('TrackGenerator startet und publiziert Track...')
         self.publish_track()
@@ -257,6 +262,23 @@ class TrackPublisher(Node):
 
         self.track_pub.publish(m_arr)
         self.get_logger().info('Track-Marker auf /track_markers publiziert')
+
+        # Track als Punktdiagramm als Bild senden
+        pts = np.vstack([cones_left, cones_right])
+        min_x, max_x = pts[:,0].min(), pts[:,0].max()
+        min_y, max_y = pts[:,1].min(), pts[:,1].max()
+        span = max(max_x - min_x, max_y - min_y, 1e-3)
+        scale = 360.0 / span
+        offset_x = (400 - (max_x - min_x) * scale) / 2 - min_x * scale
+        offset_y = (400 - (max_y - min_y) * scale) / 2 - min_y * scale
+        img = np.ones((400, 400, 3), dtype=np.uint8) * 255
+        for x, y in pts:
+            xi = int(x * scale + offset_x)
+            yi = int(400 - (y * scale + offset_y))
+            cv2.circle(img, (xi, yi), 3, (0, 0, 0), -1)
+        msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        msg.header.stamp = cone_msg.header.stamp
+        self.image_pub.publish(msg)
 
 
 def main(args=None):
