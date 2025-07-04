@@ -294,6 +294,13 @@ class PathNode(Node):
 
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
 
+        # Bestehenden Pfad zu den Mittelpunkten hinzufügen
+        mids_bg.extend([tuple(np.round(p, 4)) for p in self.current_bg])
+        mids_or.extend([tuple(np.round(p, 4)) for p in self.current_or])
+
+        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_or = sorted(set(mids_or), key=lambda x: x[0])
+
         # Mittelpunkte markieren
         for idx,(mx,my) in enumerate(mids_bg):
             m = Marker(); m.header=msg.header; m.ns='midpoints_bg'
@@ -481,6 +488,7 @@ class PathNode(Node):
 
         # --- Pfadaktualisierung nach Längenvergleich ---
         cand_combined = best_bg + best_or
+        frame_best_path = cand_combined
         cand_len = sum(
             np.linalg.norm(np.array(b) - np.array(a))
             for a, b in zip(cand_combined[:-1], cand_combined[1:])
@@ -607,6 +615,22 @@ class PathNode(Node):
                 else:
                     m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
             path_markers.markers.append(m)
+
+            cand_clr = Marker(); cand_clr.action = Marker.DELETEALL
+            cand_clr.header = msg.header; cand_clr.ns='frame_best'; cand_clr.id=41000
+            path_markers.markers.append(cand_clr)
+            if len(frame_best_path) >= 2:
+                cand_pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in frame_best_path]
+                cand_m = Marker()
+                cand_m.header = msg.header
+                cand_m.ns = 'frame_best'
+                cand_m.id = 31000
+                cand_m.type = Marker.LINE_STRIP
+                cand_m.action = Marker.ADD
+                cand_m.scale.x = 0.04
+                cand_m.points = cand_pts
+                cand_m.color = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
+                path_markers.markers.append(cand_m)
 
             # Track also as simple image showing blue/yellow cones and lines
             blue_np = np.array([p[:2] for p in cones['blue']]) if cones['blue'] else np.empty((0, 2))
