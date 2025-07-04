@@ -12,7 +12,7 @@ from rclpy.qos import (
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Float32
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
@@ -25,6 +25,9 @@ MAX_DEVIATION = 1.5
 # Accel/Brake Werte
 ACCEL_A = 9.81         # m/s² (Beschleunigung)
 BRAKE_A = -14.715      # m/s² (Bremsen, negativ!)
+
+# Maximale Fahrgeschwindigkeit f\xc3\xbc\r die Simulation
+MAX_SPEED = 5.0  # [m/s]
 
 # Track-Parameter
 Y_FINISH = 75.0        # Wo Beschleunigen aufhört, Bremsen beginnt
@@ -108,6 +111,18 @@ class ConeArrayPublisher(Node):
         # State für beide Modi
         self.timer = self.create_timer(1.0/self.update_rate, self.publish_cones)
 
+        # Geteilter Status für Geschwindigkeit und Lenkwinkel
+        self.speed_pub = self.create_publisher(Float32, '/vehicle/desired_speed', 10)
+        self.speed_sub = self.create_subscription(Float32, '/vehicle/desired_speed', self.speed_callback, 10)
+        self.angle_pub = self.create_publisher(Float32, '/vehicle/steering_angle', 10)
+        self.angle_sub = self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_callback, 10)
+        self.external_speed = None
+        self.external_angle = None
+
+        # maximale Geschwindigkeit als Parameter
+        self.declare_parameter('max_speed', MAX_SPEED)
+        self.max_speed = float(self.get_parameter('max_speed').value)
+
         # Accel-Mode States
         self.distance_traveled = 0.0  # Strecke entlang y
         self.v = 0.0                  # Momentangeschwindigkeit [m/s]
@@ -115,11 +130,40 @@ class ConeArrayPublisher(Node):
         self.phase = "accel"          # "accel" oder "brake"
 
         # Autox/Endu-Mode States
-        self.speed = 5.0  # Feste Geschwindigkeit
+        # Geschwindigkeit orientiert sich an der maximal zulässigen Geschwindigkeit
+        self.speed = self.max_speed
+
+        # Parameter für Geschwindigkeitanpassung
+        self.lookahead = 2.0  # [m] Abstand zur Vorhersage des Lenkwinkels
 
         self.get_logger().info(
             f'ConeArrayPublisher startet: Track {self.total_len:.1f} m, Mode: {mode}, Max Laps: {self.max_laps}'
         )
+
+    def _orientation_at(self, dist: float) -> float:
+        """Rückgabe der Bahnausrichtung (Yaw) an Position dist [m]"""
+        d = dist % self.total_len
+        idx = np.searchsorted(self.cumlen, d, side='right')
+        if idx == 0:
+            p0, p1 = self.centerline[0], self.centerline[1]
+        elif idx >= len(self.cumlen):
+            p0, p1 = self.centerline[-2], self.centerline[-1]
+        else:
+            p0, p1 = self.centerline[idx-1], self.centerline[idx]
+        v = p1 - p0
+        return math.atan2(v[0], v[1])
+
+    def _steer_angle(self, dist: float) -> float:
+        """Berechnet den Lenkwinkel anhand der Streckengeometrie"""
+        phi_now = self._orientation_at(dist)
+        phi_future = self._orientation_at(dist + self.lookahead)
+        return math.atan2(math.sin(phi_future - phi_now), math.cos(phi_future - phi_now))
+
+    def speed_callback(self, msg: Float32):
+        self.external_speed = float(msg.data)
+
+    def angle_callback(self, msg: Float32):
+        self.external_angle = float(msg.data)
 
     def publish_cones(self):
         dt = 1.0/self.update_rate
@@ -146,8 +190,15 @@ class ConeArrayPublisher(Node):
                         self.timer.cancel()
                         return
                     # Reset für die nächste Runde (hier nicht nötig, da nur eine Runde bei accel)
+            current_speed = self.v
+            angle = 0.0
         else:
+            angle = math.degrees(self._steer_angle(self.distance_traveled))
+            factor = max(0.3, 1.0 - abs(angle) / 90.0)
+            base_speed = self.max_speed * factor
+            self.speed = self.external_speed if self.external_speed is not None else base_speed
             self.distance_traveled += self.speed * dt
+            current_speed = self.speed
             if self.distance_traveled >= self.total_len:
                 self.lap += 1
                 self.get_logger().info(f'Runde {self.lap} beendet.')
@@ -235,6 +286,11 @@ class ConeArrayPublisher(Node):
             msg.cones.append(c)
 
         self.pub.publish(msg)
+        # Aktuelle Geschwindigkeit und Lenkwinkel publizieren
+        if self.speed_pub.get_subscription_count() > 0:
+            self.speed_pub.publish(Float32(data=float(current_speed)))
+        if self.angle_pub.get_subscription_count() > 0:
+            self.angle_pub.publish(Float32(data=float(angle)))
 
 def main(args=None):
     rclpy.init(args=args)

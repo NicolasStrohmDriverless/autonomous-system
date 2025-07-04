@@ -14,6 +14,8 @@ class ImuVizNode(Node):
         self.pub = self.create_publisher(Imu, '/sensor/imu', 10)
         # Publisher für FPS der IMU-Callbacks
         self.pub_fps = self.create_publisher(Float32, '/imu_fps', 10)
+        # Publisher für geschätzte Fahrzeuggeschwindigkeit
+        self.speed_pub = self.create_publisher(Float32, '/vehicle/speed', 10)
         # Subscription auf rohe IMU-Daten
         self.sub = self.create_subscription(Imu, '/camera/imu_raw', self.cb, 50)
 
@@ -37,6 +39,9 @@ class ImuVizNode(Node):
 
         # Für FPS-Berechnung
         self.last_time = None
+        # Für Geschwindigkeitsabschätzung
+        self.last_vel_time = None
+        self.velocity = 0.0
 
         # Vorherige ungefilterte Werte speichern, um Änderungen zu bestimmen
         self.prev_raw_accel = None
@@ -143,6 +148,16 @@ class ImuVizNode(Node):
 
         # Rohwerte für nächste Iteration speichern
         self.prev_raw_accel = [ax_corr, ay_corr, az_corr]
+
+        # Geschwindigkeit integrieren (vereinfachte Vorwärtsachse = z)
+        if self.last_vel_time is not None:
+            dt_vel = (now - self.last_vel_time).nanoseconds * 1e-9
+            self.velocity += az_corr * dt_vel
+            if self.velocity < 0.0:
+                self.velocity = 0.0
+            if self.speed_pub.get_subscription_count() > 0:
+                self.speed_pub.publish(Float32(data=float(self.velocity)))
+        self.last_vel_time = now
 
         # ----- Winkelgeschwindigkeit korrigieren und glätten -----
         gx_raw = msg.angular_velocity.x
