@@ -498,12 +498,7 @@ class PathNode(Node):
 
         combined = best_bg + best_or
         if len(combined) >= 2:
-            # shift path forward based on current speed. do not rotate
-            advance = (self.desired_speed or 0.0) * dt
-            combined = [
-                (x, y + advance)
-                for x, y in combined
-            ]
+            # keep path anchored at the origin
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined]
             n_bg = len(best_bg)
             m = Marker()
