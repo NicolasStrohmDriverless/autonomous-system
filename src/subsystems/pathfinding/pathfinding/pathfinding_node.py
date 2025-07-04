@@ -106,8 +106,7 @@ class PathNode(Node):
 
         self.bridge = CvBridge()
 
-        # Confirm initialization
-        self.get_logger().info('PathNode started')
+        # Confirm initialization (logger disabled)
 
         # interne Puffer
         self._frame_times    = []
@@ -442,9 +441,7 @@ class PathNode(Node):
 
             # Ausreißerprüfung
             if self._angle_buffer and abs(raw_angle - self._angle_buffer[-1]) > ANGLE_JUMP_THRESH:
-                self.get_logger().warn(
-                    f"Ausreißer erkannt: Δ{(raw_angle - self._angle_buffer[-1]):.1f}° > {ANGLE_JUMP_THRESH}°"
-                )
+                pass  # logging disabled
             else:
                 # Puffer aktualisieren
                 self._angle_buffer.append(raw_angle)
@@ -468,7 +465,6 @@ class PathNode(Node):
             self.angle_pub.publish(angle_msg)
             if self.angle_shared_pub.get_subscription_count() > 0:
                 self.angle_shared_pub.publish(angle_msg)
-            self.get_logger().info(f"Gefilterter Winkel: {self._angle_smoothed:.2f}°")
 
         # Pfad in MarkerArray
         path_markers = MarkerArray()
@@ -478,6 +474,14 @@ class PathNode(Node):
 
         combined = best_bg + best_or
         if len(combined) >= 2:
+            steer = math.radians(self.shared_angle) if self.shared_angle is not None else 0.0
+            advance = (self.desired_speed or 0.0) * dt
+            c_, s = math.cos(steer), math.sin(steer)
+            R = np.array([[c_, -s], [s, c_]])
+            combined = [
+                tuple((R @ np.array([x, y]) + np.array([0.0, advance])).tolist())
+                for x, y in combined
+            ]
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined]
             n_bg = len(best_bg)
             m = Marker()
@@ -581,9 +585,9 @@ class PathNode(Node):
         avg = sum(self._frame_times) / len(self._frame_times)
         self.fps_pub.publish(Float32(data=(1.0/avg if avg>0 else 0.0)))
 
-        # 9) Warnung bei Kürze
+        # 9) Warnung bei Kürze (logger disabled)
         if abort:
-            self.get_logger().warn(f"Pfad < {PATH_LENGTH}m! Grund: {abort}")
+            pass
 
         # abschließend Marker-Arrays senden (nicht entfernen)
         self.marker_pub.publish(markers)

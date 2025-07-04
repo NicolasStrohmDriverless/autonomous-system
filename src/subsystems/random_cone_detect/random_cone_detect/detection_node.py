@@ -183,28 +183,40 @@ class ConeArrayPublisher(Node):
                 self.time_accel += dt
                 if self.distance_traveled >= Y_FINISH:
                     self.phase = "brake"
-                    self.get_logger().info(f'>> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s')
+                    self.get_logger().info(
+                        f'>> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s'
+                    )
             elif self.phase == "brake":
                 self.distance_traveled += self.v * dt + 0.5 * BRAKE_A * dt * dt
                 self.v += BRAKE_A * dt
                 if self.v < 0.0:
                     self.v = 0.0
                 if self.distance_traveled >= Y_STOP or self.v == 0.0:
-                    self.get_logger().info(f'>> Fahrzeug steht! y={self.distance_traveled:.2f}')
+                    self.get_logger().info(
+                        f'>> Fahrzeug steht! y={self.distance_traveled:.2f}'
+                    )
                     self.lap += 1
                     self.lap_pub.publish(Int32(data=int(self.lap)))
                     if self.lap >= self.max_laps:
-                        self.get_logger().info(f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.')
+                        self.get_logger().info(
+                            f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.'
+                        )
                         self.timer.cancel()
                         return
                     # Reset für die nächste Runde (hier nicht nötig, da nur eine Runde bei accel)
             current_speed = self.v
-            angle = 0.0
+            angle = self.external_angle if self.external_angle is not None else 0.0
         else:
-            angle = math.degrees(self._steer_angle(self.distance_traveled))
+            angle = (
+                self.external_angle
+                if self.external_angle is not None
+                else math.degrees(self._steer_angle(self.distance_traveled))
+            )
             factor = max(0.3, 1.0 - abs(angle) / 90.0)
             base_speed = self.max_speed * factor
-            self.speed = self.external_speed if self.external_speed is not None else base_speed
+            self.speed = (
+                self.external_speed if self.external_speed is not None else base_speed
+            )
             self.distance_traveled += self.speed * dt
             current_speed = self.speed
             if self.distance_traveled >= self.total_len:
@@ -212,7 +224,9 @@ class ConeArrayPublisher(Node):
                 self.lap_pub.publish(Int32(data=int(self.lap)))
                 self.get_logger().info(f'Runde {self.lap} beendet.')
                 if self.lap >= self.max_laps:
-                    self.get_logger().info(f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.')
+                    self.get_logger().info(
+                        f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.'
+                    )
                     self.timer.cancel()
                     return
                 else:
@@ -252,6 +266,8 @@ class ConeArrayPublisher(Node):
             v      = p1 - p0
 
         phi = math.atan2(v[0], v[1])
+        if self.external_angle is not None:
+            phi = math.radians(self.external_angle)
         c_, s = math.cos(phi), math.sin(phi)
         R = np.array([[ c_, -s],
                       [ s,  c_]])
