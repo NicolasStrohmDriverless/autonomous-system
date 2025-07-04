@@ -85,6 +85,6 @@
       "version": "os-provided"
     }
   },
-  "postCreateCommand": "rm -rf build/ install/ log/ && sudo chown -R strohmo ~/autonomous-system/ && rosdep update && rosdep install --from-paths src --ignore-src --rosdistro humble -y && colcon build --symlink-install && source install/setup.bash",
+  "postCreateCommand": "sudo chown -R strohmo ~/autonomous-system/ && rosdep update && rosdep install --from-paths src --ignore-src --rosdistro humble -y && colcon build --symlink-install && source install/setup.bash",
   "postStartCommand": "cp src/drivers/depthai-ros/calibration/calibration.json /tmp/"
 }

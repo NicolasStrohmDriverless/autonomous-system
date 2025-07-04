@@ -12,7 +12,7 @@ from rclpy.qos import (
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
-from std_msgs.msg import Header, Float32, Int32
+from std_msgs.msg import Header, Float32
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
@@ -119,11 +119,6 @@ class ConeArrayPublisher(Node):
         self.external_speed = None
         self.external_angle = None
 
-        # Lap count publisher
-        self.lap_pub = self.create_publisher(Int32, '/lap_count', 10)
-        self.max_pub = self.create_publisher(Int32, '/lap_max', 1)
-        self.max_pub.publish(Int32(data=int(self.max_laps)))
-
         # maximale Geschwindigkeit als Parameter
         self.declare_parameter('max_speed', MAX_SPEED)
         self.max_speed = float(self.get_parameter('max_speed').value)
@@ -172,8 +167,6 @@ class ConeArrayPublisher(Node):
 
     def publish_cones(self):
         dt = 1.0/self.update_rate
-        # publish current lap count continuously
-        self.lap_pub.publish(Int32(data=int(self.lap)))
 
         if self.is_accel:
             # --- Beschleunigung und Bremsen ---
@@ -183,50 +176,34 @@ class ConeArrayPublisher(Node):
                 self.time_accel += dt
                 if self.distance_traveled >= Y_FINISH:
                     self.phase = "brake"
-                    self.get_logger().info(
-                        f'>> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s'
-                    )
+                    self.get_logger().info(f'>> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s')
             elif self.phase == "brake":
                 self.distance_traveled += self.v * dt + 0.5 * BRAKE_A * dt * dt
                 self.v += BRAKE_A * dt
                 if self.v < 0.0:
                     self.v = 0.0
                 if self.distance_traveled >= Y_STOP or self.v == 0.0:
-                    self.get_logger().info(
-                        f'>> Fahrzeug steht! y={self.distance_traveled:.2f}'
-                    )
+                    self.get_logger().info(f'>> Fahrzeug steht! y={self.distance_traveled:.2f}')
                     self.lap += 1
-                    self.lap_pub.publish(Int32(data=int(self.lap)))
                     if self.lap >= self.max_laps:
-                        self.get_logger().info(
-                            f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.'
-                        )
+                        self.get_logger().info(f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.')
                         self.timer.cancel()
                         return
                     # Reset für die nächste Runde (hier nicht nötig, da nur eine Runde bei accel)
             current_speed = self.v
-            angle = self.external_angle if self.external_angle is not None else 0.0
+            angle = 0.0
         else:
-            angle = (
-                self.external_angle
-                if self.external_angle is not None
-                else math.degrees(self._steer_angle(self.distance_traveled))
-            )
+            angle = math.degrees(self._steer_angle(self.distance_traveled))
             factor = max(0.3, 1.0 - abs(angle) / 90.0)
             base_speed = self.max_speed * factor
-            self.speed = (
-                self.external_speed if self.external_speed is not None else base_speed
-            )
+            self.speed = self.external_speed if self.external_speed is not None else base_speed
             self.distance_traveled += self.speed * dt
             current_speed = self.speed
             if self.distance_traveled >= self.total_len:
                 self.lap += 1
-                self.lap_pub.publish(Int32(data=int(self.lap)))
                 self.get_logger().info(f'Runde {self.lap} beendet.')
                 if self.lap >= self.max_laps:
-                    self.get_logger().info(
-                        f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.'
-                    )
+                    self.get_logger().info(f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.')
                     self.timer.cancel()
                     return
                 else:
@@ -252,8 +229,6 @@ class ConeArrayPublisher(Node):
         vis_r = visible(self.cones_right)
 
         idx = np.searchsorted(self.cumlen, d0, side='right')
-
-        # default transform using centerline orientation
         if idx == 0:
             origin = self.centerline[0]
             v      = self.centerline[1] - origin
@@ -268,49 +243,17 @@ class ConeArrayPublisher(Node):
             v      = p1 - p0
 
         phi = math.atan2(v[0], v[1])
-        scale = 1.0
-
-        # align track so that nearest cones are at x=±1.5, y=0
-        if vis_l.shape[0] > 0 and vis_r.shape[0] > 0:
-            vis_l_xy = vis_l[:, :2].astype(float)
-            vis_r_xy = vis_r[:, :2].astype(float)
-            l_near = vis_l_xy[np.argmin(np.linalg.norm(vis_l_xy - origin, axis=1))]
-            r_near = vis_r_xy[np.argmin(np.linalg.norm(vis_r_xy - origin, axis=1))]
-            origin = (l_near + r_near) / 2.0
-            lr_vec = r_near - l_near
-            width = np.linalg.norm(lr_vec)
-            if width > 0:
-                scale = 3.0 / width
-            phi = math.atan2(lr_vec[1], lr_vec[0]) + math.pi / 2.0
-
-        if self.external_angle is not None:
-            phi = math.radians(self.external_angle)
-
         c_, s = math.cos(phi), math.sin(phi)
         R = np.array([[ c_, -s],
                       [ s,  c_]])
 
         vis_l_xy = vis_l[:, :2].astype(float)
         vis_l_colors = vis_l[:, 2]
-        vis_l_tf = ((vis_l_xy - origin) @ R.T) * scale
+        vis_l_tf = (vis_l_xy - origin) @ R.T
 
         vis_r_xy = vis_r[:, :2].astype(float)
         vis_r_colors = vis_r[:, 2]
-        vis_r_tf = ((vis_r_xy - origin) @ R.T) * scale
-
-        # move track backwards by the commanded speed to simulate vehicle motion
-        advance = -(self.external_speed or 0.0) * dt
-        vis_l_tf[:, 1] += advance
-        vis_r_tf[:, 1] += advance
-
-        # ignore cones that moved behind the origin
-        mask_l = vis_l_tf[:, 1] >= 0
-        vis_l_tf = vis_l_tf[mask_l]
-        vis_l_colors = vis_l_colors[mask_l]
-
-        mask_r = vis_r_tf[:, 1] >= 0
-        vis_r_tf = vis_r_tf[mask_r]
-        vis_r_colors = vis_r_colors[mask_r]
+        vis_r_tf = (vis_r_xy - origin) @ R.T
 
         msg = ConeArray3D()
         msg.header = Header()

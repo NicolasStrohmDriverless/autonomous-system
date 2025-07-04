@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
 import threading
-
+import time
 import psutil
 import rclpy
 from rclpy.node import Node
@@ -116,7 +116,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.E
     print(">> System läuft. Mit [Strg+C] beenden.")
     try:
         while not stop_event.is_set():
-            executor.spin_once(timeout_sec=0.1)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         stop_event.set()
 

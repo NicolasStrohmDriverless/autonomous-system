@@ -35,8 +35,6 @@ class WatchdogNode(Node):
         for name in self.watched_nodes:
             alive = name in alive_nodes
             self.status[name] = alive
-            if not alive:
-                self.get_logger().warn(f'Node "{name}" is not alive!')
         self.publish_image()
 
     def publish_image(self):
