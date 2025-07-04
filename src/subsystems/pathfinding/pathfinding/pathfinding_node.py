@@ -496,28 +496,42 @@ class PathNode(Node):
                     m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
             path_markers.markers.append(m)
 
-            # Track also as simple image
-            pts_np = np.array(combined)
-            min_x, max_x = pts_np[:,0].min(), pts_np[:,0].max()
-            min_y, max_y = pts_np[:,1].min(), pts_np[:,1].max()
-            span = max(max_x - min_x, max_y - min_y, 1e-3)
-            scale = 360.0 / span
-            offset_x = (400 - (max_x - min_x) * scale) / 2 - min_x * scale
-            offset_y = (400 - (max_y - min_y) * scale) / 2 - min_y * scale
-            track_img = np.ones((400, 400, 3), dtype=np.uint8) * 255
-            for a, b in zip(pts_np[:-1], pts_np[1:]):
-                ax = int(a[0] * scale + offset_x)
-                ay = int(400 - (a[1] * scale + offset_y))
-                bx = int(b[0] * scale + offset_x)
-                by = int(400 - (b[1] * scale + offset_y))
-                cv2.line(track_img, (ax, ay), (bx, by), (0, 0, 0), 1)
-            for x, y in pts_np:
-                xi = int(x * scale + offset_x)
-                yi = int(400 - (y * scale + offset_y))
-                cv2.circle(track_img, (xi, yi), 3, (0, 0, 255), -1)
-            track_msg = self.bridge.cv2_to_imgmsg(track_img, 'bgr8')
-            track_msg.header.stamp = msg.header.stamp
-            self.track_image_pub.publish(track_msg)
+            # Track also as simple image showing blue/yellow cones and lines
+            blue_np = np.array([p[:2] for p in cones['blue']]) if cones['blue'] else np.empty((0, 2))
+            yellow_np = np.array([p[:2] for p in cones['yellow']]) if cones['yellow'] else np.empty((0, 2))
+            if blue_np.size or yellow_np.size:
+                all_pts = np.vstack([a for a in (blue_np, yellow_np) if a.size])
+                min_x, max_x = all_pts[:,0].min(), all_pts[:,0].max()
+                min_y, max_y = all_pts[:,1].min(), all_pts[:,1].max()
+                span = max(max_x - min_x, max_y - min_y, 1e-3)
+                scale = 360.0 / span
+                offset_x = (400 - (max_x - min_x) * scale) / 2 - min_x * scale
+                offset_y = (400 - (max_y - min_y) * scale) / 2 - min_y * scale
+                track_img = np.ones((400, 400, 3), dtype=np.uint8) * 255
+
+                def draw_set(pts, color_line, color_point):
+                    if len(pts) >= 2:
+                        pts_sorted = sorted(pts, key=lambda p: p[1])
+                        for a, b in zip(pts_sorted[:-1], pts_sorted[1:]):
+                            ax = int(a[0] * scale + offset_x)
+                            ay = int(400 - (a[1] * scale + offset_y))
+                            bx = int(b[0] * scale + offset_x)
+                            by = int(400 - (b[1] * scale + offset_y))
+                            cv2.line(track_img, (ax, ay), (bx, by), color_line, 1)
+                        pts_use = pts_sorted
+                    else:
+                        pts_use = pts
+                    for x, y in pts_use:
+                        xi = int(x * scale + offset_x)
+                        yi = int(400 - (y * scale + offset_y))
+                        cv2.circle(track_img, (xi, yi), 3, color_point, -1)
+
+                draw_set(blue_np,  (255, 0, 0),   (255, 0, 0))   # blue in BGR
+                draw_set(yellow_np,(0, 255, 255), (0, 255, 255)) # yellow in BGR
+
+                track_msg = self.bridge.cv2_to_imgmsg(track_img, 'bgr8')
+                track_msg.header.stamp = msg.header.stamp
+                self.track_image_pub.publish(track_msg)
 
         # Geschwindigkeit anhand Pfadlänge und Lenkwinkel berechnen
         if len(combined) >= 2:
