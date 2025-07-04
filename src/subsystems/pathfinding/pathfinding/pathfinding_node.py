@@ -122,6 +122,9 @@ class PathNode(Node):
         self.last_time = time.time()
         self.last_speed = 0.0
         self.stop_braked = False
+        self.prev_cones = {}
+        self.path_id_counter = 0
+        self.current_path_id = 0
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -153,6 +156,18 @@ class PathNode(Node):
                 continue
             p = np.array([c.x, c.z, 0]) * np.array(CONE_POSITION_SCALE)
             cones[c.color].append(p)
+
+        cone_positions = {c.id: np.array([c.x, c.z]) for c in msg.cones}
+        dx_sum = dy_sum = 0.0
+        matches = 0
+        for cid, pos in cone_positions.items():
+            if cid in self.prev_cones:
+                prev = self.prev_cones[cid]
+                dx_sum += pos[0] - prev[0]
+                dy_sum += pos[1] - prev[1]
+                matches += 1
+        avg_dx = dx_sum / matches if matches > 0 else 0.0
+        avg_dy = dy_sum / matches if matches > 0 else 0.0
 
         # 2) Kegel-Marker
         markers = MarkerArray()
@@ -429,7 +444,16 @@ class PathNode(Node):
             self.green_len = cand_green
             self.dist_since_update = 0.0
             self.stop_braked = False
+            self.path_id_counter += 1
+            self.current_path_id = self.path_id_counter
         else:
+            if matches > 0:
+                self.current_bg = [
+                    (x + avg_dx, y + avg_dy) for x, y in self.current_bg
+                ]
+                self.current_or = [
+                    (x + avg_dx, y + avg_dy) for x, y in self.current_or
+                ]
             best_bg = self.current_bg
             best_or = self.current_or
         combined = best_bg + best_or
@@ -485,7 +509,7 @@ class PathNode(Node):
             m = Marker()
             m.header = msg.header
             m.ns     = 'best_path'
-            m.id     = 30000
+            m.id     = 30000 + self.current_path_id
             m.type   = Marker.LINE_STRIP
             m.action = Marker.ADD
             m.scale.x = 0.08
@@ -593,6 +617,7 @@ class PathNode(Node):
 
         self.prev_bg = list(self.current_bg)
         self.prev_or = list(self.current_or)
+        self.prev_cones = cone_positions
 
 
 def main(args=None):
