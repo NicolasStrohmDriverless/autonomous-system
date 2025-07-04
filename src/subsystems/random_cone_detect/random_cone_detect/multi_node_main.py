@@ -16,6 +16,7 @@ from art_slam.art_slam_node import ArtSlamNode
 from random_cone_detect.watchdog_node import WatchdogNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from random_cone_detect.lap_counter_node import LapCounterNode
+from random_cone_detect.idle_monitor_node import IdleMonitorNode
 from std_msgs.msg import Int32
 
 
@@ -103,9 +104,11 @@ def run_mode(mode: str):
             SystemUsageNode()
         ]
 
-    watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
+    watchdog = WatchdogNode(
+        [n.get_name() for n in nodes] + ['safety_watchdog_node', 'idle_monitor_node']
+    )
     safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
-    nodes.extend([watchdog, safety_watchdog, CompletionWatcher()])
+    nodes.extend([watchdog, safety_watchdog, CompletionWatcher(), IdleMonitorNode()])
 
     for node in nodes:
         executor.add_node(node)
