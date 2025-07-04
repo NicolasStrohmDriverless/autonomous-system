@@ -161,6 +161,28 @@ class TrackGenerator:
             right.exterior.interpolate(i * right.length / nR).coords[0] for i in range(nR)
         ])
 
+        # Align track so that the first left and right cones are located at
+        # (-1.5, 0) and (1.5, 0) respectively.  This keeps the field of view
+        # consistent and places the start line at the origin.
+        start_left = cones_left[0]
+        start_right = cones_right[0]
+        midpoint = (start_left + start_right) / 2
+        vec = start_right - start_left
+        angle = math.atan2(vec[1], vec[0])
+        rot = np.array([
+            [math.cos(-angle), -math.sin(-angle)],
+            [math.sin(-angle),  math.cos(-angle)],
+        ])
+        scale = 3.0 / np.linalg.norm(vec)
+
+        def _transform(arr: np.ndarray) -> np.ndarray:
+            arr = (arr - midpoint) @ rot.T
+            return arr * scale
+
+        cones_left = _transform(cones_left)
+        cones_right = _transform(cones_right)
+        centerline = _transform(centerline)
+
         return cones_left, cones_right, centerline
 
 
