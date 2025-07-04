@@ -66,6 +66,60 @@ def smooth_path(path, alpha=SMOOTH_ALPHA):
     return [tuple(p) for p in smoothed]
 
 
+def transform_path(path, prev_angle, curr_angle, distance):
+    """Rotate and translate a path according to vehicle movement."""
+    if not path:
+        return []
+
+    delta = math.radians(curr_angle - prev_angle)
+    cos_a, sin_a = math.cos(delta), math.sin(delta)
+    dir_prev = np.array([
+        math.sin(math.radians(prev_angle)),
+        math.cos(math.radians(prev_angle)),
+    ])
+    translation = -distance * dir_prev
+
+    transformed = []
+    for x, y in path:
+        xr = cos_a * x - sin_a * y
+        yr = sin_a * x + cos_a * y
+        transformed.append((float(xr + translation[0]), float(yr + translation[1])))
+    return transformed
+
+
+def crop_path(path, colors, distance):
+    """Remove the traveled distance from the start of the path."""
+    pts = list(path)
+    cols = list(colors)
+    d = float(distance)
+    while d > 0 and len(pts) >= 2:
+        p0 = np.array(pts[0])
+        p1 = np.array(pts[1])
+        seg_len = float(np.linalg.norm(p1 - p0))
+        if seg_len < 1e-6:
+            pts.pop(0)
+            cols.pop(0)
+            continue
+        if d >= seg_len:
+            pts.pop(0)
+            cols.pop(0)
+            d -= seg_len
+        else:
+            new_p0 = p0 + (p1 - p0) * (d / seg_len)
+            pts[0] = tuple(new_p0.tolist())
+            d = 0.0
+    return pts, cols
+
+
+def path_length(pts):
+    if len(pts) < 2:
+        return 0.0
+    return sum(
+        np.linalg.norm(np.array(b) - np.array(a))
+        for a, b in zip(pts[:-1], pts[1:])
+    )
+
+
 class PathNode(Node):
     def __init__(self):
         super().__init__('midpoint_path_node')
@@ -121,6 +175,7 @@ class PathNode(Node):
         self.dist_since_update = 0.0
         self.last_time = time.time()
         self.last_speed = 0.0
+        self.last_angle = 0.0
         self.stop_braked = False
         self.prev_cones = {}
         self.path_id_counter = 0
@@ -144,7 +199,8 @@ class PathNode(Node):
         now = t0
         dt = now - self.last_time
         self.last_time = now
-        self.dist_since_update += abs(self.last_speed) * dt
+        move_dist = abs(self.last_speed) * dt
+        self.dist_since_update += move_dist
 
         # 1) Kegel sammeln
         cones = {col: [] for col in COLOR_MAP}
@@ -446,7 +502,26 @@ class PathNode(Node):
             self.stop_braked = False
             self.path_id_counter += 1
             self.current_path_id = self.path_id_counter
+            angle_curr = self.shared_angle if self.shared_angle is not None else (
+                self._angle_smoothed if self._angle_smoothed is not None else 0.0
+            )
+            self.last_angle = angle_curr
         else:
+            angle_curr = self.shared_angle if self.shared_angle is not None else (
+                self._angle_smoothed if self._angle_smoothed is not None else self.last_angle
+            )
+            self.current_bg = transform_path(
+                self.current_bg,
+                self.last_angle,
+                angle_curr,
+                move_dist,
+            )
+            self.current_or = transform_path(
+                self.current_or,
+                self.last_angle,
+                angle_curr,
+                move_dist,
+            )
             if matches > 0:
                 self.current_bg = [
                     (x + avg_dx, y + avg_dy) for x, y in self.current_bg
@@ -454,6 +529,19 @@ class PathNode(Node):
                 self.current_or = [
                     (x + avg_dx, y + avg_dy) for x, y in self.current_or
                 ]
+
+            colors = ["bg"] * len(self.current_bg) + ["or"] * len(self.current_or)
+            combined, colors = crop_path(
+                self.current_bg + self.current_or,
+                colors,
+                move_dist,
+            )
+            self.current_bg = [p for p, c in zip(combined, colors) if c == "bg"]
+            self.current_or = [p for p, c in zip(combined, colors) if c == "or"]
+            self.current_len = path_length(combined)
+            self.green_len = path_length(self.current_bg)
+            self.dist_since_update = 0.0
+            self.last_angle = angle_curr
             best_bg = self.current_bg
             best_or = self.current_or
         combined = best_bg + best_or
