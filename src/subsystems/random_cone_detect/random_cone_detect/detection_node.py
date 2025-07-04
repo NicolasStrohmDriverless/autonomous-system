@@ -298,6 +298,20 @@ class ConeArrayPublisher(Node):
         vis_r_colors = vis_r[:, 2]
         vis_r_tf = ((vis_r_xy - origin) @ R.T) * scale
 
+        # move track backwards by the commanded speed to simulate vehicle motion
+        advance = -(self.external_speed or 0.0) * dt
+        vis_l_tf[:, 1] += advance
+        vis_r_tf[:, 1] += advance
+
+        # ignore cones that moved behind the origin
+        mask_l = vis_l_tf[:, 1] >= 0
+        vis_l_tf = vis_l_tf[mask_l]
+        vis_l_colors = vis_l_colors[mask_l]
+
+        mask_r = vis_r_tf[:, 1] >= 0
+        vis_r_tf = vis_r_tf[mask_r]
+        vis_r_colors = vis_r_colors[mask_r]
+
         msg = ConeArray3D()
         msg.header = Header()
         msg.header.frame_id = 'map'
