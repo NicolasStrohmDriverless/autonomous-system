@@ -115,6 +115,14 @@ class PathNode(Node):
         self.prev_or         = None
         self._angle_buffer   = []
         self._angle_smoothed = None
+        self.current_bg = []
+        self.current_or = []
+        self.current_len = 0.0
+        self.green_len = 0.0
+        self.dist_since_update = 0.0
+        self.last_time = time.time()
+        self.last_speed = 0.0
+        self.stop_braked = False
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -131,6 +139,10 @@ class PathNode(Node):
 
     def callback(self, msg: ConeArray3D):
         t0 = time.time()
+        now = t0
+        dt = now - self.last_time
+        self.last_time = now
+        self.dist_since_update += abs(self.last_speed) * dt
 
         # 1) Kegel sammeln
         cones = {col: [] for col in COLOR_MAP}
@@ -394,6 +406,35 @@ class PathNode(Node):
         best_bg = smooth_path(best_bg)
         best_or = smooth_path(best_or)
 
+        # --- Pfadaktualisierung nach Längenvergleich ---
+        cand_combined = best_bg + best_or
+        cand_len = sum(
+            np.linalg.norm(np.array(b) - np.array(a))
+            for a, b in zip(cand_combined[:-1], cand_combined[1:])
+        ) if len(cand_combined) >= 2 else 0.0
+        cand_green = sum(
+            np.linalg.norm(np.array(b) - np.array(a))
+            for a, b in zip(best_bg[:-1], best_bg[1:])
+        ) if len(best_bg) >= 2 else 0.0
+
+        accept = False
+        if not self.current_bg:
+            accept = True
+        elif cand_len > (self.current_len - self.dist_since_update):
+            accept = True
+
+        if accept:
+            self.current_bg = best_bg
+            self.current_or = best_or
+            self.current_len = cand_len
+            self.green_len = cand_green
+            self.dist_since_update = 0.0
+            self.stop_braked = False
+        else:
+            best_bg = self.current_bg
+            best_or = self.current_or
+        combined = best_bg + best_or
+
         # 6) Winkel berechnen, filtern und publizieren
         if len(best_bg) >= 2:
             v = np.array(best_bg[1])
@@ -497,6 +538,10 @@ class PathNode(Node):
         if self.speed is not None:
             speed = min(speed, self.speed)
 
+        if not self.stop_braked and self.dist_since_update >= self.green_len and self.green_len > 0:
+            speed = 0.0
+            self.stop_braked = True
+
         angle_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
         cv2.putText(angle_img, f"{angle_val:.1f} Grad", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
         angle_msg = self.bridge.cv2_to_imgmsg(angle_img, 'bgr8')
@@ -511,6 +556,8 @@ class PathNode(Node):
         if self.speed_cmd_pub.get_subscription_count() > 0:
             self._ignore_next_speed_msg = True
             self.speed_cmd_pub.publish(Float32(data=float(speed)))
+
+        self.last_speed = speed
 
         # 8) FPS berechnen & publizieren
         dt = time.time() - t0
@@ -527,6 +574,9 @@ class PathNode(Node):
         # abschließend Marker-Arrays senden (nicht entfernen)
         self.marker_pub.publish(markers)
         self.path_pub.publish(path_markers)
+
+        self.prev_bg = list(self.current_bg)
+        self.prev_or = list(self.current_or)
 
 
 def main(args=None):

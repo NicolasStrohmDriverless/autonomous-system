@@ -15,6 +15,7 @@ from pathfinding.pathfinding_node import PathNode
 from art_slam.art_slam_node import ArtSlamNode
 from random_cone_detect.watchdog_node import WatchdogNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
+from random_cone_detect.lap_counter_node import LapCounterNode
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -64,6 +65,7 @@ def main():
             ConeArrayPublisher(mode="accel", max_laps=1),
             PathNode(),
             ArtSlamNode(),
+            LapCounterNode(max_laps=1),
             SystemUsageNode()
         ]
         watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
@@ -75,6 +77,7 @@ def main():
             ConeArrayPublisher(mode="autox", max_laps=22),
             PathNode(),
             ArtSlamNode(),
+            LapCounterNode(max_laps=22),
             SystemUsageNode()
         ]
         watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
@@ -86,6 +89,7 @@ def main():
             ConeArrayPublisher(mode="autox", max_laps=2),
             PathNode(),
             ArtSlamNode(),
+            LapCounterNode(max_laps=2),
             SystemUsageNode()
         ]
         watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
