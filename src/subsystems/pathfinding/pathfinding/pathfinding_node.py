@@ -294,14 +294,14 @@ class PathNode(Node):
 
         start_pt = (0.0, 0.0)
         # Zusätzliche Mittelpunkte zwischen Ursprung und erstem blauen
-        # sowie erstem gelben Kegel erzeugen. Dadurch existieren gerade
-        # zu Beginn mehr valide Punkte zwischen links/blau und rechts/gelb.
+        # sowie erstem gelben Kegel erzeugen. Der Startpunkt bleibt dabei
+        # im Koordinatenursprung, es werden lediglich Zwischenpunkte
+        # eingefügt, damit zu Beginn mehr valide Punkte existieren.
         if cones['blue'] and cones['yellow']:
             # naheliegendste Kegel bestimmen (Distanz zum Ursprung)
             first_blue = min(cones['blue'], key=lambda p: np.linalg.norm(p[:2]))
             first_yellow = min(cones['yellow'], key=lambda p: np.linalg.norm(p[:2]))
             mid_first = (first_blue[:2] + first_yellow[:2]) / 2
-            start_pt = tuple(np.round(mid_first, 4))
             # mehrere Punkte auf der Strecke Ursprung -> Mittelpunkt einfügen
             steps = 4
             for i in range(1, steps + 1):
