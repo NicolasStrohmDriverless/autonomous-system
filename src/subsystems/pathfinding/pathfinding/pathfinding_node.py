@@ -474,16 +474,10 @@ class PathNode(Node):
 
         combined = best_bg + best_or
         if len(combined) >= 2:
-            # rotate path so that the next cones after the first two are
-            # centered at x=\u00b11.5 on the y-axis. Instead of using the
-            # externally provided steering angle, derive the rotation from the
-            # path itself.
-            rot = math.radians(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+            # shift path forward based on current speed. do not rotate
             advance = (self.desired_speed or 0.0) * dt
-            c_, s = math.cos(-rot), math.sin(-rot)
-            R = np.array([[c_, -s], [s, c_]])
             combined = [
-                tuple((R @ np.array([x, y]) + np.array([0.0, advance])).tolist())
+                (x, y + advance)
                 for x, y in combined
             ]
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined]
