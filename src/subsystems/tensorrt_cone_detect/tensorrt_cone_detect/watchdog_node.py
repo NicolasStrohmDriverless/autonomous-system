@@ -25,6 +25,11 @@ class WatchdogNode(Node):
         self.get_logger().info(
             f'Watching nodes: {", ".join(self.watched_nodes)}')
 
+    def shutdown(self):
+        for name in self.status:
+            self.status[name] = False
+        self.publish_image()
+
     def check_nodes(self):
         alive_nodes = set(self.get_node_names())
         for name in self.watched_nodes:
@@ -55,6 +60,7 @@ def main():
     try:
         rclpy.spin(node)
     finally:
+        node.shutdown()
         node.destroy_node()
         rclpy.shutdown()
 
