@@ -274,6 +274,7 @@ class PathNode(Node):
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
+        start_pt = (0.0, 0.0)
         # Zusätzliche Mittelpunkte zwischen Ursprung und erstem blauen
         # sowie erstem gelben Kegel erzeugen. Dadurch existieren gerade
         # zu Beginn mehr valide Punkte zwischen links/blau und rechts/gelb.
@@ -282,6 +283,7 @@ class PathNode(Node):
             first_blue = min(cones['blue'], key=lambda p: np.linalg.norm(p[:2]))
             first_yellow = min(cones['yellow'], key=lambda p: np.linalg.norm(p[:2]))
             mid_first = (first_blue[:2] + first_yellow[:2]) / 2
+            start_pt = tuple(np.round(mid_first, 4))
             # mehrere Punkte auf der Strecke Ursprung -> Mittelpunkt einfügen
             steps = 4
             for i in range(1, steps + 1):
@@ -442,7 +444,7 @@ class PathNode(Node):
 
         # nur eine Konfiguration (GEGENCHECK = 1)
         for _ in range(GEGENCHECK):
-            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, (0,0), v0, PATH_LENGTH)
+            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, start_pt, v0, PATH_LENGTH)
             l_or_max = PATH_LENGTH - l_bg
             p_or, l_or = [], 0.0
             if l_or_max > 0 and len(p_bg) > 1:
