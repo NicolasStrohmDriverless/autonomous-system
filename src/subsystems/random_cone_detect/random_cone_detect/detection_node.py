@@ -12,7 +12,7 @@ from rclpy.qos import (
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
-from std_msgs.msg import Header, Float32
+from std_msgs.msg import Header, Float32, Int32
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
@@ -119,6 +119,11 @@ class ConeArrayPublisher(Node):
         self.external_speed = None
         self.external_angle = None
 
+        # Lap count publisher
+        self.lap_pub = self.create_publisher(Int32, '/lap_count', 10)
+        self.max_pub = self.create_publisher(Int32, '/lap_max', 1)
+        self.max_pub.publish(Int32(data=int(self.max_laps)))
+
         # maximale Geschwindigkeit als Parameter
         self.declare_parameter('max_speed', MAX_SPEED)
         self.max_speed = float(self.get_parameter('max_speed').value)
@@ -167,6 +172,8 @@ class ConeArrayPublisher(Node):
 
     def publish_cones(self):
         dt = 1.0/self.update_rate
+        # publish current lap count continuously
+        self.lap_pub.publish(Int32(data=int(self.lap)))
 
         if self.is_accel:
             # --- Beschleunigung und Bremsen ---
@@ -185,6 +192,7 @@ class ConeArrayPublisher(Node):
                 if self.distance_traveled >= Y_STOP or self.v == 0.0:
                     self.get_logger().info(f'>> Fahrzeug steht! y={self.distance_traveled:.2f}')
                     self.lap += 1
+                    self.lap_pub.publish(Int32(data=int(self.lap)))
                     if self.lap >= self.max_laps:
                         self.get_logger().info(f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.')
                         self.timer.cancel()
@@ -201,6 +209,7 @@ class ConeArrayPublisher(Node):
             current_speed = self.speed
             if self.distance_traveled >= self.total_len:
                 self.lap += 1
+                self.lap_pub.publish(Int32(data=int(self.lap)))
                 self.get_logger().info(f'Runde {self.lap} beendet.')
                 if self.lap >= self.max_laps:
                     self.get_logger().info(f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.')
