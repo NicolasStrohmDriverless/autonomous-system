@@ -311,12 +311,6 @@ class PathNode(Node):
                     mids_bg.append(extra)
 
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
-
-        # Bestehenden Pfad zu den Mittelpunkten hinzufügen
-        mids_bg.extend([tuple(np.round(p, 4)) for p in self.current_bg])
-        mids_or.extend([tuple(np.round(p, 4)) for p in self.current_or])
-
-        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
         # Mittelpunkte markieren
@@ -594,8 +588,9 @@ class PathNode(Node):
         combined = best_bg + best_or
 
         # 6) Winkel berechnen, filtern und publizieren
-        if len(best_bg) >= 2:
-            v = np.array(best_bg[1])
+        angle_source = frame_best_path if len(frame_best_path) >= 2 else best_bg
+        if len(angle_source) >= 2:
+            v = np.array(angle_source[1])
             raw_angle = float(np.degrees(np.arctan2(v[0], v[1])))
 
             # Ausreißerprüfung
@@ -716,17 +711,17 @@ class PathNode(Node):
         else:
             path_len = 0.0
 
-        # base speed on the longest path observed if available
-        if self.longest_len > 0.0:
-            path_len = self.longest_len
-
-        angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
-        angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
-        path_factor = min(path_len, SPEED_PATH_LENGTH) / SPEED_PATH_LENGTH
-        speed_len   = self.max_speed * path_factor
-        speed_angle = self.max_speed * angle_factor
-        speed_est   = 0.5 * (speed_len + speed_angle)
-        speed = min(speed_est, self.max_speed)
+        if path_len >= 1.0:
+            angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+            angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
+            path_factor = min(path_len, SPEED_PATH_LENGTH) / SPEED_PATH_LENGTH
+            speed_len   = self.max_speed * path_factor
+            speed_angle = self.max_speed * angle_factor
+            speed_est   = 0.5 * (speed_len + speed_angle)
+            speed = min(speed_est, self.max_speed)
+        else:
+            angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+            speed = 0.0
         if self.desired_speed is not None:
             speed = min(self.desired_speed, self.max_speed)
         if self.speed is not None:
