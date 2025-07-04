@@ -16,7 +16,7 @@ class WatchdogNode(Node):
     def __init__(self, watched_nodes):
         super().__init__('watchdog_node')
         self.watched_nodes = list(watched_nodes)
-        self.declare_parameter('check_period', 1.0)
+        self.declare_parameter('check_period', 0.25)
         period = float(self.get_parameter('check_period').value)
         self.timer = self.create_timer(period, self.check_nodes)
         self.status = {name: True for name in self.watched_nodes}
