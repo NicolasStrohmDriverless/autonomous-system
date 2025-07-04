@@ -485,9 +485,11 @@ class PathNode(Node):
         # 5) Pfad glätten
         best_bg = smooth_path(best_bg)
         best_or = smooth_path(best_or)
+        cand_bg = best_bg
+        cand_or = best_or
 
         # --- Pfadaktualisierung nach Längenvergleich ---
-        cand_combined = best_bg + best_or
+        cand_combined = cand_bg + cand_or
         frame_best_path = cand_combined
         cand_len = sum(
             np.linalg.norm(np.array(b) - np.array(a))
@@ -495,8 +497,8 @@ class PathNode(Node):
         ) if len(cand_combined) >= 2 else 0.0
         cand_green = sum(
             np.linalg.norm(np.array(b) - np.array(a))
-            for a, b in zip(best_bg[:-1], best_bg[1:])
-        ) if len(best_bg) >= 2 else 0.0
+            for a, b in zip(cand_bg[:-1], cand_bg[1:])
+        ) if len(cand_bg) >= 2 else 0.0
 
         accept = False
         if not self.current_bg:
@@ -505,8 +507,8 @@ class PathNode(Node):
             accept = True
 
         if accept:
-            self.current_bg = best_bg
-            self.current_or = best_or
+            self.current_bg = cand_bg
+            self.current_or = cand_or
             self.current_len = cand_len
             self.green_len = cand_green
             self.dist_since_update = 0.0
@@ -517,6 +519,8 @@ class PathNode(Node):
                 self._angle_smoothed if self._angle_smoothed is not None else 0.0
             )
             self.last_angle = angle_curr
+            best_bg = self.current_bg
+            best_or = self.current_or
         else:
             angle_curr = self.shared_angle if self.shared_angle is not None else (
                 self._angle_smoothed if self._angle_smoothed is not None else self.last_angle
@@ -595,11 +599,11 @@ class PathNode(Node):
         clr.header = msg.header; clr.ns='best_path'; clr.id=40000
         path_markers.markers.append(clr)
 
-        combined = best_bg + best_or
-        if len(combined) >= 2:
+        combined_display = frame_best_path
+        if len(combined_display) >= 2:
             # keep path anchored at the origin
-            pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined]
-            n_bg = len(best_bg)
+            pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined_display]
+            n_bg = len(cand_bg)
             m = Marker()
             m.header = msg.header
             m.ns     = 'best_path'
