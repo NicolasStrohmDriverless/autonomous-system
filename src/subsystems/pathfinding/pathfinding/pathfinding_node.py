@@ -181,6 +181,10 @@ class PathNode(Node):
         self.prev_cones = {}
         self.path_id_counter = 0
         self.current_path_id = 0
+        # longest path tracking
+        self.longest_bg = []
+        self.longest_or = []
+        self.longest_len = 0.0
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -195,12 +199,26 @@ class PathNode(Node):
     def angle_shared_callback(self, msg: Float32):
         self.shared_angle = float(msg.data)
 
+    def _update_longest_path(self, prev_angle, curr_angle, move_dist, avg_dx, avg_dy, matches):
+        """Transform and crop the stored longest path."""
+        self.longest_bg = transform_path(self.longest_bg, prev_angle, curr_angle, move_dist)
+        self.longest_or = transform_path(self.longest_or, prev_angle, curr_angle, move_dist)
+        if matches > 0:
+            self.longest_bg = [(x + avg_dx, y + avg_dy) for x, y in self.longest_bg]
+            self.longest_or = [(x + avg_dx, y + avg_dy) for x, y in self.longest_or]
+        colors = ['bg'] * len(self.longest_bg) + ['or'] * len(self.longest_or)
+        combined, colors = crop_path(self.longest_bg + self.longest_or, colors, move_dist)
+        self.longest_bg = [p for p, c in zip(combined, colors) if c == 'bg']
+        self.longest_or = [p for p, c in zip(combined, colors) if c == 'or']
+        self.longest_len = path_length(combined)
+
     def callback(self, msg: ConeArray3D):
         t0 = time.time()
         now = t0
         dt = now - self.last_time
         self.last_time = now
         move_dist = abs(self.last_speed) * dt
+        prev_angle = self.last_angle
         self.dist_since_update += move_dist
 
         # 1) Kegel sammeln
@@ -470,6 +488,8 @@ class PathNode(Node):
 
         # Extrapolation, damit immer genau PATH_LENGTH erreicht wird
         combined = best_bg + best_or
+
+
         if len(combined) >= 2 and best_len < PATH_LENGTH:
             prev_pt = np.array(combined[-2])
             last_pt = np.array(combined[-1])
@@ -518,6 +538,11 @@ class PathNode(Node):
             angle_curr = self.shared_angle if self.shared_angle is not None else (
                 self._angle_smoothed if self._angle_smoothed is not None else 0.0
             )
+            self._update_longest_path(prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches)
+            if self.current_len > self.longest_len:
+                self.longest_bg = list(self.current_bg)
+                self.longest_or = list(self.current_or)
+                self.longest_len = self.current_len
             self.last_angle = angle_curr
             best_bg = self.current_bg
             best_or = self.current_or
@@ -556,6 +581,11 @@ class PathNode(Node):
             self.current_len = path_length(combined)
             self.green_len = path_length(self.current_bg)
             self.dist_since_update = 0.0
+            self._update_longest_path(prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches)
+            if self.current_len > self.longest_len:
+                self.longest_bg = list(self.current_bg)
+                self.longest_or = list(self.current_or)
+                self.longest_len = self.current_len
             self.last_angle = angle_curr
             best_bg = self.current_bg
             best_or = self.current_or
@@ -600,6 +630,8 @@ class PathNode(Node):
         path_markers.markers.append(clr)
 
         combined_display = frame_best_path
+        if self.current_len < 1.0:
+            combined_display = self.longest_bg + self.longest_or
         if len(combined_display) >= 2:
             # keep path anchored at the origin
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined_display]
