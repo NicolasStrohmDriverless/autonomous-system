@@ -13,6 +13,8 @@ from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
 from art_slam.art_slam_node import ArtSlamNode
+from random_cone_detect.watchdog_node import WatchdogNode
+from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -64,6 +66,9 @@ def main():
             ArtSlamNode(),
             SystemUsageNode()
         ]
+        watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
+        safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
+        nodes.extend([watchdog, safety_watchdog])
     elif mode == "endu":
         nodes = [
             TrackPublisher(),
@@ -72,6 +77,9 @@ def main():
             ArtSlamNode(),
             SystemUsageNode()
         ]
+        watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
+        safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
+        nodes.extend([watchdog, safety_watchdog])
     else:  # autox
         nodes = [
             TrackPublisher(),
@@ -80,6 +88,9 @@ def main():
             ArtSlamNode(),
             SystemUsageNode()
         ]
+        watchdog = WatchdogNode([n.get_name() for n in nodes] + ['safety_watchdog_node'])
+        safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
+        nodes.extend([watchdog, safety_watchdog])
 
     for node in nodes:
         executor.add_node(node)
