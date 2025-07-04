@@ -13,6 +13,8 @@ from pathfinding.pathfinding_node import PathNode
 from imu_viz.imu_viz_node import ImuVizNode
 from art_slam.art_slam_node import ArtSlamNode
 from path_viz.path_viz_node import PathVizNode
+from tensorrt_cone_detect_cpp.watchdog_node import WatchdogNode
+from tensorrt_cone_detect_cpp.safety_watchdog_node import SafetyWatchdogNode
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -55,6 +57,9 @@ def main():
         ImuVizNode(),
         SystemUsageNode(),
     ]
+    watchdog = WatchdogNode(['cone_detector_cpp'] + [n.get_name() for n in nodes] + ['safety_watchdog_node'])
+    safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
+    nodes.extend([watchdog, safety_watchdog])
     rclpy.logging.get_logger('multi_node_main').info(
         'Using SORT-based tracking in detection node')
     executor = MultiThreadedExecutor(num_threads=len(nodes))

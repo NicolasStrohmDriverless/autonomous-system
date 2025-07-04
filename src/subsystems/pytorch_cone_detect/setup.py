@@ -63,6 +63,8 @@ setup(
             'depth_node = depth_tracking.depth_node:main',
             'detection_node = pytorch_cone_detect.detection_node:main',
             'multi_node_main = pytorch_cone_detect.multi_node_main:main',
+            'watchdog_node = pytorch_cone_detect.watchdog_node:main',
+            'safety_watchdog_node = pytorch_cone_detect.safety_watchdog_node:main',
         ],
     },
 )

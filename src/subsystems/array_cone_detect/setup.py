@@ -63,6 +63,8 @@ setup(
             'detection_node = array_cone_detect.detection_node:main',
             'depth_node = array_cone_detect.depth_node:main',
             'multi_node_main = array_cone_detect.multi_node_main:main',
+            'watchdog_node = array_cone_detect.watchdog_node:main',
+            'safety_watchdog_node = array_cone_detect.safety_watchdog_node:main',
         ],
     },
 )

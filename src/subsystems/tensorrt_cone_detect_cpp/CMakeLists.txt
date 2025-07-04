@@ -46,5 +46,13 @@ install(
   PROGRAMS src/multi_node_main.py
   DESTINATION lib/${PROJECT_NAME}
 )
+install(
+  PROGRAMS src/watchdog_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(
+  PROGRAMS src/safety_watchdog_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()
