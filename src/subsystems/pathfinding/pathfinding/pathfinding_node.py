@@ -711,16 +711,12 @@ class PathNode(Node):
         else:
             path_len = 0.0
 
-        if path_len >= 1.0:
-            angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+        angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+        if path_len > 0.0:
             angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
             path_factor = min(path_len, SPEED_PATH_LENGTH) / SPEED_PATH_LENGTH
-            speed_len   = self.max_speed * path_factor
-            speed_angle = self.max_speed * angle_factor
-            speed_est   = 0.5 * (speed_len + speed_angle)
-            speed = min(speed_est, self.max_speed)
+            speed = self.max_speed * angle_factor * path_factor
         else:
-            angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
             speed = 0.0
         if self.desired_speed is not None:
             speed = min(self.desired_speed, self.max_speed)
