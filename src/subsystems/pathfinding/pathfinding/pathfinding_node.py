@@ -8,6 +8,9 @@ from scipy.spatial import Delaunay
 from std_msgs.msg import ColorRGBA, Float32
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import (
@@ -51,6 +54,7 @@ SMOOTH_ALPHA      = 0.4   # Faktor für exponentielle Glättung des Pfades
 ANGLE_WINDOW        = 7     # Anzahl der letzten Winkel für Median
 ANGLE_JUMP_THRESH   = 30.0  # Maximal erlaubter Sprung in °
 ANGLE_SMOOTH_ALPHA  = 0.3   # Faktor für exponentielle Glättung des Winkels
+MAX_SPEED          = 5.0    # Maximale Geschwindigkeit in m/s
 
 def smooth_path(path, alpha=SMOOTH_ALPHA):
     """Exponentielle Glättung eines Pfades."""
@@ -79,6 +83,24 @@ class PathNode(Node):
         self.path_pub   = self.create_publisher(MarkerArray, '/best_path_marker', 10)
         self.fps_pub    = self.create_publisher(Float32,     '/path_inference_fps', 10)
         self.angle_pub  = self.create_publisher(Float32,     '/path_to_y_axis_angle', 10)
+        self.image_pub  = self.create_publisher(Image,       '/path_status/image', 1)
+
+        self.declare_parameter('max_speed', MAX_SPEED)
+        self.max_speed = float(self.get_parameter('max_speed').value)
+
+        # Geschwindigkeit aus IMU (optional)
+        self.speed = None
+        self.create_subscription(Float32, '/vehicle/speed', self.speed_callback, 10)
+
+        # Geteilter Status mit anderen Nodes
+        self.speed_cmd_pub = self.create_publisher(Float32, '/vehicle/desired_speed', 10)
+        self.speed_cmd_sub = self.create_subscription(Float32, '/vehicle/desired_speed', self.speed_cmd_callback, 10)
+        self.angle_shared_pub = self.create_publisher(Float32, '/vehicle/steering_angle', 10)
+        self.angle_shared_sub = self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_shared_callback, 10)
+        self.desired_speed = None
+        self.shared_angle = None
+
+        self.bridge = CvBridge()
 
         # Confirm initialization
         self.get_logger().info('PathNode started')
@@ -89,6 +111,15 @@ class PathNode(Node):
         self.prev_or         = None
         self._angle_buffer   = []
         self._angle_smoothed = None
+
+    def speed_callback(self, msg: Float32):
+        self.speed = float(msg.data)
+
+    def speed_cmd_callback(self, msg: Float32):
+        self.desired_speed = float(msg.data)
+
+    def angle_shared_callback(self, msg: Float32):
+        self.shared_angle = float(msg.data)
 
     def callback(self, msg: ConeArray3D):
         t0 = time.time()
@@ -386,6 +417,8 @@ class PathNode(Node):
             # Publizieren
             angle_msg = Float32(data=self._angle_smoothed)
             self.angle_pub.publish(angle_msg)
+            if self.angle_shared_pub.get_subscription_count() > 0:
+                self.angle_shared_pub.publish(angle_msg)
             self.get_logger().info(f"Gefilterter Winkel: {self._angle_smoothed:.2f}°")
 
         # Pfad in MarkerArray
@@ -414,9 +447,34 @@ class PathNode(Node):
                     m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
             path_markers.markers.append(m)
 
-        # Publisher
-        self.marker_pub.publish(markers)
-        self.path_pub.publish(path_markers)
+        # Geschwindigkeit anhand Pfadlänge und Lenkwinkel berechnen
+        if len(combined) >= 2:
+            path_len = sum(
+                np.linalg.norm(np.array(b) - np.array(a))
+                for a, b in zip(combined[:-1], combined[1:])
+            )
+        else:
+            path_len = 0.0
+
+        angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
+        length_factor = min(1.0, path_len / PATH_LENGTH)
+        angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
+        speed_est = self.max_speed * length_factor * angle_factor
+        if self.desired_speed is not None:
+            speed = min(self.desired_speed, self.max_speed)
+        elif self.speed is not None:
+            speed = min(self.speed, self.max_speed)
+        else:
+            speed = speed_est
+
+        img = np.ones((60, 180, 3), dtype=np.uint8) * 255
+        cv2.putText(img, f"{angle_val:.1f}\u00B0", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(img, f"{speed:.2f} m/s", (10, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        img_msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        img_msg.header.stamp = msg.header.stamp
+        self.image_pub.publish(img_msg)
+        if self.speed_cmd_pub.get_subscription_count() > 0:
+            self.speed_cmd_pub.publish(Float32(data=float(speed)))
 
         # 8) FPS berechnen & publizieren
         dt = time.time() - t0
@@ -430,7 +488,7 @@ class PathNode(Node):
         if abort:
             self.get_logger().warn(f"Pfad < {PATH_LENGTH}m! Grund: {abort}")
 
-        # abschließend Marker-Arrays senden
+        # abschließend Marker-Arrays senden (nicht entfernen)
         self.marker_pub.publish(markers)
         self.path_pub.publish(path_markers)
 
