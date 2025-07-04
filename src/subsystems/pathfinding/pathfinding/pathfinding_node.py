@@ -32,6 +32,7 @@ qos_sub = QoSProfile(
 # Pfad- und Marker-Parameter
 PATH_LENGTH             = 20.0    # nun 20 m
 SPEED_PATH_LENGTH       = 30.0    # Pfadlänge für Geschwindigkeitsberechnung
+ANGLE_SPEED_DIVISOR     = 45.0    # Winkel-Referenz für Geschwindigkeitsberechnung
 MAX_ANGLE               = 40.0
 FIRST_STEP_MAX_ANGLE    = 50.0
 MIDPOINT_MARKER_SCALE   = 0.1
@@ -713,9 +714,10 @@ class PathNode(Node):
 
         angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
         if path_len > 0.0:
-            angle_factor = max(0.0, 1.0 - abs(angle_val) / 90.0)
-            path_factor = min(path_len, SPEED_PATH_LENGTH) / SPEED_PATH_LENGTH
-            speed = self.max_speed * angle_factor * path_factor
+            speed = self.max_speed * (
+                (1 - abs(angle_val) / ANGLE_SPEED_DIVISOR + path_len / SPEED_PATH_LENGTH)
+                / 2.0
+            )
         else:
             speed = 0.0
         if self.desired_speed is not None:
