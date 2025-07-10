@@ -54,7 +54,8 @@ class TrackGenerator:
                  mode: Mode,
                  track_width=3.0,
                  curvature_threshold: float = 1.0/3.75,
-                 allow_sharp_turns: bool = False):
+                 allow_sharp_turns: bool = False,
+                 max_turn_angle_deg: float = 90.0):
         self._n_points = n_points
         self._n_regions = n_regions
         self._min_bound = min_bound
@@ -64,6 +65,9 @@ class TrackGenerator:
         self._track_width = track_width
         self._curvature_threshold = curvature_threshold
         self._allow_sharp_turns = allow_sharp_turns
+        self._max_turn_angle_deg = max_turn_angle_deg
+        if curvature_threshold is None:
+            self._curvature_threshold = max(1e-3, math.radians(90 - max_turn_angle_deg/2))
 
     def bounded_voronoi(self, pts, bbox):
         def _mirror(boundary, axis):
@@ -209,7 +213,8 @@ class TrackPublisher(Node):
             mode=Mode.RANDOM,
             track_width=3.0,
             curvature_threshold=1.0/3.75,
-            allow_sharp_turns=True
+            allow_sharp_turns=True,
+            max_turn_angle_deg=90.0
         ).create_track()
 
         # --- 1) ConeArray3D erzeugen und publizieren ---

@@ -89,7 +89,8 @@ class ConeArrayPublisher(Node):
             cones_l, cones_r, centerline = TrackGenerator(
                 n_points=50, n_regions=10,
                 min_bound=0.0, max_bound=100.0,
-                mode=Mode.RANDOM
+                mode=Mode.RANDOM,
+                max_turn_angle_deg=90.0
             ).create_track()
             # cones_l, cones_r als (N,2), also ohne Farbe
             # -> erweitere um Farben für Konsistenz
