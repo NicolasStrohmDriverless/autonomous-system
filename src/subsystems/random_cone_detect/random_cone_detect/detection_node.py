@@ -13,6 +13,7 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 from std_msgs.msg import Header, Float32, Int32
+from geometry_msgs.msg import Pose2D
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
@@ -121,6 +122,8 @@ class ConeArrayPublisher(Node):
         self.angle_sub = self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_callback, 10)
         self.external_speed = None
         self.external_angle = None
+        self.state_pub = self.create_publisher(Pose2D, '/vehicle/car_state', 10)
+        self.speed_current_pub = self.create_publisher(Float32, '/vehicle/speed', 10)
 
         # Lap counter publishers
         self.lap_pub = self.create_publisher(Int32, '/lap_count', 10)
@@ -167,6 +170,23 @@ class ConeArrayPublisher(Node):
             p0, p1 = self.centerline[idx-1], self.centerline[idx]
         v = p1 - p0
         return math.atan2(v[0], v[1])
+
+    def _position_at(self, dist: float) -> tuple[float, float]:
+        """Berechne die Position auf der Mittelachse f\u00fcr die Distanz dist."""
+        d = dist % self.total_len
+        idx = np.searchsorted(self.cumlen, d, side='right')
+        if idx == 0:
+            t0, t1 = 0.0, self.cumlen[1]
+            p0, p1 = self.centerline[0], self.centerline[1]
+        elif idx >= len(self.cumlen):
+            t0, t1 = self.cumlen[-2], self.cumlen[-1]
+            p0, p1 = self.centerline[-2], self.centerline[-1]
+        else:
+            t0, t1 = self.cumlen[idx-1], self.cumlen[idx]
+            p0, p1 = self.centerline[idx-1], self.centerline[idx]
+        frac = (d - t0) / (t1 - t0) if t1 > t0 else 0.0
+        pos = p0 + frac * (p1 - p0)
+        return float(pos[0]), float(pos[1])
 
     def _steer_angle(self, dist: float) -> float:
         """Berechnet den Lenkwinkel anhand der Streckengeometrie"""
@@ -225,6 +245,16 @@ class ConeArrayPublisher(Node):
                     return
                 else:
                     self.distance_traveled = 0.0  # Für neue Runde zurücksetzen
+
+        # aktuellen Fahrzeugzustand publizieren
+        phi_now = self._orientation_at(self.distance_traveled)
+        pos_x, pos_y = self._position_at(self.distance_traveled)
+        if self.state_pub.get_subscription_count() > 0:
+            self.state_pub.publish(
+                Pose2D(x=float(pos_x), y=float(pos_y), theta=float(math.degrees(phi_now)))
+            )
+        if self.speed_current_pub.get_subscription_count() > 0:
+            self.speed_current_pub.publish(Float32(data=float(current_speed)))
 
         # Sichtbare Kegel im aktuellen Fenster bestimmen
         d0 = self.distance_traveled
