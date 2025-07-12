@@ -52,16 +52,19 @@ class TrackGenerator:
     Generiert einen zufälligen, geschlossenen Track via begrenzter Voronoi-Regionen,
     optional mit oder ohne Krümmungs-Pruning, liefert linke Kegel, rechte Kegel und Centerline.
     """
-    def __init__(self,
-                 n_points,
-                 n_regions,
-                 min_bound,
-                 max_bound,
-                 mode: Mode,
-                 track_width=TRACK_WIDTH,
-                 curvature_threshold: float = 1.0/3.75,
-                 allow_sharp_turns: bool = False,
-                 max_turn_angle_deg: float = MAX_CURVE_ANGLE_DEG):
+    def __init__(
+        self,
+        n_points,
+        n_regions,
+        min_bound,
+        max_bound,
+        mode: Mode,
+        track_width=TRACK_WIDTH,
+        curvature_threshold: float = 1.0 / 3.75,
+        allow_sharp_turns: bool = False,
+        max_turn_angle_deg: float = MAX_CURVE_ANGLE_DEG,
+        seed: int | None = None,
+    ):
         self._n_points = n_points
         self._n_regions = n_regions
         self._min_bound = min_bound
@@ -72,6 +75,9 @@ class TrackGenerator:
         self._curvature_threshold = curvature_threshold
         self._allow_sharp_turns = allow_sharp_turns
         self._max_turn_angle_deg = max_turn_angle_deg
+        # Independent random generators for reproducibility
+        self._rng = np.random.default_rng(seed)
+        self._rnd = random.Random(seed)
         if curvature_threshold is None:
             self._curvature_threshold = max(1e-3, math.radians(90 - max_turn_angle_deg/2))
 
@@ -99,19 +105,19 @@ class TrackGenerator:
             center = np.stack((np.zeros_like(y), y), axis=1)
             return left, right, center
 
-        pts = np.random.uniform(self._min_bound, self._max_bound, (self._n_points, 2))
+        pts = self._rng.uniform(self._min_bound, self._max_bound, (self._n_points, 2))
         vor = self.bounded_voronoi(pts, self._bounding_box)
 
         # wiederhole Auswahl, bis gültiger Track gefunden
         while True:
             # 1) Punkte auswählen
             if self._mode == Mode.RANDOM:
-                i = random.randrange(len(pts))
+                i = self._rnd.randrange(len(pts))
                 sel = [i] + [closest_node(pts[i], pts, k=j+1)
                              for j in range(self._n_regions-1)]
             elif self._mode == Mode.LINE:
-                i = random.randrange(len(pts))
-                ang = random.uniform(0, math.pi/2)
+                i = self._rnd.randrange(len(pts))
+                ang = self._rnd.uniform(0, math.pi / 2)
                 p = pts[i]
                 d = self._max_bound / 2
                 line = LineString([
@@ -121,7 +127,7 @@ class TrackGenerator:
                 dists = [ShapelyPoint(q).distance(line) for q in pts]
                 sel = np.argpartition(dists, self._n_regions)[:self._n_regions]
             else:  # NEAREST
-                sel = np.random.choice(len(pts), self._n_regions, replace=False)
+                sel = self._rng.choice(len(pts), self._n_regions, replace=False)
 
             regs = vor.filtered_regions[sel]
             verts = np.unique(
@@ -224,14 +230,17 @@ class TrackGenerator:
 
 
 class TrackPublisher(Node):
-    def __init__(self):
+    def __init__(self, seed: int | None = None):
         super().__init__('track_generator_node')
         # Publisher für Kegel (als ConeArray3D für PathNode)
         self.cone_pub  = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos_cone_pub)
         # Publisher für Track-Marker (Visualisierung)
         self.track_pub = self.create_publisher(MarkerArray, '/track_markers', qos_marker_pub)
-        self.image_pub = self.create_publisher(Image, '/track/image', 1)
+        # Publish generated track image on a debug topic to avoid confusion with
+        # the actual driven track published by the pathfinding node
+        self.image_pub = self.create_publisher(Image, '/track/generated_image', 1)
         self.bridge = CvBridge()
+        self._seed = seed
 
         self.get_logger().info('TrackGenerator startet und publiziert Track...')
         self.publish_track()
@@ -247,7 +256,8 @@ class TrackPublisher(Node):
             track_width=TRACK_WIDTH,
             curvature_threshold=1.0/3.75,
             allow_sharp_turns=True,
-            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG
+            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG,
+            seed=self._seed,
         ).create_track()
 
         # --- 1) ConeArray3D erzeugen und publizieren ---

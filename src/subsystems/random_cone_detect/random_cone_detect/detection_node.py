@@ -75,12 +75,13 @@ def generate_accel_track():
     return np.array(cones_l, dtype=object), np.array(cones_r, dtype=object), np.array(centerline, dtype=float)
 
 class ConeArrayPublisher(Node):
-    def __init__(self, mode="autox", max_laps=2):
+    def __init__(self, mode="autox", max_laps=2, seed: int | None = None):
         super().__init__('cone_array_publisher')
         self.pub = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos)
         self.mode = mode
         self.max_laps = max_laps
         self.lap = 0
+        self._seed = seed
 
         if self.mode == "accel":
             cones_l, cones_r, centerline = generate_accel_track()
@@ -90,7 +91,8 @@ class ConeArrayPublisher(Node):
                 n_points=50, n_regions=10,
                 min_bound=0.0, max_bound=100.0,
                 mode=Mode.RANDOM,
-                max_turn_angle_deg=90.0
+                max_turn_angle_deg=90.0,
+                seed=self._seed,
             ).create_track()
             # cones_l, cones_r als (N,2), also ohne Farbe
             # -> erweitere um Farben für Konsistenz

@@ -2,6 +2,7 @@
 import subprocess
 import threading
 import time
+import random
 import psutil
 import rclpy
 from rclpy.node import Node
@@ -91,10 +92,13 @@ class MissionCheckNode(Node):
 def run_mode(mode: str, executor: MultiThreadedExecutor):
     """Run the system in three sequential phases."""
 
+    # Use a single random seed so that all nodes operate on the same track
+    seed = random.randrange(2**32 - 1)
+
     # Phase 1: mission check and track generation
     mission_nodes = [MissionCheckNode()]
     if mode != "accel":
-        mission_nodes.append(TrackPublisher())
+        mission_nodes.append(TrackPublisher(seed=seed))
     for n in mission_nodes:
         executor.add_node(n)
     input("Mission Check abgeschlossen? [Enter]")
@@ -106,7 +110,11 @@ def run_mode(mode: str, executor: MultiThreadedExecutor):
     nodes = [
         CompletionWatcher(),
         IdleMonitorNode(),
-        ConeArrayPublisher(mode="accel" if mode == "accel" else "autox", max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)),
+        ConeArrayPublisher(
+            mode="accel" if mode == "accel" else "autox",
+            max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2),
+            seed=seed if mode != "accel" else None,
+        ),
         PathNode(),
         ArtSlamNode(),
         LapCounterNode(max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)),
