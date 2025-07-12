@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import math
-import random
 import time
 
 import numpy as np
@@ -141,7 +140,15 @@ class PathNode(Node):
         self.angle_pub       = self.create_publisher(Float32, '/path_to_y_axis_angle', 10)
         self.angle_image_pub = self.create_publisher(Image,   '/path_status/angle_image', 1)
         self.speed_image_pub = self.create_publisher(Image,   '/path_status/speed_image', 1)
-        self.track_image_pub = self.create_publisher(Image,   '/path_status/track_image', 1)
+        # Publishes the track image for status monitoring and for generic UI
+        # components. Keep the original topic for backwards compatibility.
+        self.track_image_pub = self.create_publisher(
+            Image,
+            '/path_status/track_image',
+            1,
+        )
+        # Additional topic with a generic name for convenience
+        self.track_global_pub = self.create_publisher(Image, '/track/image', 1)
 
         self.declare_parameter('max_speed', MAX_SPEED)
         self.max_speed = float(self.get_parameter('max_speed').value)
@@ -702,6 +709,7 @@ class PathNode(Node):
                 track_msg = self.bridge.cv2_to_imgmsg(track_img, 'bgr8')
                 track_msg.header.stamp = msg.header.stamp
                 self.track_image_pub.publish(track_msg)
+                self.track_global_pub.publish(track_msg)
 
         # Geschwindigkeit anhand Pfadlänge und Lenkwinkel berechnen
         if len(combined) >= 2:
