@@ -324,18 +324,34 @@ class TrackPublisher(Node):
         self.get_logger().info('Track-Marker auf /track_markers publiziert')
 
         # Track als Punktdiagramm als Bild senden
+        # Zeichne Track farblich codiert als Bild
         pts = np.vstack([cones_left, cones_right])
-        min_x, max_x = pts[:,0].min(), pts[:,0].max()
-        min_y, max_y = pts[:,1].min(), pts[:,1].max()
+        min_x, max_x = pts[:, 0].min(), pts[:, 0].max()
+        min_y, max_y = pts[:, 1].min(), pts[:, 1].max()
         span = max(max_x - min_x, max_y - min_y, 1e-3)
         scale = 360.0 / span
         offset_x = (400 - (max_x - min_x) * scale) / 2 - min_x * scale
         offset_y = (400 - (max_y - min_y) * scale) / 2 - min_y * scale
+
         img = np.ones((400, 400, 3), dtype=np.uint8) * 255
-        for x, y in pts:
+
+        # linke Kegel blau einzeichnen
+        for x, y in cones_left:
             xi = int(x * scale + offset_x)
             yi = int(400 - (y * scale + offset_y))
-            cv2.circle(img, (xi, yi), 3, (0, 0, 0), -1)
+            cv2.circle(img, (xi, yi), 3, (255, 0, 0), -1)
+
+        # rechte Kegel gelb einzeichnen
+        for x, y in cones_right:
+            xi = int(x * scale + offset_x)
+            yi = int(400 - (y * scale + offset_y))
+            cv2.circle(img, (xi, yi), 3, (0, 255, 255), -1)
+
+        # Startkegel orange markieren
+        for sx, sy in start_positions:
+            xi = int(sx * scale + offset_x)
+            yi = int(400 - (sy * scale + offset_y))
+            cv2.circle(img, (xi, yi), 4, (0, 165, 255), -1)
         # Startlinie gr\xc3\xbcn einzeichnen
         sx1 = int(-TRACK_WIDTH/2 * scale + offset_x)
         sy1 = int(400 - (0.0 * scale + offset_y))
