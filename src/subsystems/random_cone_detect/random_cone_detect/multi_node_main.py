@@ -13,7 +13,9 @@ from std_msgs.msg import Float32
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
-from art_slam.art_slam_node import ArtSlamNode
+from vehicle_control.car_state_node import CarStateNode
+from vehicle_control.mapping_node import MappingNode
+from vehicle_control.slam_node import SlamNode
 from random_cone_detect.watchdog_node import WatchdogNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from random_cone_detect.lap_counter_node import LapCounterNode
@@ -117,7 +119,9 @@ def run_mode(mode: str, executor: MultiThreadedExecutor):
             seed=seed if mode != "accel" else None,
         ),
         PathNode(),
-        ArtSlamNode(),
+        CarStateNode(),
+        MappingNode(),
+        SlamNode(),
         LapCounterNode(max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)),
     ]
     for n in nodes:
@@ -153,7 +157,9 @@ WATCHED_NODES = [
     'system_usage_node',
     'cone_array_publisher',
     'midpoint_path_node',
-    'art_slam_node',
+    'car_state_node',
+    'mapping_node',
+    'slam_node',
     'lap_counter_node',
     'idle_monitor_node',
 ]
