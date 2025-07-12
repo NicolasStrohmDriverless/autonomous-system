@@ -373,8 +373,14 @@ class TrackPublisher(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = TrackPublisher()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Publish a randomly generated track")
+    parser.add_argument("--seed", type=int, default=None, help="Seed for track generation")
+    parsed, remaining = parser.parse_known_args(args=args)
+
+    rclpy.init(args=remaining)
+    node = TrackPublisher(seed=parsed.seed)
     # Nur eine kurze Spin-Iteration, da wir nur einmal publizieren
     rclpy.spin_once(node, timeout_sec=0.1)
     node.destroy_node()

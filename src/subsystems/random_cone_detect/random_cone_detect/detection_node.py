@@ -309,24 +309,25 @@ class ConeArrayPublisher(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    import sys
+    import argparse
 
-    mode = "autox"
-    max_laps = 2
-    # Modus und Runden je nach argv (oder interaktiv, wenn du willst)
-    if len(sys.argv) > 1:
-        mode_arg = sys.argv[1].lower()
-        if mode_arg == "accel":
-            mode = "accel"
-            max_laps = 1
-        elif mode_arg == "endu":
-            mode = "autox"
-            max_laps = 22
-        else:
-            mode = "autox"
-            max_laps = 2
-    node = ConeArrayPublisher(mode=mode, max_laps=max_laps)
+    parser = argparse.ArgumentParser(description="Publish simulated cone detections")
+    parser.add_argument("mode", nargs="?", default="autox", choices=["accel", "autox", "endu"], help="Track mode")
+    parser.add_argument("--seed", dest="seed", type=int, default=None, help="Seed for track generation")
+    parsed, remaining = parser.parse_known_args(args=args)
+
+    if parsed.mode == "accel":
+        max_laps = 1
+        mode = "accel"
+    elif parsed.mode == "endu":
+        max_laps = 22
+        mode = "autox"
+    else:
+        max_laps = 2
+        mode = "autox"
+
+    rclpy.init(args=remaining)
+    node = ConeArrayPublisher(mode=mode, max_laps=max_laps, seed=parsed.seed)
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
