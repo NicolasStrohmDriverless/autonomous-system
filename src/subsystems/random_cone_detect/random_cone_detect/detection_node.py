@@ -18,31 +18,32 @@ from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
 
 # Globale Schalter
-ENABLE_NOISE     = False
+ENABLE_NOISE = False
 ENABLE_DEVIATION = True
 MAX_DEVIATION = 1.5
 
 # Accel/Brake Werte
-ACCEL_A = 9.81         # m/s² (Beschleunigung)
-BRAKE_A = -14.715      # m/s² (Bremsen, negativ!)
+ACCEL_A = 9.81  # m/s² (Beschleunigung)
+BRAKE_A = -14.715  # m/s² (Bremsen, negativ!)
 
 # Maximale Fahrgeschwindigkeit f\xc3\xbc\r die Simulation
 MAX_SPEED = 5.0  # [m/s]
 
 # Track-Parameter
-Y_FINISH = 75.0        # Wo Beschleunigen aufhört, Bremsen beginnt
-Y_STOP   = 150.0       # Ende der Strecke
+Y_FINISH = 75.0  # Wo Beschleunigen aufhört, Bremsen beginnt
+Y_STOP = 150.0  # Ende der Strecke
 
 qos = QoSProfile(
     reliability=QoSReliabilityPolicy.BEST_EFFORT,
     history=QoSHistoryPolicy.KEEP_LAST,
     depth=10,
-    durability=QoSDurabilityPolicy.VOLATILE
+    durability=QoSDurabilityPolicy.VOLATILE,
 )
+
 
 def generate_accel_track():
     y_drive_end = Y_FINISH
-    y_stop_end  = Y_STOP
+    y_stop_end = Y_STOP
     track_x_left = -1.5
     track_x_right = 1.5
     y_spacing = 3.0
@@ -56,30 +57,32 @@ def generate_accel_track():
 
     # Kegel bis zum Ende der Beschleunigungsstrecke (blau/gelb)
     for y in np.arange(0.0, y_drive_end + 0.1, y_spacing):
-        cones_l.append([track_x_left, y, 'blue'])
-        cones_r.append([track_x_right, y, 'yellow'])
+        cones_l.append([track_x_left, y, "blue"])
+        cones_r.append([track_x_right, y, "yellow"])
 
     # Stopp-Bereich (orange)
     for y in np.arange(y_drive_end, y_stop_end + 0.1, stop_side_spacing):
-        cones_l.append([track_x_left, y, 'orange'])
-        cones_r.append([track_x_right, y, 'orange'])
+        cones_l.append([track_x_left, y, "orange"])
+        cones_r.append([track_x_right, y, "orange"])
 
     # Hinten quer Kegel (nur orange, nach Regelwerk)
     for x in np.arange(track_x_left, track_x_right + 0.1, stop_rear_spacing):
-        cones_l.append([x, y_stop_end, 'orange'])  # als Extra-Liste (Kegel auf Linie hinten)
+        cones_l.append([x, y_stop_end, "orange"])  # als Extra-Liste (Kegel auf Linie hinten)
 
     # Startkegel orange an Start
-    cones_l.append([track_x_left, 0.0, 'orange'])
-    cones_r.append([track_x_right, 0.0, 'orange'])
+    cones_l.append([track_x_left, 0.0, "orange"])
+    cones_r.append([track_x_right, 0.0, "orange"])
 
     return np.array(cones_l, dtype=object), np.array(cones_r, dtype=object), np.array(centerline, dtype=float)
 
+
 class ConeArrayPublisher(Node):
-    def __init__(self, mode="autox", max_laps=2):
-        super().__init__('cone_array_publisher')
-        self.pub = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos)
+    def __init__(self, mode="autox", max_laps=2, seed: int | None = None):
+        super().__init__("cone_array_publisher")
+        self.pub = self.create_publisher(ConeArray3D, "/cone_detections_3d", qos)
         self.mode = mode
         self.max_laps = max_laps
+        self.seed = seed
         self.lap = 0
 
         if self.mode == "accel":
@@ -87,52 +90,55 @@ class ConeArrayPublisher(Node):
             self.is_accel = True
         else:
             cones_l, cones_r, centerline = TrackGenerator(
-                n_points=50, n_regions=10,
-                min_bound=0.0, max_bound=100.0,
+                n_points=50,
+                n_regions=10,
+                min_bound=0.0,
+                max_bound=100.0,
                 mode=Mode.RANDOM,
-                max_turn_angle_deg=90.0
+                max_turn_angle_deg=90.0,
+                seed=self.seed,
             ).create_track()
             # cones_l, cones_r als (N,2), also ohne Farbe
             # -> erweitere um Farben für Konsistenz
-            cones_l = np.array([[x, y, 'blue'] for x, y in cones_l], dtype=object)
-            cones_r = np.array([[x, y, 'yellow'] for x, y in cones_r], dtype=object)
+            cones_l = np.array([[x, y, "blue"] for x, y in cones_l], dtype=object)
+            cones_r = np.array([[x, y, "yellow"] for x, y in cones_r], dtype=object)
             self.is_accel = False
 
-        self.cones_left  = cones_l
+        self.cones_left = cones_l
         self.cones_right = cones_r
-        self.centerline  = centerline
+        self.centerline = centerline
 
         seg = np.linalg.norm(np.diff(self.centerline, axis=0), axis=1)
-        self.cumlen    = np.insert(np.cumsum(seg), 0, 0.0)
+        self.cumlen = np.insert(np.cumsum(seg), 0, 0.0)
         self.total_len = float(self.cumlen[-1])
 
-        self.update_rate = 20.0   # Hz
+        self.update_rate = 20.0  # Hz
         self.window_length = 30.0
 
         # State für beide Modi
-        self.timer = self.create_timer(1.0/self.update_rate, self.publish_cones)
+        self.timer = self.create_timer(1.0 / self.update_rate, self.publish_cones)
 
         # Geteilter Status für Geschwindigkeit und Lenkwinkel
-        self.speed_pub = self.create_publisher(Float32, '/vehicle/desired_speed', 10)
-        self.speed_sub = self.create_subscription(Float32, '/vehicle/desired_speed', self.speed_callback, 10)
-        self.angle_pub = self.create_publisher(Float32, '/vehicle/steering_angle', 10)
-        self.angle_sub = self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_callback, 10)
+        self.speed_pub = self.create_publisher(Float32, "/vehicle/desired_speed", 10)
+        self.speed_sub = self.create_subscription(Float32, "/vehicle/desired_speed", self.speed_callback, 10)
+        self.angle_pub = self.create_publisher(Float32, "/vehicle/steering_angle", 10)
+        self.angle_sub = self.create_subscription(Float32, "/vehicle/steering_angle", self.angle_callback, 10)
         self.external_speed = None
         self.external_angle = None
 
         # Lap counter publishers
-        self.lap_pub = self.create_publisher(Int32, '/lap_count', 10)
-        self.lap_max_pub = self.create_publisher(Int32, '/lap_max', 10)
+        self.lap_pub = self.create_publisher(Int32, "/lap_count", 10)
+        self.lap_max_pub = self.create_publisher(Int32, "/lap_max", 10)
 
         # maximale Geschwindigkeit als Parameter
-        self.declare_parameter('max_speed', MAX_SPEED)
-        self.max_speed = float(self.get_parameter('max_speed').value)
+        self.declare_parameter("max_speed", MAX_SPEED)
+        self.max_speed = float(self.get_parameter("max_speed").value)
 
         # Accel-Mode States
         self.distance_traveled = 0.0  # Strecke entlang y
-        self.v = 0.0                  # Momentangeschwindigkeit [m/s]
-        self.time_accel = 0.0         # Zeit seit Start (nur für accel-mode)
-        self.phase = "accel"          # "accel" oder "brake"
+        self.v = 0.0  # Momentangeschwindigkeit [m/s]
+        self.time_accel = 0.0  # Zeit seit Start (nur für accel-mode)
+        self.phase = "accel"  # "accel" oder "brake"
 
         # Autox/Endu-Mode States
         # Geschwindigkeit orientiert sich an der maximal zulässigen Geschwindigkeit
@@ -142,7 +148,7 @@ class ConeArrayPublisher(Node):
         self.lookahead = 2.0  # [m] Abstand zur Vorhersage des Lenkwinkels
 
         self.get_logger().info(
-            f'ConeArrayPublisher startet: Track {self.total_len:.1f} m, Mode: {mode}, Max Laps: {self.max_laps}'
+            f"ConeArrayPublisher startet: Track {self.total_len:.1f} m, Mode: {mode}, Max Laps: {self.max_laps}"
         )
 
         # publish initial lap information
@@ -156,13 +162,13 @@ class ConeArrayPublisher(Node):
     def _orientation_at(self, dist: float) -> float:
         """Rückgabe der Bahnausrichtung (Yaw) an Position dist [m]"""
         d = dist % self.total_len
-        idx = np.searchsorted(self.cumlen, d, side='right')
+        idx = np.searchsorted(self.cumlen, d, side="right")
         if idx == 0:
             p0, p1 = self.centerline[0], self.centerline[1]
         elif idx >= len(self.cumlen):
             p0, p1 = self.centerline[-2], self.centerline[-1]
         else:
-            p0, p1 = self.centerline[idx-1], self.centerline[idx]
+            p0, p1 = self.centerline[idx - 1], self.centerline[idx]
         v = p1 - p0
         return math.atan2(v[0], v[1])
 
@@ -179,7 +185,7 @@ class ConeArrayPublisher(Node):
         self.external_angle = float(msg.data)
 
     def publish_cones(self):
-        dt = 1.0/self.update_rate
+        dt = 1.0 / self.update_rate
 
         if self.is_accel:
             # --- Beschleunigung und Bremsen ---
@@ -189,18 +195,20 @@ class ConeArrayPublisher(Node):
                 self.time_accel += dt
                 if self.distance_traveled >= Y_FINISH:
                     self.phase = "brake"
-                    self.get_logger().info(f'>> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s')
+                    self.get_logger().info(
+                        f">> Wechsle zu BREMSEN bei y={self.distance_traveled:.2f}, v={self.v:.2f} m/s"
+                    )
             elif self.phase == "brake":
                 self.distance_traveled += self.v * dt + 0.5 * BRAKE_A * dt * dt
                 self.v += BRAKE_A * dt
                 if self.v < 0.0:
                     self.v = 0.0
                 if self.distance_traveled >= Y_STOP or self.v == 0.0:
-                    self.get_logger().info(f'>> Fahrzeug steht! y={self.distance_traveled:.2f}')
+                    self.get_logger().info(f">> Fahrzeug steht! y={self.distance_traveled:.2f}")
                     self.lap += 1
                     self.publish_lap_info()
                     if self.lap >= self.max_laps:
-                        self.get_logger().info(f'>> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.')
+                        self.get_logger().info(f">> Alle Runden gefahren ({self.max_laps}). Stoppe Publisher.")
                         self.timer.cancel()
                         return
                     # Reset für die nächste Runde (hier nicht nötig, da nur eine Runde bei accel)
@@ -215,10 +223,10 @@ class ConeArrayPublisher(Node):
             current_speed = self.speed
             if self.distance_traveled >= self.total_len:
                 self.lap += 1
-                self.get_logger().info(f'Runde {self.lap} beendet.')
+                self.get_logger().info(f"Runde {self.lap} beendet.")
                 self.publish_lap_info()
                 if self.lap >= self.max_laps:
-                    self.get_logger().info(f'Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.')
+                    self.get_logger().info(f"Maximale Runden erreicht ({self.max_laps}) – stoppe Publisher.")
                     self.timer.cancel()
                     return
                 else:
@@ -229,6 +237,7 @@ class ConeArrayPublisher(Node):
         d1 = d0 + self.window_length
 
         tree = cKDTree(self.centerline)
+
         def visible(cones):
             if cones.shape[0] == 0:
                 return cones
@@ -243,24 +252,23 @@ class ConeArrayPublisher(Node):
         vis_l = visible(self.cones_left)
         vis_r = visible(self.cones_right)
 
-        idx = np.searchsorted(self.cumlen, d0, side='right')
+        idx = np.searchsorted(self.cumlen, d0, side="right")
         if idx == 0:
             origin = self.centerline[0]
-            v      = self.centerline[1] - origin
+            v = self.centerline[1] - origin
         elif idx >= len(self.cumlen):
             origin = self.centerline[-1]
-            v      = origin - self.centerline[-2]
+            v = origin - self.centerline[-2]
         else:
-            t0, t1 = self.cumlen[idx-1], self.cumlen[idx]
-            p0, p1 = self.centerline[idx-1], self.centerline[idx]
-            frac   = (d0 - t0)/(t1 - t0)
-            origin = p0 + frac*(p1 - p0)
-            v      = p1 - p0
+            t0, t1 = self.cumlen[idx - 1], self.cumlen[idx]
+            p0, p1 = self.centerline[idx - 1], self.centerline[idx]
+            frac = (d0 - t0) / (t1 - t0)
+            origin = p0 + frac * (p1 - p0)
+            v = p1 - p0
 
         phi = math.atan2(v[0], v[1])
         c_, s = math.cos(phi), math.sin(phi)
-        R = np.array([[ c_, -s],
-                      [ s,  c_]])
+        R = np.array([[c_, -s], [s, c_]])
 
         vis_l_xy = vis_l[:, :2].astype(float)
         vis_l_colors = vis_l[:, 2]
@@ -272,32 +280,24 @@ class ConeArrayPublisher(Node):
 
         msg = ConeArray3D()
         msg.header = Header()
-        msg.header.frame_id = 'map'
-        msg.header.stamp    = self.get_clock().now().to_msg()
+        msg.header.frame_id = "map"
+        msg.header.stamp = self.get_clock().now().to_msg()
 
         def apply_deviation(x, y):
             if not ENABLE_DEVIATION or y <= 0:
                 return x, y
-            factor = (math.exp(y/self.window_length) - 1) / (math.e - 1)
+            factor = (math.exp(y / self.window_length) - 1) / (math.e - 1)
             dev = MAX_DEVIATION * factor
             return x + np.random.uniform(-dev, dev), y + np.random.uniform(-dev, dev)
 
         for i, ((x, y), color) in enumerate(zip(vis_l_tf, vis_l_colors)):
             x_, y_ = apply_deviation(x, y)
-            c = Cone3D(
-                id=f'L{i}', label='left', conf=1.0,
-                x=float(x_), y=0.0, z=float(y_),
-                color=str(color)
-            )
+            c = Cone3D(id=f"L{i}", label="left", conf=1.0, x=float(x_), y=0.0, z=float(y_), color=str(color))
             msg.cones.append(c)
 
         for i, ((x, y), color) in enumerate(zip(vis_r_tf, vis_r_colors)):
             x_, y_ = apply_deviation(x, y)
-            c = Cone3D(
-                id=f'R{i}', label='right', conf=1.0,
-                x=float(x_), y=0.0, z=float(y_),
-                color=str(color)
-            )
+            c = Cone3D(id=f"R{i}", label="right", conf=1.0, x=float(x_), y=0.0, z=float(y_), color=str(color))
             msg.cones.append(c)
 
         self.pub.publish(msg)
@@ -307,9 +307,11 @@ class ConeArrayPublisher(Node):
         if self.angle_pub.get_subscription_count() > 0:
             self.angle_pub.publish(Float32(data=float(angle)))
 
+
 def main(args=None):
     rclpy.init(args=args)
     import sys
+
     mode = "autox"
     max_laps = 2
     # Modus und Runden je nach argv (oder interaktiv, wenn du willst)
@@ -329,5 +331,6 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

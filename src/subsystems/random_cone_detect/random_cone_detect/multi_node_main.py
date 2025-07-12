@@ -3,6 +3,7 @@ import subprocess
 import threading
 import time
 import psutil
+import random
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -24,17 +25,17 @@ class CompletionWatcher(Node):
     """Watch /lap_count and /lap_max to stop the executor when the track is done."""
 
     def __init__(self, on_complete=None):
-        super().__init__('completion_watcher')
+        super().__init__("completion_watcher")
         self.lap = 0
         self.max_laps = 1
         self.on_complete = on_complete
-        self.create_subscription(Int32, '/lap_count', self.lap_cb, 10)
-        self.create_subscription(Int32, '/lap_max', self.max_cb, 10)
+        self.create_subscription(Int32, "/lap_count", self.lap_cb, 10)
+        self.create_subscription(Int32, "/lap_max", self.max_cb, 10)
 
     def lap_cb(self, msg: Int32):
         self.lap = int(msg.data)
         if self.lap >= self.max_laps:
-            self.get_logger().info('Track finished, shutting down')
+            self.get_logger().info("Track finished, shutting down")
             if self.on_complete is not None:
                 try:
                     self.on_complete()
@@ -46,11 +47,12 @@ class CompletionWatcher(Node):
     def max_cb(self, msg: Int32):
         self.max_laps = int(msg.data)
 
+
 class SystemUsageNode(Node):
     def __init__(self):
-        super().__init__('system_usage_node')
-        self.cpu_pub = self.create_publisher(Float32, '/system/cpu_load', 10)
-        self.gpu_pub = self.create_publisher(Float32, '/system/gpu_load', 10)
+        super().__init__("system_usage_node")
+        self.cpu_pub = self.create_publisher(Float32, "/system/cpu_load", 10)
+        self.gpu_pub = self.create_publisher(Float32, "/system/gpu_load", 10)
         # alle 1s
         self.create_timer(1.0, self.publish_usage)
 
@@ -68,11 +70,10 @@ class SystemUsageNode(Node):
     def get_gpu_usage(self) -> float:
         try:
             result = subprocess.check_output(
-                ['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'],
-                encoding='utf-8'
+                ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"], encoding="utf-8"
             )
             # erster Eintrag
-            usage = float(result.strip().split('\n')[0])
+            usage = float(result.strip().split("\n")[0])
             return usage
         except Exception as e:
             self.get_logger().warn(f"GPU usage read failed: {e}")
@@ -84,34 +85,41 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.E
 
     CompletionWatcher and IdleMonitorNode are started first so they receive
     initial lap information from the publishers."""
+    seed = random.randrange(2**32 - 1)
     nodes = [
         CompletionWatcher(on_complete=stop_event.set),
         IdleMonitorNode(on_timeout=stop_event.set),
     ]
 
     if mode == "accel":
-        nodes.extend([
-            ConeArrayPublisher(mode="accel", max_laps=1),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=1),
-        ])
+        nodes.extend(
+            [
+                ConeArrayPublisher(mode="accel", max_laps=1, seed=seed),
+                PathNode(),
+                ArtSlamNode(),
+                LapCounterNode(max_laps=1),
+            ]
+        )
     elif mode == "endu":
-        nodes.extend([
-            TrackPublisher(),
-            ConeArrayPublisher(mode="autox", max_laps=22),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=22),
-        ])
+        nodes.extend(
+            [
+                TrackPublisher(seed=seed),
+                ConeArrayPublisher(mode="autox", max_laps=22, seed=seed),
+                PathNode(),
+                ArtSlamNode(),
+                LapCounterNode(max_laps=22),
+            ]
+        )
     else:  # autox
-        nodes.extend([
-            TrackPublisher(),
-            ConeArrayPublisher(mode="autox", max_laps=2),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=2),
-        ])
+        nodes.extend(
+            [
+                TrackPublisher(seed=seed),
+                ConeArrayPublisher(mode="autox", max_laps=2, seed=seed),
+                PathNode(),
+                ArtSlamNode(),
+                LapCounterNode(max_laps=2),
+            ]
+        )
 
     for node in nodes:
         executor.add_node(node)
@@ -124,7 +132,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.E
         stop_event.set()
 
     for node in nodes:
-        if hasattr(node, 'shutdown'):
+        if hasattr(node, "shutdown"):
             try:
                 node.shutdown()
             except Exception:
@@ -135,15 +143,15 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.E
 
 
 WATCHED_NODES = [
-    'watchdog_node',
-    'safety_watchdog_node',
-    'system_usage_node',
-    'track_generator_node',
-    'cone_array_publisher',
-    'midpoint_path_node',
-    'art_slam_node',
-    'lap_counter_node',
-    'idle_monitor_node',
+    "watchdog_node",
+    "safety_watchdog_node",
+    "system_usage_node",
+    "track_generator_node",
+    "cone_array_publisher",
+    "midpoint_path_node",
+    "art_slam_node",
+    "lap_counter_node",
+    "idle_monitor_node",
 ]
 
 
@@ -171,9 +179,13 @@ def main():
     try:
         while True:
             try:
-                inp = input(
-                    "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
-                ).strip().lower()
+                inp = (
+                    input(
+                        "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                    )
+                    .strip()
+                    .lower()
+                )
             except EOFError:
                 break
             mode = inp if inp in ["accel", "autox", "endu"] else "autox"
@@ -183,7 +195,7 @@ def main():
         running.clear()
         spin_thread.join()
         for n in [watchdog, safety_watchdog, system_node]:
-            if hasattr(n, 'shutdown'):
+            if hasattr(n, "shutdown"):
                 try:
                     n.shutdown()
                 except Exception:
@@ -192,5 +204,6 @@ def main():
             n.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -25,43 +25,50 @@ qos_cone_pub = QoSProfile(
     reliability=QoSReliabilityPolicy.BEST_EFFORT,
     history=QoSHistoryPolicy.KEEP_LAST,
     depth=1,
-    durability=QoSDurabilityPolicy.VOLATILE
+    durability=QoSDurabilityPolicy.VOLATILE,
 )
 # QoS für Marker-Publisher (reliable, depth=10)
 qos_marker_pub = QoSProfile(
     reliability=QoSReliabilityPolicy.RELIABLE,
     history=QoSHistoryPolicy.KEEP_LAST,
     depth=10,
-    durability=QoSDurabilityPolicy.VOLATILE
+    durability=QoSDurabilityPolicy.VOLATILE,
 )
 
 # Globale Parameter f\xc3\xbcr die Trackgenerierung
-MAX_CURVE_ANGLE_DEG = 90.0   # maximal erlaubter Kurvenwinkel
-START_STRAIGHT_LEN = 3.0     # L\xc3\xa4nge des geraden Startst\xc3\xbccks
-TRACK_WIDTH = 3.0            # Breite der Strecke
+MAX_CURVE_ANGLE_DEG = 90.0  # maximal erlaubter Kurvenwinkel
+START_STRAIGHT_LEN = 3.0  # L\xc3\xa4nge des geraden Startst\xc3\xbccks
+TRACK_WIDTH = 3.0  # Breite der Strecke
 
 from enum import Enum
+
+
 class Mode(Enum):
-    RANDOM  = 1
-    LINE    = 2
+    RANDOM = 1
+    LINE = 2
     NEAREST = 3
-    ACCEL   = 4
+    ACCEL = 4
+
 
 class TrackGenerator:
     """
     Generiert einen zufälligen, geschlossenen Track via begrenzter Voronoi-Regionen,
     optional mit oder ohne Krümmungs-Pruning, liefert linke Kegel, rechte Kegel und Centerline.
     """
-    def __init__(self,
-                 n_points,
-                 n_regions,
-                 min_bound,
-                 max_bound,
-                 mode: Mode,
-                 track_width=TRACK_WIDTH,
-                 curvature_threshold: float = 1.0/3.75,
-                 allow_sharp_turns: bool = False,
-                 max_turn_angle_deg: float = MAX_CURVE_ANGLE_DEG):
+
+    def __init__(
+        self,
+        n_points,
+        n_regions,
+        min_bound,
+        max_bound,
+        mode: Mode,
+        track_width=TRACK_WIDTH,
+        curvature_threshold: float = 1.0 / 3.75,
+        allow_sharp_turns: bool = False,
+        max_turn_angle_deg: float = MAX_CURVE_ANGLE_DEG,
+        seed: int | None = None,
+    ):
         self._n_points = n_points
         self._n_regions = n_regions
         self._min_bound = min_bound
@@ -72,30 +79,31 @@ class TrackGenerator:
         self._curvature_threshold = curvature_threshold
         self._allow_sharp_turns = allow_sharp_turns
         self._max_turn_angle_deg = max_turn_angle_deg
+        self._seed = seed
         if curvature_threshold is None:
-            self._curvature_threshold = max(1e-3, math.radians(90 - max_turn_angle_deg/2))
+            self._curvature_threshold = max(1e-3, math.radians(90 - max_turn_angle_deg / 2))
 
     def bounded_voronoi(self, pts, bbox):
         def _mirror(boundary, axis):
             m = pts.copy()
-            m[:,axis] = 2*boundary - m[:,axis]
+            m[:, axis] = 2 * boundary - m[:, axis]
             return m
+
         x_min, x_max, y_min, y_max = bbox
-        pts_all = np.vstack([
-            pts,
-            _mirror(x_min,0), _mirror(x_max,0),
-            _mirror(y_min,1), _mirror(y_max,1)
-        ])
+        pts_all = np.vstack([pts, _mirror(x_min, 0), _mirror(x_max, 0), _mirror(y_min, 1), _mirror(y_max, 1)])
         vor = spatial.Voronoi(pts_all)
         vor.filtered_points = pts
-        vor.filtered_regions = np.array(vor.regions, object)[vor.point_region[:len(pts)]]
+        vor.filtered_regions = np.array(vor.regions, object)[vor.point_region[: len(pts)]]
         return vor
 
     def create_track(self):
+        if self._seed is not None:
+            np.random.seed(self._seed)
+            random.seed(self._seed)
         if self._mode == Mode.ACCEL:
             y = np.linspace(0.0, 100.0, int(100.0 / self._track_width) + 1)
-            left = np.stack((-self._track_width/2 * np.ones_like(y), y), axis=1)
-            right = np.stack((self._track_width/2 * np.ones_like(y), y), axis=1)
+            left = np.stack((-self._track_width / 2 * np.ones_like(y), y), axis=1)
+            right = np.stack((self._track_width / 2 * np.ones_like(y), y), axis=1)
             center = np.stack((np.zeros_like(y), y), axis=1)
             return left, right, center
 
@@ -107,35 +115,34 @@ class TrackGenerator:
             # 1) Punkte auswählen
             if self._mode == Mode.RANDOM:
                 i = random.randrange(len(pts))
-                sel = [i] + [closest_node(pts[i], pts, k=j+1)
-                             for j in range(self._n_regions-1)]
+                sel = [i] + [closest_node(pts[i], pts, k=j + 1) for j in range(self._n_regions - 1)]
             elif self._mode == Mode.LINE:
                 i = random.randrange(len(pts))
-                ang = random.uniform(0, math.pi/2)
+                ang = random.uniform(0, math.pi / 2)
                 p = pts[i]
                 d = self._max_bound / 2
-                line = LineString([
-                    (p[0]-d*math.cos(ang), p[1]-d*math.sin(ang)),
-                    (p[0]+d*math.cos(ang), p[1]+d*math.sin(ang))
-                ])
+                line = LineString(
+                    [
+                        (p[0] - d * math.cos(ang), p[1] - d * math.sin(ang)),
+                        (p[0] + d * math.cos(ang), p[1] + d * math.sin(ang)),
+                    ]
+                )
                 dists = [ShapelyPoint(q).distance(line) for q in pts]
-                sel = np.argpartition(dists, self._n_regions)[:self._n_regions]
+                sel = np.argpartition(dists, self._n_regions)[: self._n_regions]
             else:  # NEAREST
                 sel = np.random.choice(len(pts), self._n_regions, replace=False)
 
             regs = vor.filtered_regions[sel]
-            verts = np.unique(
-                np.vstack([vor.vertices[r] for r in regs]), axis=0
-            )
+            verts = np.unique(np.vstack([vor.vertices[r] for r in regs]), axis=0)
             verts = np.vstack([clockwise_sort(verts), clockwise_sort(verts)[0]])
 
             # 2) Spline & optional Krümmungs-Pruning
             if not self._allow_sharp_turns:
                 # klassisches Pruning, bis Krümmung akzeptabel
                 while True:
-                    tck, _ = interpolate.splprep([verts[:,0], verts[:,1]], s=0, per=True)
-                    t = np.linspace(0,1,1000)
-                    x, y   = interpolate.splev(t, tck, der=0)
+                    tck, _ = interpolate.splprep([verts[:, 0], verts[:, 1]], s=0, per=True)
+                    t = np.linspace(0, 1, 1000)
+                    x, y = interpolate.splev(t, tck, der=0)
                     dx, dy = interpolate.splev(t, tck, der=1)
                     ddx, ddy = interpolate.splev(t, tck, der=2)
                     k = curvature(dx, ddx, dy, ddy)
@@ -151,8 +158,8 @@ class TrackGenerator:
                     break
             else:
                 # nur einmal splinen, keine Krümmungsprüfung
-                tck, _ = interpolate.splprep([verts[:,0], verts[:,1]], s=0, per=True)
-                t = np.linspace(0,1,1000)
+                tck, _ = interpolate.splprep([verts[:, 0], verts[:, 1]], s=0, per=True)
+                t = np.linspace(0, 1, 1000)
                 x, y = interpolate.splev(t, tck, der=0)
 
             poly = Polygon(zip(x, y))
@@ -160,7 +167,7 @@ class TrackGenerator:
                 break
 
         centerline = np.vstack((x, y)).T
-        left  = poly.buffer(self._track_width / 2)
+        left = poly.buffer(self._track_width / 2)
         right = poly.buffer(-self._track_width / 2)
 
         # --- Fix: MultiPolygon-Handling einbauen ---
@@ -171,12 +178,8 @@ class TrackGenerator:
 
         nL = int(np.ceil(left.length / self._track_width)) + 1
         nR = int(np.ceil(right.length / self._track_width)) + 1
-        cones_left  = np.array([
-            left.exterior.interpolate(i * left.length / nL).coords[0] for i in range(nL)
-        ])
-        cones_right = np.array([
-            right.exterior.interpolate(i * right.length / nR).coords[0] for i in range(nR)
-        ])
+        cones_left = np.array([left.exterior.interpolate(i * left.length / nL).coords[0] for i in range(nL)])
+        cones_right = np.array([right.exterior.interpolate(i * right.length / nR).coords[0] for i in range(nR)])
 
         # Align track so that the first left and right cones are located at
         # (-TRACK_WIDTH/2, 0) and (TRACK_WIDTH/2, 0) respectively.  This keeps the field of view
@@ -186,10 +189,12 @@ class TrackGenerator:
         midpoint = (start_left + start_right) / 2
         vec = start_right - start_left
         angle = math.atan2(vec[1], vec[0])
-        rot = np.array([
-            [math.cos(-angle), -math.sin(-angle)],
-            [math.sin(-angle),  math.cos(-angle)],
-        ])
+        rot = np.array(
+            [
+                [math.cos(-angle), -math.sin(-angle)],
+                [math.sin(-angle), math.cos(-angle)],
+            ]
+        )
         scale = 3.0 / np.linalg.norm(vec)
 
         def _transform(arr: np.ndarray) -> np.ndarray:
@@ -203,37 +208,40 @@ class TrackGenerator:
         # Startrichtung nach oben ausrichten
         dir_vec = centerline[1] - centerline[0]
         phi = math.atan2(dir_vec[1], dir_vec[0])
-        rot2 = np.array([
-            [math.cos(math.pi/2 - phi), -math.sin(math.pi/2 - phi)],
-            [math.sin(math.pi/2 - phi),  math.cos(math.pi/2 - phi)],
-        ])
+        rot2 = np.array(
+            [
+                [math.cos(math.pi / 2 - phi), -math.sin(math.pi / 2 - phi)],
+                [math.sin(math.pi / 2 - phi), math.cos(math.pi / 2 - phi)],
+            ]
+        )
         cones_left = cones_left @ rot2.T
         cones_right = cones_right @ rot2.T
         centerline = centerline @ rot2.T
 
         # Sicherstellen, dass die ersten Meter gerade verlaufen
-        cones_left[0] = (-self._track_width/2, 0.0)
-        cones_right[0] = (self._track_width/2, 0.0)
+        cones_left[0] = (-self._track_width / 2, 0.0)
+        cones_right[0] = (self._track_width / 2, 0.0)
         centerline[0] = (0.0, 0.0)
         if len(centerline) > 1:
-            cones_left[1] = (-self._track_width/2, START_STRAIGHT_LEN)
-            cones_right[1] = (self._track_width/2, START_STRAIGHT_LEN)
+            cones_left[1] = (-self._track_width / 2, START_STRAIGHT_LEN)
+            cones_right[1] = (self._track_width / 2, START_STRAIGHT_LEN)
             centerline[1] = (0.0, START_STRAIGHT_LEN)
 
         return cones_left, cones_right, centerline
 
 
 class TrackPublisher(Node):
-    def __init__(self):
-        super().__init__('track_generator_node')
+    def __init__(self, seed: int | None = None):
+        super().__init__("track_generator_node")
+        self._seed = seed
         # Publisher für Kegel (als ConeArray3D für PathNode)
-        self.cone_pub  = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos_cone_pub)
+        self.cone_pub = self.create_publisher(ConeArray3D, "/cone_detections_3d", qos_cone_pub)
         # Publisher für Track-Marker (Visualisierung)
-        self.track_pub = self.create_publisher(MarkerArray, '/track_markers', qos_marker_pub)
-        self.image_pub = self.create_publisher(Image, '/track/image', 1)
+        self.track_pub = self.create_publisher(MarkerArray, "/track_markers", qos_marker_pub)
+        self.image_pub = self.create_publisher(Image, "/track/image", 1)
         self.bridge = CvBridge()
 
-        self.get_logger().info('TrackGenerator startet und publiziert Track...')
+        self.get_logger().info("TrackGenerator startet und publiziert Track...")
         self.publish_track()
 
     def publish_track(self):
@@ -245,47 +253,48 @@ class TrackPublisher(Node):
             max_bound=100,
             mode=Mode.RANDOM,
             track_width=TRACK_WIDTH,
-            curvature_threshold=1.0/3.75,
+            curvature_threshold=1.0 / 3.75,
             allow_sharp_turns=True,
-            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG
+            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG,
+            seed=self._seed,
         ).create_track()
 
         # --- 1) ConeArray3D erzeugen und publizieren ---
         cone_msg = ConeArray3D()
         cone_msg.header.stamp = self.get_clock().now().to_msg()
-        cone_msg.header.frame_id = 'map'
+        cone_msg.header.frame_id = "map"
         # linke Kegel
         for i, (x, y) in enumerate(cones_left):
             c = Cone3D()
-            c.id    = str(i)
-            c.label = 'left'
-            c.conf  = 1.0
+            c.id = str(i)
+            c.label = "left"
+            c.conf = 1.0
             c.x, c.y, c.z = float(x), float(y), 0.0
-            c.color = 'blue'
+            c.color = "blue"
             cone_msg.cones.append(c)
         # rechte Kegel
         off = len(cones_left)
         for i, (x, y) in enumerate(cones_right):
             c = Cone3D()
-            c.id    = str(off + i)
-            c.label = 'right'
-            c.conf  = 1.0
+            c.id = str(off + i)
+            c.label = "right"
+            c.conf = 1.0
             c.x, c.y, c.z = float(x), float(y), 0.0
-            c.color = 'yellow'
+            c.color = "yellow"
             cone_msg.cones.append(c)
         # zwei Start-Kegel als orange markieren
-        start_positions = [(-TRACK_WIDTH/2, 0.0), (TRACK_WIDTH/2, 0.0)]
+        start_positions = [(-TRACK_WIDTH / 2, 0.0), (TRACK_WIDTH / 2, 0.0)]
         for idx, (sx, sy) in enumerate(start_positions, start=off + len(cones_right)):
             s = Cone3D()
-            s.id    = f'start{idx}'
-            s.label = 'start'
-            s.conf  = 1.0
+            s.id = f"start{idx}"
+            s.label = "start"
+            s.conf = 1.0
             s.x, s.y, s.z = float(sx), float(sy), 0.0
-            s.color = 'orange'
+            s.color = "orange"
             cone_msg.cones.append(s)
 
         self.cone_pub.publish(cone_msg)
-        self.get_logger().info(f'Publiziert {len(cone_msg.cones)} Kegel auf /cone_detections_3d')
+        self.get_logger().info(f"Publiziert {len(cone_msg.cones)} Kegel auf /cone_detections_3d")
 
         # --- 2) Track als MarkerArray visualisieren ---
         m_arr = MarkerArray()
@@ -293,9 +302,9 @@ class TrackPublisher(Node):
         # Centerline
         line = Marker()
         line.header = cone_msg.header
-        line.ns     = 'track_centerline'
-        line.id     = 0
-        line.type   = Marker.LINE_STRIP
+        line.ns = "track_centerline"
+        line.id = 0
+        line.type = Marker.LINE_STRIP
         line.action = Marker.ADD
         line.scale.x = 0.05
         line.color.r = 1.0
@@ -308,20 +317,20 @@ class TrackPublisher(Node):
         # Startlinie
         start = Marker()
         start.header = cone_msg.header
-        start.ns     = 'track_start_line'
-        start.id     = 1
-        start.type   = Marker.LINE_LIST
+        start.ns = "track_start_line"
+        start.id = 1
+        start.type = Marker.LINE_LIST
         start.action = Marker.ADD
         start.scale.x = 0.1
         start.color.g = 1.0
         start.color.a = 1.0
-        for x in [-TRACK_WIDTH/2, TRACK_WIDTH/2]:
+        for x in [-TRACK_WIDTH / 2, TRACK_WIDTH / 2]:
             p = MsgPoint(x=x, y=0.0, z=0.0)
             start.points.append(p)
         m_arr.markers.append(start)
 
         self.track_pub.publish(m_arr)
-        self.get_logger().info('Track-Marker auf /track_markers publiziert')
+        self.get_logger().info("Track-Marker auf /track_markers publiziert")
 
         # Track als Punktdiagramm als Bild senden
         # Zeichne Track farblich codiert als Bild
@@ -353,12 +362,12 @@ class TrackPublisher(Node):
             yi = int(400 - (sy * scale + offset_y))
             cv2.circle(img, (xi, yi), 4, (0, 165, 255), -1)
         # Startlinie gr\xc3\xbcn einzeichnen
-        sx1 = int(-TRACK_WIDTH/2 * scale + offset_x)
+        sx1 = int(-TRACK_WIDTH / 2 * scale + offset_x)
         sy1 = int(400 - (0.0 * scale + offset_y))
-        sx2 = int(TRACK_WIDTH/2 * scale + offset_x)
+        sx2 = int(TRACK_WIDTH / 2 * scale + offset_x)
         sy2 = sy1
         cv2.line(img, (sx1, sy1), (sx2, sy2), (0, 255, 0), 2)
-        msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        msg = self.bridge.cv2_to_imgmsg(img, "bgr8")
         msg.header.stamp = cone_msg.header.stamp
         self.image_pub.publish(msg)
 
@@ -372,5 +381,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
