@@ -79,66 +79,70 @@ class SystemUsageNode(Node):
             return 0.0
 
 
-def run_mode(mode: str, executor: MultiThreadedExecutor, stop_event: threading.Event):
-    """Start all nodes for the selected mode.
+class MissionCheckNode(Node):
+    """Placeholder node for initial mission checks."""
 
-    CompletionWatcher and IdleMonitorNode are started first so they receive
-    initial lap information from the publishers."""
+    def __init__(self):
+        super().__init__('mission_check_node')
+        # Just log a message once on startup
+        self.get_logger().info('Mission check started')
+
+
+def run_mode(mode: str, executor: MultiThreadedExecutor):
+    """Run the system in three sequential phases."""
+
+    # Phase 1: mission check and track generation
+    mission_nodes = [MissionCheckNode()]
+    if mode != "accel":
+        mission_nodes.append(TrackPublisher())
+    for n in mission_nodes:
+        executor.add_node(n)
+    input("Mission Check abgeschlossen? [Enter]")
+    for n in mission_nodes:
+        executor.remove_node(n)
+        n.destroy_node()
+
+    # Phase 2: start remaining nodes and wait for confirmation
     nodes = [
-        CompletionWatcher(on_complete=stop_event.set),
-        IdleMonitorNode(on_timeout=stop_event.set),
+        CompletionWatcher(),
+        IdleMonitorNode(),
+        ConeArrayPublisher(mode="accel" if mode == "accel" else "autox", max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)),
+        PathNode(),
+        ArtSlamNode(),
+        LapCounterNode(max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)),
     ]
+    for n in nodes:
+        executor.add_node(n)
 
-    if mode == "accel":
-        nodes.extend([
-            ConeArrayPublisher(mode="accel", max_laps=1),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=1),
-        ])
-    elif mode == "endu":
-        nodes.extend([
-            TrackPublisher(),
-            ConeArrayPublisher(mode="autox", max_laps=22),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=22),
-        ])
-    else:  # autox
-        nodes.extend([
-            TrackPublisher(),
-            ConeArrayPublisher(mode="autox", max_laps=2),
-            PathNode(),
-            ArtSlamNode(),
-            LapCounterNode(max_laps=2),
-        ])
-
-    for node in nodes:
-        executor.add_node(node)
+    ready = input("darf ich starten? [J/Enter] ").strip().lower()
+    if ready not in ('', 'j', 'ja', 'yes', 'y'):
+        for n in nodes:
+            executor.remove_node(n)
+            n.destroy_node()
+        return
 
     print(">> System läuft. Mit [Strg+C] beenden.")
+    stop_event = threading.Event()
     try:
         while not stop_event.is_set():
             time.sleep(0.1)
     except KeyboardInterrupt:
         stop_event.set()
 
-    for node in nodes:
-        if hasattr(node, 'shutdown'):
+    for n in nodes:
+        if hasattr(n, 'shutdown'):
             try:
-                node.shutdown()
+                n.shutdown()
             except Exception:
                 pass
-        executor.remove_node(node)
-        node.destroy_node()
-    stop_event.clear()
+        executor.remove_node(n)
+        n.destroy_node()
 
 
 WATCHED_NODES = [
     'watchdog_node',
     'safety_watchdog_node',
     'system_usage_node',
-    'track_generator_node',
     'cone_array_publisher',
     'midpoint_path_node',
     'art_slam_node',
@@ -177,8 +181,7 @@ def main():
             except EOFError:
                 break
             mode = inp if inp in ["accel", "autox", "endu"] else "autox"
-            stop_event = threading.Event()
-            run_mode(mode, executor, stop_event)
+            run_mode(mode, executor)
     finally:
         running.clear()
         spin_thread.join()

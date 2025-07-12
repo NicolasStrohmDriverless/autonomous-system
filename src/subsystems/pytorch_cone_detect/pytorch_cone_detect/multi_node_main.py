@@ -1,6 +1,8 @@
 import os
 #!/usr/bin/env python3
 import subprocess
+import threading
+import time
 
 import psutil
 import rclpy
@@ -16,6 +18,14 @@ from art_slam.art_slam_node import ArtSlamNode
 from path_viz.path_viz_node import PathVizNode
 from pytorch_cone_detect.watchdog_node import WatchdogNode
 from pytorch_cone_detect.safety_watchdog_node import SafetyWatchdogNode
+
+
+class MissionCheckNode(Node):
+    """Placeholder node for initial mission checks."""
+
+    def __init__(self):
+        super().__init__('mission_check_node')
+        self.get_logger().info('Mission check started')
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -51,6 +61,16 @@ class SystemUsageNode(Node):
 
 def main():
     rclpy.init()
+    executor = MultiThreadedExecutor()
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
+
+    mission = MissionCheckNode()
+    executor.add_node(mission)
+    input("Mission Check abgeschlossen? [Enter]")
+    executor.remove_node(mission)
+    mission.destroy_node()
+
     nodes = [
         DepthAIDriver(),
         DepthTrackingNode(),
@@ -65,15 +85,35 @@ def main():
     nodes.extend([watchdog, safety_watchdog])
     rclpy.logging.get_logger('multi_node_main').info(
         'Using SORT-based tracking in detection node')
-    executor = MultiThreadedExecutor(num_threads=len(nodes))
-    for node in nodes:
-        executor.add_node(node)
-    try:
-        executor.spin()
-    finally:
-        for node in nodes:
-            node.destroy_node()
+    for n in nodes:
+        executor.add_node(n)
+
+    ready = input("darf ich starten? [J/Enter] ").strip().lower()
+    if ready not in ('', 'j', 'ja', 'yes', 'y'):
+        for n in nodes:
+            executor.remove_node(n)
+            n.destroy_node()
         rclpy.shutdown()
+        spin_thread.join()
+        return
+
+    print(">> System läuft. Mit [Strg+C] beenden.")
+    try:
+        while rclpy.ok():
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        for n in nodes:
+            if hasattr(n, 'shutdown'):
+                try:
+                    n.shutdown()
+                except Exception:
+                    pass
+            executor.remove_node(n)
+            n.destroy_node()
+        rclpy.shutdown()
+        spin_thread.join()
 
 if __name__ == '__main__':
     main()

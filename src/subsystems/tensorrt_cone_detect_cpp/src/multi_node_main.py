@@ -3,6 +3,8 @@ import subprocess
 import os
 import psutil
 import rclpy
+import threading
+import time
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import Float32
@@ -15,6 +17,14 @@ from art_slam.art_slam_node import ArtSlamNode
 from path_viz.path_viz_node import PathVizNode
 from tensorrt_cone_detect_cpp.watchdog_node import WatchdogNode
 from tensorrt_cone_detect_cpp.safety_watchdog_node import SafetyWatchdogNode
+
+
+class MissionCheckNode(Node):
+    """Placeholder node for initial mission checks."""
+
+    def __init__(self):
+        super().__init__('mission_check_node')
+        self.get_logger().info('Mission check started')
 
 class SystemUsageNode(Node):
     def __init__(self):
@@ -43,6 +53,16 @@ class SystemUsageNode(Node):
 
 def main():
     rclpy.init()
+    executor = MultiThreadedExecutor()
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
+
+    mission = MissionCheckNode()
+    executor.add_node(mission)
+    input("Mission Check abgeschlossen? [Enter]")
+    executor.remove_node(mission)
+    mission.destroy_node()
+
     pkg_share = get_package_share_directory('tensorrt_cone_detect_cpp')
     model_path = os.path.join(pkg_share, 'resource', 'v11n_416x416.onnx')
     detection_proc = subprocess.Popen([
@@ -62,17 +82,38 @@ def main():
     nodes.extend([watchdog, safety_watchdog])
     rclpy.logging.get_logger('multi_node_main').info(
         'Using SORT-based tracking in detection node')
-    executor = MultiThreadedExecutor(num_threads=len(nodes))
-    for node in nodes:
-        executor.add_node(node)
-    try:
-        executor.spin()
-    finally:
-        for node in nodes:
-            node.destroy_node()
+    for n in nodes:
+        executor.add_node(n)
+    ready = input("darf ich starten? [J/Enter] ").strip().lower()
+    if ready not in ('', 'j', 'ja', 'yes', 'y'):
+        for n in nodes:
+            executor.remove_node(n)
+            n.destroy_node()
         detection_proc.terminate()
         detection_proc.wait()
         rclpy.shutdown()
+        spin_thread.join()
+        return
+
+    print(">> System läuft. Mit [Strg+C] beenden.")
+    try:
+        while rclpy.ok():
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        for n in nodes:
+            if hasattr(n, 'shutdown'):
+                try:
+                    n.shutdown()
+                except Exception:
+                    pass
+            executor.remove_node(n)
+            n.destroy_node()
+        detection_proc.terminate()
+        detection_proc.wait()
+        rclpy.shutdown()
+        spin_thread.join()
 
 if __name__ == '__main__':
     main()
