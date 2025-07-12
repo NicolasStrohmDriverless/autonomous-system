@@ -110,7 +110,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor):
     stop_event = threading.Event()
     nodes = [
         CompletionWatcher(on_complete=stop_event.set),
-        IdleMonitorNode(),
+        IdleMonitorNode(on_timeout=stop_event.set),
         ConeArrayPublisher(
             mode="accel" if mode == "accel" else "autox",
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2),
