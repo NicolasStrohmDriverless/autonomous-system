@@ -22,7 +22,7 @@ from std_msgs.msg import Int32
 
 
 class CompletionWatcher(Node):
-    """Watch /lap_count and /lap_max to stop the executor when the track is done."""
+    """Watch /lap_count and /lap_max to notify when the track is done."""
 
     def __init__(self, on_complete=None):
         super().__init__('completion_watcher')
@@ -35,7 +35,7 @@ class CompletionWatcher(Node):
     def lap_cb(self, msg: Int32):
         self.lap = int(msg.data)
         if self.lap >= self.max_laps:
-            self.get_logger().info('Track finished, shutting down')
+            self.get_logger().info('Track finished')
             if self.on_complete is not None:
                 try:
                     self.on_complete()
@@ -107,8 +107,9 @@ def run_mode(mode: str, executor: MultiThreadedExecutor):
         n.destroy_node()
 
     # Phase 2: start remaining nodes and wait for confirmation
+    stop_event = threading.Event()
     nodes = [
-        CompletionWatcher(),
+        CompletionWatcher(on_complete=stop_event.set),
         IdleMonitorNode(),
         ConeArrayPublisher(
             mode="accel" if mode == "accel" else "autox",
@@ -130,7 +131,6 @@ def run_mode(mode: str, executor: MultiThreadedExecutor):
         return
 
     print(">> System läuft. Mit [Strg+C] beenden.")
-    stop_event = threading.Event()
     try:
         while not stop_event.is_set():
             time.sleep(0.1)
