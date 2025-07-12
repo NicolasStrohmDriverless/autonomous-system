@@ -35,11 +35,17 @@ qos_marker_pub = QoSProfile(
     durability=QoSDurabilityPolicy.VOLATILE
 )
 
+# Globale Parameter f\xc3\xbcr die Trackgenerierung
+MAX_CURVE_ANGLE_DEG = 90.0   # maximal erlaubter Kurvenwinkel
+START_STRAIGHT_LEN = 3.0     # L\xc3\xa4nge des geraden Startst\xc3\xbccks
+TRACK_WIDTH = 3.0            # Breite der Strecke
+
 from enum import Enum
 class Mode(Enum):
     RANDOM  = 1
     LINE    = 2
     NEAREST = 3
+    ACCEL   = 4
 
 class TrackGenerator:
     """
@@ -52,10 +58,10 @@ class TrackGenerator:
                  min_bound,
                  max_bound,
                  mode: Mode,
-                 track_width=3.0,
+                 track_width=TRACK_WIDTH,
                  curvature_threshold: float = 1.0/3.75,
                  allow_sharp_turns: bool = False,
-                 max_turn_angle_deg: float = 90.0):
+                 max_turn_angle_deg: float = MAX_CURVE_ANGLE_DEG):
         self._n_points = n_points
         self._n_regions = n_regions
         self._min_bound = min_bound
@@ -86,6 +92,13 @@ class TrackGenerator:
         return vor
 
     def create_track(self):
+        if self._mode == Mode.ACCEL:
+            y = np.linspace(0.0, 100.0, int(100.0 / self._track_width) + 1)
+            left = np.stack((-self._track_width/2 * np.ones_like(y), y), axis=1)
+            right = np.stack((self._track_width/2 * np.ones_like(y), y), axis=1)
+            center = np.stack((np.zeros_like(y), y), axis=1)
+            return left, right, center
+
         pts = np.random.uniform(self._min_bound, self._max_bound, (self._n_points, 2))
         vor = self.bounded_voronoi(pts, self._bounding_box)
 
@@ -166,7 +179,7 @@ class TrackGenerator:
         ])
 
         # Align track so that the first left and right cones are located at
-        # (-1.5, 0) and (1.5, 0) respectively.  This keeps the field of view
+        # (-TRACK_WIDTH/2, 0) and (TRACK_WIDTH/2, 0) respectively.  This keeps the field of view
         # consistent and places the start line at the origin.
         start_left = cones_left[0]
         start_right = cones_right[0]
@@ -186,6 +199,26 @@ class TrackGenerator:
         cones_left = _transform(cones_left)
         cones_right = _transform(cones_right)
         centerline = _transform(centerline)
+
+        # Startrichtung nach oben ausrichten
+        dir_vec = centerline[1] - centerline[0]
+        phi = math.atan2(dir_vec[1], dir_vec[0])
+        rot2 = np.array([
+            [math.cos(math.pi/2 - phi), -math.sin(math.pi/2 - phi)],
+            [math.sin(math.pi/2 - phi),  math.cos(math.pi/2 - phi)],
+        ])
+        cones_left = cones_left @ rot2.T
+        cones_right = cones_right @ rot2.T
+        centerline = centerline @ rot2.T
+
+        # Sicherstellen, dass die ersten Meter gerade verlaufen
+        cones_left[0] = (-self._track_width/2, 0.0)
+        cones_right[0] = (self._track_width/2, 0.0)
+        centerline[0] = (0.0, 0.0)
+        if len(centerline) > 1:
+            cones_left[1] = (-self._track_width/2, START_STRAIGHT_LEN)
+            cones_right[1] = (self._track_width/2, START_STRAIGHT_LEN)
+            centerline[1] = (0.0, START_STRAIGHT_LEN)
 
         return cones_left, cones_right, centerline
 
@@ -211,10 +244,10 @@ class TrackPublisher(Node):
             min_bound=0,
             max_bound=100,
             mode=Mode.RANDOM,
-            track_width=3.0,
+            track_width=TRACK_WIDTH,
             curvature_threshold=1.0/3.75,
             allow_sharp_turns=True,
-            max_turn_angle_deg=90.0
+            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG
         ).create_track()
 
         # --- 1) ConeArray3D erzeugen und publizieren ---
@@ -241,7 +274,7 @@ class TrackPublisher(Node):
             c.color = 'yellow'
             cone_msg.cones.append(c)
         # zwei Start-Kegel als orange markieren
-        start_positions = [(-1.5, 0.0), (1.5, 0.0)]
+        start_positions = [(-TRACK_WIDTH/2, 0.0), (TRACK_WIDTH/2, 0.0)]
         for idx, (sx, sy) in enumerate(start_positions, start=off + len(cones_right)):
             s = Cone3D()
             s.id    = f'start{idx}'
@@ -282,7 +315,7 @@ class TrackPublisher(Node):
         start.scale.x = 0.1
         start.color.g = 1.0
         start.color.a = 1.0
-        for x in [-1.5, 1.5]:
+        for x in [-TRACK_WIDTH/2, TRACK_WIDTH/2]:
             p = MsgPoint(x=x, y=0.0, z=0.0)
             start.points.append(p)
         m_arr.markers.append(start)
@@ -303,6 +336,12 @@ class TrackPublisher(Node):
             xi = int(x * scale + offset_x)
             yi = int(400 - (y * scale + offset_y))
             cv2.circle(img, (xi, yi), 3, (0, 0, 0), -1)
+        # Startlinie gr\xc3\xbcn einzeichnen
+        sx1 = int(-TRACK_WIDTH/2 * scale + offset_x)
+        sy1 = int(400 - (0.0 * scale + offset_y))
+        sx2 = int(TRACK_WIDTH/2 * scale + offset_x)
+        sy2 = sy1
+        cv2.line(img, (sx1, sy1), (sx2, sy2), (0, 255, 0), 2)
         msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
         msg.header.stamp = cone_msg.header.stamp
         self.image_pub.publish(msg)
