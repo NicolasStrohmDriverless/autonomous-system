@@ -70,7 +70,13 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     stop_event = threading.Event()
     ebs_node = EbsActiveNode()
     nodes = [
-        MultiWatchdogNode(["mapping_node", "slam_node"]),
+        MultiWatchdogNode([
+            "safety_watchdog_node",
+            "ebs_active_node",
+            "slam_node",
+            "mapping_node",
+            "midpoint_path_node",
+        ]),
         SafetyWatchdogNode(["multi_watchdog_node"]),
         TrackPublisher(),
         ConeArrayPublisher(
