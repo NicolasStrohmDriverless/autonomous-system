@@ -16,7 +16,6 @@ from random_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
 from vehicle_control.mapping_node import MappingNode
 from vehicle_control.slam_node import SlamNode
-from random_cone_detect.watchdog_node import WatchdogNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 
 MODES = ["accel", "autox", "endu"]
@@ -30,8 +29,7 @@ class Control:
 
     def start(self, mode: str):
         self.nodes = [
-            WatchdogNode(["mapping_node", "slam_node"]),
-            SafetyWatchdogNode(["watchdog_node"]),
+            SafetyWatchdogNode(["multi_watchdog_node"]),
             TrackPublisher(),
             ConeArrayPublisher(mode=mode, max_laps=1),
             PathNode(),
