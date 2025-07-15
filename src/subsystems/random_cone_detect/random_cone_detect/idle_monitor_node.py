@@ -23,7 +23,7 @@ class IdleMonitorNode(Node):
             self.speed_callback,
             10,
         )
-        self.create_timer(1.0, self.check_timeout)
+        self.timer = self.create_timer(1.0, self.check_timeout)
 
     def speed_callback(self, msg: Float32):
         speed = float(msg.data)
@@ -45,6 +45,13 @@ class IdleMonitorNode(Node):
                 self.get_logger().info(
                     f'No movement detected for {self.timeout_sec} s, returning to selection.'
                 )
+                if self.timer is not None:
+                    self.timer.cancel()
+                    try:
+                        self.destroy_timer(self.timer)
+                    except Exception:
+                        pass
+                    self.timer = None
                 if self.on_timeout is not None:
                     try:
                         self.on_timeout()
