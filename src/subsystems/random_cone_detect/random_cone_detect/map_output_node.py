@@ -21,12 +21,19 @@ class MapOutputNode(Node):
         self.map = np.zeros((MAP_SIZE, MAP_SIZE, 3), dtype=np.uint8)
         self.origin = MAP_SIZE // 2
         self.bridge = CvBridge()
+        self.pos_x = 0.0
+        self.pos_y = 0.0
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         self.image_pub = self.create_publisher(Image, "/mapping/image", 1)
+        self.create_timer(1.0, self.publish_map)
+        # draw initial car position at the origin so a map is available even
+        # before any state updates arrive
+        self.draw_car(self.pos_x, self.pos_y)
+        self.publish_map()
 
-    def state_cb(self, msg: Pose2D) -> None:
-        ix = int(msg.x) + self.origin
-        iy = int(msg.y) + self.origin
+    def draw_car(self, x: float, y: float) -> None:
+        ix = int(x) + self.origin
+        iy = int(y) + self.origin
         w = int(CAR_WIDTH)
         l = int(CAR_LENGTH)
         x0 = max(ix - w // 2, 0)
@@ -34,6 +41,14 @@ class MapOutputNode(Node):
         y0 = max(iy - l // 2, 0)
         y1 = min(iy + l // 2, MAP_SIZE - 1)
         self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 255, 255]
+
+    def state_cb(self, msg: Pose2D) -> None:
+        self.pos_x = float(msg.x)
+        self.pos_y = float(msg.y)
+        self.draw_car(self.pos_x, self.pos_y)
+        self.publish_map()
+
+    def publish_map(self) -> None:
         img_msg = self.bridge.cv2_to_imgmsg(self.map, "bgr8")
         img_msg.header.stamp = self.get_clock().now().to_msg()
         self.image_pub.publish(img_msg)
