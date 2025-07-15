@@ -63,7 +63,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     for n in nodes:
         executor.add_node(n)
 
-    ready = input("darf ich starten? [J/Enter] ").strip().lower()
+    ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
     if ready not in ("", "j", "ja", "yes", "y"):
         for n in nodes:
             executor.remove_node(n)
