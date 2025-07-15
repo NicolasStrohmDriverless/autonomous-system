@@ -19,10 +19,7 @@ from random_cone_detect.idle_monitor_node import IdleMonitorNode
 
 MODES = ["accel", "autox", "endu"]
 
-CONTROL_SCRIPT = (
-    "/home/strohmo/autonomous-system/src/subsystems/"
-    "vehicle_control/vehicle_control/control_main.py"
-)
+CONTROL_MODULE = "vehicle_control.control_main"
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
@@ -40,7 +37,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
             n.destroy_node()
         return
 
-    proc = subprocess.Popen([sys.executable, CONTROL_SCRIPT])
+    proc = subprocess.Popen([sys.executable, "-m", CONTROL_MODULE])
     try:
         while rclpy.ok() and proc.poll() is None:
             time.sleep(0.1)
