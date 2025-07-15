@@ -73,7 +73,10 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
         MultiWatchdogNode(["mapping_node", "slam_node"]),
         SafetyWatchdogNode(["multi_watchdog_node"]),
         TrackPublisher(),
-        ConeArrayPublisher(mode=mode, max_laps=1),
+        ConeArrayPublisher(
+            mode=mode,
+            max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2),
+        ),
         PathNode(),
         MappingNode(),
         SlamNode(),
