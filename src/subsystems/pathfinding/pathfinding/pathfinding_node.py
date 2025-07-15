@@ -121,6 +121,59 @@ def path_length(pts):
     )
 
 
+def draw_speed_gauge(speed: float, max_speed: float,
+                     width: int = 180, height: int = 30) -> np.ndarray:
+    """Return an image visualizing ``speed`` as a horizontal gauge."""
+    img = np.ones((height, width, 3), dtype=np.uint8) * 255
+    start_x, end_x = 10, width - 10
+    y0, y1 = height // 2 - 5, height // 2 + 5
+    cv2.rectangle(img, (start_x, y0), (end_x, y1), (0, 0, 0), 1)
+    frac = 0.0 if max_speed <= 0 else max(0.0, min(1.0, speed / max_speed))
+    pos = int(start_x + frac * (end_x - start_x))
+    cv2.rectangle(img, (start_x, y0), (pos, y1), (0, 255, 0), -1)
+    cv2.putText(
+        img,
+        f"{speed:.2f} m/s",
+        (10, height - 5),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 0, 0),
+        1,
+    )
+    return img
+
+
+def draw_angle_gauge(angle: float, max_angle: float,
+                     width: int = 180, height: int = 30) -> np.ndarray:
+    """Return an image visualizing ``angle`` as a centered gauge."""
+    img = np.ones((height, width, 3), dtype=np.uint8) * 255
+    start_x, end_x = 10, width - 10
+    center = (start_x + end_x) // 2
+    half = (end_x - start_x) // 2
+    y0, y1 = height // 2 - 5, height // 2 + 5
+    cv2.rectangle(img, (start_x, y0), (end_x, y1), (0, 0, 0), 1)
+    cv2.line(img, (center, y0), (center, y1), (0, 0, 0), 1)
+    if max_angle > 0:
+        frac = max(-1.0, min(1.0, angle / max_angle))
+    else:
+        frac = 0.0
+    pos = int(center + frac * half)
+    if pos >= center:
+        cv2.rectangle(img, (center, y0), (pos, y1), (0, 255, 0), -1)
+    else:
+        cv2.rectangle(img, (pos, y0), (center, y1), (0, 255, 0), -1)
+    cv2.putText(
+        img,
+        f"{angle:.1f}\xb0",
+        (10, height - 5),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 0, 0),
+        1,
+    )
+    return img
+
+
 class PathNode(Node):
     def __init__(self):
         super().__init__('midpoint_path_node')
@@ -739,14 +792,12 @@ class PathNode(Node):
         # store newly calculated speed as desired speed
         self.desired_speed = speed
 
-        angle_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
-        cv2.putText(angle_img, f"{angle_val:.1f} Grad", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        angle_img = draw_angle_gauge(angle_val, MAX_ANGLE)
         angle_msg = self.bridge.cv2_to_imgmsg(angle_img, 'bgr8')
         angle_msg.header.stamp = msg.header.stamp
         self.angle_image_pub.publish(angle_msg)
 
-        speed_img = np.ones((30, 180, 3), dtype=np.uint8) * 255
-        cv2.putText(speed_img, f"{speed:.2f} m/s", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        speed_img = draw_speed_gauge(speed, self.max_speed)
         speed_msg = self.bridge.cv2_to_imgmsg(speed_img, 'bgr8')
         speed_msg.header.stamp = msg.header.stamp
         self.speed_image_pub.publish(speed_msg)
