@@ -25,21 +25,27 @@ CONTROL_MODULE = "vehicle_control.control_main"
 
 def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     nodes = [
-        LapCounterNode(max_laps=1 if mode == 'accel' else (22 if mode == 'endu' else 2)),
+        LapCounterNode(
+            max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
+        ),
         IdleMonitorNode(on_timeout=lambda: None),
         MapOutputNode(),
     ]
     for n in nodes:
         executor.add_node(n)
 
-    ready = input("darf ich starten? [J/Enter] ").strip().lower()
-    if ready not in ("", "j", "ja", "yes", "y"):
-        for n in nodes:
-            executor.remove_node(n)
-            n.destroy_node()
-        return
-
-    proc = subprocess.Popen([sys.executable, "-m", CONTROL_MODULE])
+    # Vehicle control (which also generates the random track) is started with
+    # the preselected mode.  The control script will ask for the ready prompt
+    # itself.
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            CONTROL_MODULE,
+            "--mode",
+            mode,
+        ]
+    )
     try:
         while rclpy.ok() and proc.poll() is None:
             time.sleep(0.1)
@@ -48,7 +54,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     proc.wait()
 
     for n in nodes:
-        if hasattr(n, 'shutdown'):
+        if hasattr(n, "shutdown"):
             try:
                 n.shutdown()
             except Exception:
@@ -66,12 +72,16 @@ def main() -> None:
     try:
         while True:
             try:
-                inp = input(
-                    "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
-                ).strip().lower()
+                inp = (
+                    input(
+                        "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                    )
+                    .strip()
+                    .lower()
+                )
             except EOFError:
                 break
-            mode = inp if inp in MODES else 'autox'
+            mode = inp if inp in MODES else "autox"
             run_mode(mode, executor)
     finally:
         rclpy.shutdown()
