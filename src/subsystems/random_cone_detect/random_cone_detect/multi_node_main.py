@@ -68,6 +68,17 @@ class MultiWatchdogNode(Node):
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = False) -> None:
+    if auto_start:
+        ready_ok = True
+    else:
+        ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
+        # Only start when the user explicitly confirms.  Just pressing enter
+        # should no longer be interpreted as approval.
+        ready_ok = ready in ("j", "ja", "yes", "y")
+
+    if not ready_ok:
+        return
+
     stop_event = threading.Event()
     ebs_node = EbsActiveNode()
 
@@ -101,20 +112,6 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
     ]
     for n in nodes:
         executor.add_node(n)
-
-    if auto_start:
-        ready_ok = True
-    else:
-        ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
-        # Only start when the user explicitly confirms.  Just pressing enter
-        # should no longer be interpreted as approval.
-        ready_ok = ready in ("j", "ja", "yes", "y")
-
-    if not ready_ok:
-        for n in nodes:
-            executor.remove_node(n)
-            n.destroy_node()
-        return
 
     try:
         while rclpy.ok() and not stop_event.is_set():
