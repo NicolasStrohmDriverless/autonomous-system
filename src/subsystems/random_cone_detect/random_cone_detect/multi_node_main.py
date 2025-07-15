@@ -70,6 +70,11 @@ class MultiWatchdogNode(Node):
 def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = False) -> None:
     stop_event = threading.Event()
     ebs_node = EbsActiveNode()
+
+    def idle_abort() -> None:
+        """Trigger the emergency brake when idle timeout fires."""
+        ebs_node.trigger()
+        stop_event.set()
     nodes = [
         MultiWatchdogNode([
             "safety_watchdog_node",
@@ -90,7 +95,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         LapCounterNode(
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
-        IdleMonitorNode(on_timeout=stop_event.set),
+        IdleMonitorNode(on_timeout=idle_abort),
         MapOutputNode(),
         ebs_node,
     ]
@@ -101,7 +106,9 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         ready_ok = True
     else:
         ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
-        ready_ok = ready in ("", "j", "ja", "yes", "y")
+        # Only start when the user explicitly confirms.  Just pressing enter
+        # should no longer be interpreted as approval.
+        ready_ok = ready in ("j", "ja", "yes", "y")
 
     if not ready_ok:
         for n in nodes:
@@ -116,7 +123,10 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         pass
 
     if stop_event.is_set():
+        print("Idle timeout reached, aborting mission.")
         ebs_node.trigger()
+        # Give other nodes a short time to react to the EBS trigger before
+        # tearing everything down.
         time.sleep(10.0)
         stop_event.clear()
 
