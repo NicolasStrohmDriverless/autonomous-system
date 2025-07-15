@@ -1,33 +1,82 @@
 #!/usr/bin/env python3
-"""Mission launcher for random_cone_detect.
+"""Mission launcher for ``random_cone_detect``.
 
-Additional monitoring nodes run here while vehicle control including the random
-track generator is executed via ``control_main.py``.  After that script exits the
-mission menu appears again.
+Previously this script only started a few helper nodes and delegated the
+vehicle control stack to :mod:`control_main`.  To simplify running the system
+in different configurations the launcher now creates all required nodes
+directly.  The old watchdog node has been removed and its functionality is
+handled internally here.  The safety watchdog node is still spawned
+separately.
 """
 
-import subprocess
-import sys
 import threading
 import time
 
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import numpy as np
+import cv2
 
 from random_cone_detect.lap_counter_node import LapCounterNode
 from random_cone_detect.idle_monitor_node import IdleMonitorNode
 from random_cone_detect.map_output_node import MapOutputNode
+from random_cone_detect.track_publisher import TrackPublisher
+from random_cone_detect.detection_node import ConeArrayPublisher
+from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
+from pathfinding.pathfinding_node import PathNode
+from vehicle_control.mapping_node import MappingNode
+from vehicle_control.slam_node import SlamNode
 from ebs_active.ebs_active_node import EbsActiveNode
 
 MODES = ["accel", "autox", "endu"]
 
-CONTROL_MODULE = "vehicle_control.control_main"
+
+class MultiWatchdogNode(Node):
+    """Internal watchdog checking that important nodes stay alive."""
+
+    def __init__(self, watched_nodes):
+        super().__init__("multi_watchdog_node")
+        self.watched_nodes = list(watched_nodes)
+        self.status = {name: True for name in self.watched_nodes}
+        self.bridge = CvBridge()
+        self.image_pub = self.create_publisher(Image, "/watchdog/image", 1)
+        self.timer = self.create_timer(0.25, self.check_nodes)
+
+    def check_nodes(self) -> None:
+        alive = set(self.get_node_names())
+        for name in self.watched_nodes:
+            self.status[name] = name in alive
+        self.publish_image()
+
+    def publish_image(self) -> None:
+        row_h = 30
+        width = 250
+        img = np.ones((row_h * len(self.watched_nodes), width, 3), dtype=np.uint8) * 255
+        for i, name in enumerate(self.watched_nodes):
+            center = (width - 20, i * row_h + row_h // 2)
+            color = (0, 255, 0) if self.status.get(name, False) else (0, 0, 255)
+            cv2.circle(img, center, 10, color, -1)
+            cv2.putText(img, name, (10, i * row_h + row_h // 2 + 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        msg = self.bridge.cv2_to_imgmsg(img, "bgr8")
+        msg.header.stamp = self.get_clock().now().to_msg()
+        self.image_pub.publish(msg)
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     stop_event = threading.Event()
     ebs_node = EbsActiveNode()
     nodes = [
+        MultiWatchdogNode(["mapping_node", "slam_node"]),
+        SafetyWatchdogNode(["multi_watchdog_node"]),
+        TrackPublisher(),
+        ConeArrayPublisher(mode=mode, max_laps=1),
+        PathNode(),
+        MappingNode(),
+        SlamNode(),
         LapCounterNode(
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
@@ -38,28 +87,18 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     for n in nodes:
         executor.add_node(n)
 
-    # Vehicle control (which also generates the random track) is started with
-    # the preselected mode.  The control script will ask for the ready prompt
-    # itself.
-    proc = subprocess.Popen(
-        [
-            sys.executable,
-            "-m",
-            CONTROL_MODULE,
-            "--mode",
-            mode,
-        ]
-    )
+    ready = input("darf ich starten? [J/Enter] ").strip().lower()
+    if ready not in ("", "j", "ja", "yes", "y"):
+        for n in nodes:
+            executor.remove_node(n)
+            n.destroy_node()
+        return
+
     try:
-        while rclpy.ok() and proc.poll() is None and not stop_event.is_set():
+        while rclpy.ok() and not stop_event.is_set():
             time.sleep(0.1)
     except KeyboardInterrupt:
-        proc.terminate()
-
-    if stop_event.is_set() and proc.poll() is None:
-        ebs_node.announce_ready()
-        proc.terminate()
-    proc.wait()
+        pass
 
     if stop_event.is_set():
         ebs_node.trigger()

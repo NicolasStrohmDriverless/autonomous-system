@@ -63,7 +63,6 @@ setup(
             'detection_node        = random_cone_detect.detection_node:main',
             'depth_node            = random_cone_detect.depth_node:main',
             'multi_node_main       = random_cone_detect.multi_node_main:main',
-            'watchdog_node        = random_cone_detect.watchdog_node:main',
             'safety_watchdog_node = random_cone_detect.safety_watchdog_node:main',
             'track_publisher_node  = random_cone_detect.track_publisher_node:main',
             'lap_counter_node      = random_cone_detect.lap_counter_node:main',
