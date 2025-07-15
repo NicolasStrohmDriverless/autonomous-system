@@ -17,6 +17,7 @@ from rclpy.executors import MultiThreadedExecutor
 from random_cone_detect.lap_counter_node import LapCounterNode
 from random_cone_detect.idle_monitor_node import IdleMonitorNode
 from random_cone_detect.map_output_node import MapOutputNode
+from ebs_active.ebs_active_node import EbsActiveNode
 
 MODES = ["accel", "autox", "endu"]
 
@@ -24,12 +25,15 @@ CONTROL_MODULE = "vehicle_control.control_main"
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
+    stop_event = threading.Event()
+    ebs_node = EbsActiveNode()
     nodes = [
         LapCounterNode(
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
-        IdleMonitorNode(on_timeout=lambda: None),
+        IdleMonitorNode(on_timeout=stop_event.set),
         MapOutputNode(),
+        ebs_node,
     ]
     for n in nodes:
         executor.add_node(n)
@@ -47,11 +51,20 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
         ]
     )
     try:
-        while rclpy.ok() and proc.poll() is None:
+        while rclpy.ok() and proc.poll() is None and not stop_event.is_set():
             time.sleep(0.1)
     except KeyboardInterrupt:
         proc.terminate()
+
+    if stop_event.is_set() and proc.poll() is None:
+        ebs_node.announce_ready()
+        proc.terminate()
     proc.wait()
+
+    if stop_event.is_set():
+        ebs_node.trigger()
+        time.sleep(10.0)
+        stop_event.clear()
 
     for n in nodes:
         if hasattr(n, "shutdown"):
