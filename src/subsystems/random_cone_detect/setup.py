@@ -35,6 +35,7 @@ setup(
         'shapely',
         'gpxpy',
         'art_slam',
+        'ebs_active',
     ],
     zip_safe=True,
     maintainer='Nicolas Müller',
