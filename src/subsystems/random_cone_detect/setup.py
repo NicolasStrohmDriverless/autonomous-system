@@ -66,6 +66,7 @@ setup(
             'safety_watchdog_node = random_cone_detect.safety_watchdog_node:main',
             'track_publisher_node  = random_cone_detect.track_publisher_node:main',
             'lap_counter_node      = random_cone_detect.lap_counter_node:main',
+            'map_output_node       = random_cone_detect.map_output_node:main',
         ],
     },
 )
