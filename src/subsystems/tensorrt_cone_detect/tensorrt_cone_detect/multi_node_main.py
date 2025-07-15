@@ -6,6 +6,7 @@ executed via ``control_main.py``.  After that script finishes the mission menu
 appears again.
 """
 
+import argparse
 import subprocess
 import sys
 import threading
@@ -51,7 +52,7 @@ MODES = ["accel", "autox", "endu"]
 CONTROL_MODULE = "vehicle_control.control_main"
 
 
-def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
+def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = False) -> None:
     nodes = [
         DepthAIDriver(),
         DepthTrackingNode(),
@@ -63,8 +64,13 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
     for n in nodes:
         executor.add_node(n)
 
-    ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
-    if ready not in ("", "j", "ja", "yes", "y"):
+    if auto_start:
+        ready_ok = True
+    else:
+        ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
+        ready_ok = ready in ("", "j", "ja", "yes", "y")
+
+    if not ready_ok:
         for n in nodes:
             executor.remove_node(n)
             n.destroy_node()
@@ -88,7 +94,16 @@ def run_mode(mode: str, executor: MultiThreadedExecutor) -> None:
         n.destroy_node()
 
 
-def main() -> None:
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description="Mission launcher")
+    parser.add_argument("--mode", choices=MODES, help="preselect mission mode")
+    parser.add_argument(
+        "--auto-start",
+        action="store_true",
+        help="skip the ready prompt and start immediately",
+    )
+    args = parser.parse_args(argv)
+
     rclpy.init()
     executor = MultiThreadedExecutor()
     spin_thread = threading.Thread(target=executor.spin, daemon=True)
@@ -96,14 +111,25 @@ def main() -> None:
 
     try:
         while True:
-            try:
-                inp = input(
-                    "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
-                ).strip().lower()
-            except EOFError:
+            if args.mode:
+                mode = args.mode
+            else:
+                try:
+                    inp = (
+                        input(
+                            "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                        )
+                        .strip()
+                        .lower()
+                    )
+                except EOFError:
+                    break
+                mode = inp if inp in MODES else 'autox'
+
+            run_mode(mode, executor, auto_start=args.auto_start)
+
+            if args.mode:
                 break
-            mode = inp if inp in MODES else 'autox'
-            run_mode(mode, executor)
     finally:
         rclpy.shutdown()
         spin_thread.join()
