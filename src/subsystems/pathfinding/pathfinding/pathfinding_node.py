@@ -342,6 +342,10 @@ class PathNode(Node):
                         mid = tuple(((np.array(pts2d[a]) + np.array(pts2d[b]))/2).round(4))
                         if mid[1] <= 0:
                             continue
+                        vec = np.array(pts2d[b]) - np.array(pts2d[a])
+                        ang = abs(np.degrees(np.arctan2(vec[0], vec[1])))
+                        if ang > MAX_ANGLE:
+                            continue
                         if cs == {'blue','yellow'}:
                             mids_bg.append(mid)
                         if cs == {'orange'}:
