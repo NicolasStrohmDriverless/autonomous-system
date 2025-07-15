@@ -93,7 +93,7 @@ def main(argv=None):
             if args.auto_start:
                 ready_ok = True
             else:
-                ready = input("darf ich starten? [J/Enter] ").strip().lower()
+                ready = input("Ich bin ready, darf ich fahren? [J/Enter] ").strip().lower()
                 ready_ok = ready in ("", "j", "ja", "yes", "y")
 
             if not ready_ok:
