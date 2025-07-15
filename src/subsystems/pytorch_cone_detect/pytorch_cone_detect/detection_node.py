@@ -153,6 +153,9 @@ class DepthAIDriver(Node):
             f"DepthAIDriver: YOLO-Modell geladen von {MODEL_PATH} auf {self.device_name}"
         )
 
+        # Status Flag f\u00fcr Logging, wenn noch kein Kamerabild vorhanden ist
+        self.warned_no_frame = False
+
     def on_timer(self):
         # RGB
         in_rgb = self.q_rgb.tryGet()
@@ -214,6 +217,20 @@ class DepthAIDriver(Node):
             fps_msg = Float32()
             fps_msg.data = float(fps)
             self.pub_fps.publish(fps_msg)
+
+            if len(arr2d.cones) == 0:
+                self.get_logger().error("Keine Kegel erkannt!")
+
+            self.warned_no_frame = False
+        else:
+            # Kein Kameraframe verf\u00fcgbar, dennoch leeres Array publizieren
+            t = self.get_clock().now().to_msg()
+            arr2d = ConeArray2D()
+            arr2d.header.stamp = t
+            self.pub_det2d.publish(arr2d)
+            if not self.warned_no_frame:
+                self.get_logger().error("Noch kein Kamerabild - keine Kegel erkannt!")
+                self.warned_no_frame = True
 
         # Disparity
         in_depth = self.q_depth.tryGet()

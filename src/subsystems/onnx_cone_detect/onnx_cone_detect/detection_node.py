@@ -123,6 +123,9 @@ class DepthAIDriver(Node):
 
         self.get_logger().info("DepthAIDriver: v11n_416x416.onnx geladen, starte Inferenz auf GPU")
 
+        # Flag f\u00fcr einmaliges Logging, wenn kein Kamerabild vorhanden ist
+        self.warned_no_frame = False
+
     def on_timer(self):
         # === 1) RGB-Frame + Detection + Overlay + 2D-Publish + FPS ===
         in_rgb = self.q_rgb.tryGet()
@@ -196,6 +199,19 @@ class DepthAIDriver(Node):
             fps_msg = Float32()
             fps_msg.data = float(fps)
             self.pub_fps.publish(fps_msg)
+
+            if len(arr2d.cones) == 0:
+                self.get_logger().error("Keine Kegel erkannt!")
+
+            self.warned_no_frame = False
+        else:
+            t = self.get_clock().now().to_msg()
+            arr2d = ConeArray2D()
+            arr2d.header.stamp = t
+            self.pub_det2d.publish(arr2d)
+            if not self.warned_no_frame:
+                self.get_logger().error("Noch kein Kamerabild - keine Kegel erkannt!")
+                self.warned_no_frame = True
 
         # === 2) Disparität-Frame publishen (Falschfarben + ECHTES raw) ===
         in_depth = self.q_depth.tryGet()
