@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+import math
 
 class Mode(Enum):
     """ 
@@ -118,3 +119,96 @@ def transformation_matrix(displacement, angle):
         [0,     0,            1      ]
     ])
     return M
+
+import yaml
+from shapely.geometry import LineString
+
+
+def load_yaml_track(path: str, num_center_points: int = 400):
+    """Load a track yaml file and align it to the time keeping gate.
+
+    Parameters
+    ----------
+    path: str
+        Path to the track yaml file.
+    num_center_points: int
+        Number of points to sample for the generated centerline.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        Arrays for left cones, right cones (x, y, color), centerline (x, y)
+        and the time keeping cones (x, y, color).
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)["track"]
+
+    def _parse(key: str):
+        cones = []
+        for item in data.get(key, []):
+            pos = item.get("position", [0.0, 0.0, 0.0])
+            cls = item.get("class", "unknown")
+            cones.append([float(pos[0]), float(pos[1]), cls])
+        return np.array(cones, dtype=object)
+
+    cones_left = _parse("left")
+    cones_right = _parse("right")
+    cones_time = _parse("time_keeping")
+
+    if len(cones_time) >= 2:
+        gate_center = (
+            cones_time[0, :2].astype(float) + cones_time[1, :2].astype(float)
+        ) / 2.0
+        gate_vec = (
+            cones_time[1, :2].astype(float) - cones_time[0, :2].astype(float)
+        )
+        track_angle = math.atan2(gate_vec[1], gate_vec[0]) + math.pi / 2
+    else:
+        gate_center = np.zeros(2)
+        track_angle = 0.0
+
+    c, s = math.cos(-track_angle), math.sin(-track_angle)
+
+    def _transform(arr: np.ndarray) -> np.ndarray:
+        if arr.size == 0:
+            return arr
+        xy = arr[:, :2].astype(float) - gate_center
+        arr[:, 0] = xy[:, 0] * c - xy[:, 1] * s
+        arr[:, 1] = xy[:, 0] * s + xy[:, 1] * c
+        return arr
+
+    cones_left = _transform(cones_left)
+    cones_right = _transform(cones_right)
+    cones_time = _transform(cones_time)
+
+    line_left = (
+        LineString(cones_left[:, :2].astype(float)) if len(cones_left) > 1 else None
+    )
+    line_right = (
+        LineString(cones_right[:, :2].astype(float)) if len(cones_right) > 1 else None
+    )
+
+    center = []
+    for i in range(num_center_points):
+        t = i / (num_center_points - 1)
+        if line_left is not None:
+            p_l = line_left.interpolate(t * line_left.length)
+        else:
+            p_l = None
+        if line_right is not None:
+            p_r = line_right.interpolate(t * line_right.length)
+        else:
+            p_r = None
+        if p_l and p_r:
+            center.append([(p_l.x + p_r.x) / 2.0, (p_l.y + p_r.y) / 2.0])
+        elif p_l:
+            center.append([p_l.x, p_l.y])
+        elif p_r:
+            center.append([p_r.x, p_r.y])
+    centerline = np.array(center, dtype=float)
+
+    if len(centerline):
+        idx = np.argmin(np.linalg.norm(centerline[:, :2] - [0.0, 0.0], axis=1))
+        centerline = np.vstack([centerline[idx:], centerline[:idx]])
+
+    return cones_left, cones_right, centerline, cones_time
