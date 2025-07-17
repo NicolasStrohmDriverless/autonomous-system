@@ -95,7 +95,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
             "midpoint_path_node",
         ]),
         SafetyWatchdogNode(["multi_watchdog_node"]),
-        TrackPublisher(),
+        TrackPublisher(mode=mode),
         ConeArrayPublisher(
             mode=mode,
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2),

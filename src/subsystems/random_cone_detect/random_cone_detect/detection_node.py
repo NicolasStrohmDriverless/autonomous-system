@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import math
 import random
+from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
+import cv2
+from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
@@ -14,9 +17,11 @@ from rclpy.qos import (
 )
 from std_msgs.msg import Header, Float32, Int32
 from geometry_msgs.msg import Pose2D
+from sensor_msgs.msg import Image
 
 from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 from random_cone_detect.track_publisher import TrackGenerator, Mode
+from random_cone_detect.utils import load_yaml_track
 
 # Globale Schalter
 ENABLE_NOISE     = False
@@ -84,21 +89,28 @@ class ConeArrayPublisher(Node):
         self.lap = 0
         self._seed = seed
 
+        track_dir = Path(__file__).resolve().parents[1] / "tracks"
+
         if self.mode == "accel":
-            cones_l, cones_r, centerline = generate_accel_track()
+            track_file = track_dir / "acceleration.yaml"
+            cones_l, cones_r, centerline, _ = load_yaml_track(str(track_file))
             self.is_accel = True
+        elif self.mode == "skidpad":
+            track_file = track_dir / "skidpad.yaml"
+            cones_l, cones_r, centerline, _ = load_yaml_track(str(track_file))
+            self.is_accel = False
         else:
-            cones_l, cones_r, centerline = TrackGenerator(
-                n_points=50, n_regions=10,
-                min_bound=0.0, max_bound=100.0,
-                mode=Mode.RANDOM,
-                max_turn_angle_deg=90.0,
-                seed=self._seed,
-            ).create_track()
-            # cones_l, cones_r als (N,2), also ohne Farbe
-            # -> erweitere um Farben für Konsistenz
-            cones_l = np.array([[x, y, 'blue'] for x, y in cones_l], dtype=object)
-            cones_r = np.array([[x, y, 'yellow'] for x, y in cones_r], dtype=object)
+            fs_tracks = [
+                "FSE23.yaml",
+                "FSE24.yaml",
+                "FSG23.yaml",
+                "FSG24.yaml",
+                "FSS22_V1.yaml",
+                "FSS22_V2.yaml",
+            ]
+            fname = random.choice(fs_tracks)
+            track_file = track_dir / fname
+            cones_l, cones_r, centerline, _ = load_yaml_track(str(track_file))
             self.is_accel = False
 
         self.cones_left  = cones_l
@@ -128,6 +140,17 @@ class ConeArrayPublisher(Node):
         # Lap counter publishers
         self.lap_pub = self.create_publisher(Int32, '/lap_count', 10)
         self.lap_max_pub = self.create_publisher(Int32, '/lap_max', 10)
+
+        # Camera simulation parameters
+        self.image_pub = self.create_publisher(Image, '/sim/camera/image', 1)
+        self.bridge = CvBridge()
+        self.fx = 200.0
+        self.fy = 200.0
+        self.cx = 320.0
+        self.cy = 240.0
+        self.cam_height = 1.0
+        self.img_width = 640
+        self.img_height = 480
 
         # maximale Geschwindigkeit als Parameter
         self.declare_parameter('max_speed', MAX_SPEED)
@@ -333,6 +356,32 @@ class ConeArrayPublisher(Node):
             msg.cones.append(c)
 
         self.pub.publish(msg)
+
+        # Kameraabbild mit Bounding-Boxen erstellen
+        img = np.zeros((self.img_height, self.img_width, 3), dtype=np.uint8)
+
+        def draw_box(arr, colors):
+            for (x, z), color in zip(arr, colors):
+                if z <= 0.1:
+                    continue
+                u = int(self.fx * (x) / z + self.cx)
+                v = int(self.fy * (-self.cam_height) / z + self.cy)
+                if 0 <= u < self.img_width and 0 <= v < self.img_height:
+                    col = {
+                        'blue': (255, 0, 0),
+                        'yellow': (0, 255, 255),
+                        'orange': (0, 165, 255),
+                    }.get(str(color), (128, 128, 128))
+                    cv2.rectangle(img, (u-5, v-5), (u+5, v+5), col, 1)
+
+        draw_box(vis_l_tf[:, :2], vis_l_colors)
+        draw_box(vis_r_tf[:, :2], vis_r_colors)
+
+        if self.image_pub.get_subscription_count() > 0:
+            imsg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+            imsg.header.stamp = msg.header.stamp
+            self.image_pub.publish(imsg)
+
         # Aktuelle Geschwindigkeit und Lenkwinkel publizieren
         if self.speed_pub.get_subscription_count() > 0:
             self.speed_pub.publish(Float32(data=float(current_speed)))

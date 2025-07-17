@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import math
 import random
+from pathlib import Path
 import numpy as np
 from scipy import signal, spatial, interpolate
 from shapely.geometry import Point as ShapelyPoint, LineString, Polygon, MultiPolygon  # <--- MultiPolygon import
@@ -18,7 +19,12 @@ from geometry_msgs.msg import Point as MsgPoint
 from sensor_msgs.msg import Image
 
 # Hilfsfunktionen (aus utils.py)
-from random_cone_detect.utils import closest_node, clockwise_sort, curvature
+from random_cone_detect.utils import (
+    closest_node,
+    clockwise_sort,
+    curvature,
+    load_yaml_track,
+)
 
 # QoS für Cone-Publisher (Best Effort, volatile, depth=1)
 qos_cone_pub = QoSProfile(
@@ -230,7 +236,7 @@ class TrackGenerator:
 
 
 class TrackPublisher(Node):
-    def __init__(self, seed: int | None = None):
+    def __init__(self, mode: str = "autox", seed: int | None = None):
         super().__init__('track_generator_node')
         # Publisher für Kegel (als ConeArray3D für PathNode)
         self.cone_pub  = self.create_publisher(ConeArray3D, '/cone_detections_3d', qos_cone_pub)
@@ -241,50 +247,56 @@ class TrackPublisher(Node):
         self.image_pub = self.create_publisher(Image, '/track/generated_image', 1)
         self.bridge = CvBridge()
         self._seed = seed
+        self._mode = mode
 
-        self.get_logger().info('TrackGenerator startet und publiziert Track...')
+        self.get_logger().info('TrackPublisher startet und publiziert Track...')
         self.publish_track()
 
     def publish_track(self):
-        # Hier allow_sharp_turns=True, um Eckradien bis 90° zu erlauben
-        cones_left, cones_right, centerline = TrackGenerator(
-            n_points=50,
-            n_regions=10,
-            min_bound=0,
-            max_bound=100,
-            mode=Mode.RANDOM,
-            track_width=TRACK_WIDTH,
-            curvature_threshold=1.0/3.75,
-            allow_sharp_turns=True,
-            max_turn_angle_deg=MAX_CURVE_ANGLE_DEG,
-            seed=self._seed,
-        ).create_track()
+        track_dir = Path(__file__).resolve().parents[1] / "tracks"
+        if self._mode == "accel":
+            track_file = track_dir / "acceleration.yaml"
+        elif self._mode == "skidpad":
+            track_file = track_dir / "skidpad.yaml"
+        else:
+            fs_tracks = [
+                "FSE23.yaml",
+                "FSE24.yaml",
+                "FSG23.yaml",
+                "FSG24.yaml",
+                "FSS22_V1.yaml",
+                "FSS22_V2.yaml",
+            ]
+            track_file = track_dir / random.choice(fs_tracks)
+        cones_left, cones_right, centerline, gates = load_yaml_track(str(track_file))
 
         # --- 1) ConeArray3D erzeugen und publizieren ---
         cone_msg = ConeArray3D()
         cone_msg.header.stamp = self.get_clock().now().to_msg()
         cone_msg.header.frame_id = 'map'
         # linke Kegel
-        for i, (x, y) in enumerate(cones_left):
+        for i, (x, y, color) in enumerate(cones_left):
             c = Cone3D()
             c.id    = str(i)
             c.label = 'left'
             c.conf  = 1.0
             c.x, c.y, c.z = float(x), float(y), 0.0
-            c.color = 'blue'
+            c.color = str(color)
             cone_msg.cones.append(c)
         # rechte Kegel
         off = len(cones_left)
-        for i, (x, y) in enumerate(cones_right):
+        for i, (x, y, color) in enumerate(cones_right):
             c = Cone3D()
             c.id    = str(off + i)
             c.label = 'right'
             c.conf  = 1.0
             c.x, c.y, c.z = float(x), float(y), 0.0
-            c.color = 'yellow'
+            c.color = str(color)
             cone_msg.cones.append(c)
-        # zwei Start-Kegel als orange markieren
-        start_positions = [(-TRACK_WIDTH/2, 0.0), (TRACK_WIDTH/2, 0.0)]
+        # Startkegel aus den Zeitmess-Toren verwenden
+        start_positions = [tuple(map(float, g[:2])) for g in gates[:2]]
+        if len(start_positions) < 2:
+            start_positions = [(-TRACK_WIDTH/2, 0.0), (TRACK_WIDTH/2, 0.0)]
         for idx, (sx, sy) in enumerate(start_positions, start=off + len(cones_right)):
             s = Cone3D()
             s.id    = f'start{idx}'
@@ -362,11 +374,17 @@ class TrackPublisher(Node):
             xi = int(sx * scale + offset_x)
             yi = int(400 - (sy * scale + offset_y))
             cv2.circle(img, (xi, yi), 4, (0, 165, 255), -1)
-        # Startlinie gr\xc3\xbcn einzeichnen
-        sx1 = int(-TRACK_WIDTH/2 * scale + offset_x)
-        sy1 = int(400 - (0.0 * scale + offset_y))
-        sx2 = int(TRACK_WIDTH/2 * scale + offset_x)
-        sy2 = sy1
+        # Startlinie gr\u00fcn einzeichnen
+        if len(start_positions) >= 2:
+            sx1 = int(start_positions[0][0] * scale + offset_x)
+            sy1 = int(400 - (start_positions[0][1] * scale + offset_y))
+            sx2 = int(start_positions[1][0] * scale + offset_x)
+            sy2 = int(400 - (start_positions[1][1] * scale + offset_y))
+        else:
+            sx1 = int(-TRACK_WIDTH/2 * scale + offset_x)
+            sy1 = int(400 - (0.0 * scale + offset_y))
+            sx2 = int(TRACK_WIDTH/2 * scale + offset_x)
+            sy2 = sy1
         cv2.line(img, (sx1, sy1), (sx2, sy2), (0, 255, 0), 2)
         msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
         msg.header.stamp = cone_msg.header.stamp
