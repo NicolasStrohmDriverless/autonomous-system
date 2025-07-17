@@ -35,6 +35,9 @@ BRAKE_A = -14.715      # m/s² (Bremsen, negativ!)
 # Maximale Fahrgeschwindigkeit f\xc3\xbc\r die Simulation
 MAX_SPEED = 5.0  # [m/s]
 
+# simple acceleration limit for adjusting the current speed
+SPEED_SMOOTH_A = 3.0  # [m/s²]
+
 # Track-Parameter
 Y_FINISH = 75.0        # Wo Beschleunigen aufhört, Bremsen beginnt
 Y_STOP   = 150.0       # Ende der Strecke
@@ -163,8 +166,8 @@ class ConeArrayPublisher(Node):
         self.phase = "accel"          # "accel" oder "brake"
 
         # Autox/Endu-Mode States
-        # Geschwindigkeit orientiert sich an der maximal zulässigen Geschwindigkeit
-        self.speed = self.max_speed
+        # Current simulated speed
+        self.speed = 0.0
 
         # Parameter für Geschwindigkeitanpassung
         self.lookahead = 2.0  # [m] Abstand zur Vorhersage des Lenkwinkels
@@ -255,7 +258,13 @@ class ConeArrayPublisher(Node):
             angle = math.degrees(self._steer_angle(self.distance_traveled))
             factor = max(0.3, 1.0 - abs(angle) / 90.0)
             base_speed = self.max_speed * factor
-            self.speed = self.external_speed if self.external_speed is not None else base_speed
+            target_speed = (
+                self.external_speed if self.external_speed is not None else base_speed
+            )
+            if self.speed < target_speed:
+                self.speed = min(target_speed, self.speed + SPEED_SMOOTH_A * dt)
+            else:
+                self.speed = max(target_speed, self.speed - SPEED_SMOOTH_A * dt)
             self.distance_traveled += self.speed * dt
             current_speed = self.speed
             if self.distance_traveled >= self.total_len:

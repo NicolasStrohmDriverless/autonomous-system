@@ -45,8 +45,14 @@ class EbsActiveNode(Node):
     def shutdown(self) -> None:
         """Cancel pending timers before node destruction."""
         if self.reset_timer is not None:
-            self.reset_timer.cancel()
-            self.reset_timer = None
+            try:
+                self.reset_timer.cancel()
+            finally:
+                try:
+                    self.destroy_timer(self.reset_timer)
+                except Exception:
+                    pass
+                self.reset_timer = None
 
     def deactivate(self):
         if not self.active:
@@ -56,8 +62,14 @@ class EbsActiveNode(Node):
         self.get_logger().info('EBS deactivated')
         self.publish_state()
         if self.reset_timer is not None:
-            self.reset_timer.cancel()
-            self.reset_timer = None
+            try:
+                self.reset_timer.cancel()
+            finally:
+                try:
+                    self.destroy_timer(self.reset_timer)
+                except Exception:
+                    pass
+                self.reset_timer = None
 
 
 def main(args=None):
