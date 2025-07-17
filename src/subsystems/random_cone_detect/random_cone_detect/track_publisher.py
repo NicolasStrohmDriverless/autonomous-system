@@ -358,13 +358,13 @@ class TrackPublisher(Node):
         img = np.ones((400, 400, 3), dtype=np.uint8) * 255
 
         # linke Kegel blau einzeichnen
-        for x, y in cones_left:
+        for x, y, *_ in cones_left:
             xi = int(x * scale + offset_x)
             yi = int(400 - (y * scale + offset_y))
             cv2.circle(img, (xi, yi), 3, (255, 0, 0), -1)
 
         # rechte Kegel gelb einzeichnen
-        for x, y in cones_right:
+        for x, y, *_ in cones_right:
             xi = int(x * scale + offset_x)
             yi = int(400 - (y * scale + offset_y))
             cv2.circle(img, (xi, yi), 3, (0, 255, 255), -1)
