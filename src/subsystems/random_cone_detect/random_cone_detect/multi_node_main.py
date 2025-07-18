@@ -25,7 +25,7 @@ from random_cone_detect.lap_counter_node import LapCounterNode
 from random_cone_detect.idle_monitor_node import IdleMonitorNode
 from random_cone_detect.map_output_node import MapOutputNode
 from random_cone_detect.track_publisher import TrackPublisher
-from random_cone_detect.detection_node import ConeArrayPublisher
+from random_cone_detect.detection_node import DetectionNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from pathfinding.pathfinding_node import PathNode
 from vehicle_control.mapping_node import MappingNode
@@ -96,10 +96,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         ]),
         SafetyWatchdogNode(["multi_watchdog_node"]),
         TrackPublisher(mode=mode),
-        ConeArrayPublisher(
-            mode=mode,
-            max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2),
-        ),
+        DetectionNode(),
         PathNode(),
         MappingNode(),
         SlamNode(),
