@@ -212,3 +212,50 @@ def load_yaml_track(path: str, num_center_points: int = 400):
         centerline = np.vstack([centerline[idx:], centerline[:idx]])
 
     return cones_left, cones_right, centerline, cones_time
+
+
+def generate_accel_track() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Generate the acceleration track via code instead of a YAML file."""
+
+    y_stage_start = 4.0
+    y_track_start = 5.0
+    segment_length = 75 / 0.3
+    y_stage_finish = y_stage_start + segment_length
+    y_track_finish = y_track_start + segment_length
+    y_stop_end = y_stage_finish + segment_length
+
+    x_edges = [-1.5, 1.5]
+
+    cones_left: list[list[object]] = []
+    cones_right: list[list[object]] = []
+
+    def _append(x: float, y: float, color: str) -> None:
+        if x < 0:
+            cones_left.append([x, y, color])
+        else:
+            cones_right.append([x, y, color])
+
+    for x in x_edges:
+        _append(x, y_stage_start, "orange")
+        _append(x, y_stage_finish, "orange")
+
+    for x in x_edges:
+        _append(x, y_stage_start, "orange")
+        _append(x, y_stage_finish, "orange")
+
+    for x, col in zip(x_edges, ["blue", "yellow"]):
+        _append(x, y_track_start, col)
+        _append(x, y_track_finish, col)
+
+    for x in np.linspace(-1.5, 1.5, 5):
+        _append(float(x), y_stage_finish, "orange")
+
+    for x in np.linspace(-1.5, 1.5, 3):
+        _append(float(x), y_stop_end, "orange")
+
+    return (
+        np.array(cones_left, dtype=object),
+        np.array(cones_right, dtype=object),
+        np.empty((0, 2), dtype=float),
+        np.empty((0, 3), dtype=object),
+    )
