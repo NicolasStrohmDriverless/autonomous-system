@@ -15,7 +15,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from sensor_msgs.msg import Image
 
-from oak_cone_detect_interfaces.msg import Cone3D, ConeArray3D
+from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D
 from random_cone_detect.utils import load_yaml_track, generate_accel_track
 
 
@@ -38,13 +38,12 @@ class TrackPublisher(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
         )
-        self.cone_pub = self.create_publisher(ConeArray3D, "/track/cones", qos)
+        self.cone_pub = self.create_publisher(ConeArray2D, "/track/cones", qos)
         self.image_pub = self.create_publisher(Image, "/vehicle/car_image", 10)
         self.bridge = CvBridge()
         self.mode = mode
         # cache track so we don't change it between publishes
         self.left, self.right, self.centerline, self.start = self._load_track()
-        self.timer = self.create_timer(1.0, self.publish_track)
         self.publish_track()
 
     # ------------------------------------------------------------------
@@ -74,20 +73,19 @@ class TrackPublisher(Node):
         start = self.start
         path = getattr(self, "_track_path", Path("generated"))
 
-        msg = ConeArray3D()
+        msg = ConeArray2D()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
 
         color_counts = {"blue": 0, "yellow": 0, "orange": 0}
 
         for i, (x, y, col) in enumerate(left):
-            c = Cone3D(
+            c = Cone2D(
                 id=f"L{i}",
                 label="left",
                 conf=1.0,
                 x=float(x),
                 y=float(y),
-                z=0.0,
                 color=str(col),
             )
             msg.cones.append(c)
@@ -95,26 +93,24 @@ class TrackPublisher(Node):
                 color_counts[str(col)] += 1
         off = len(msg.cones)
         for i, (x, y, col) in enumerate(right):
-            c = Cone3D(
+            c = Cone2D(
                 id=f"R{i}",
                 label="right",
                 conf=1.0,
                 x=float(x),
                 y=float(y),
-                z=0.0,
                 color=str(col),
             )
             msg.cones.append(c)
             if str(col) in color_counts:
                 color_counts[str(col)] += 1
         for i, (x, y, col) in enumerate(start, start=off + len(right)):
-            c = Cone3D(
+            c = Cone2D(
                 id=f"S{i}",
                 label="start",
                 conf=1.0,
                 x=float(x),
                 y=float(y),
-                z=0.0,
                 color=str(col),
             )
             msg.cones.append(c)
