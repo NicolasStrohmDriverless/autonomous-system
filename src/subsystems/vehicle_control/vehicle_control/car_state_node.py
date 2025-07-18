@@ -8,13 +8,13 @@ from rclpy.node import Node
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Pose2D
 
-MAX_BRAKEFORCE = -10.0  # m/s^2 (negative)
+ACCELERATION = 9.81  # m/s^2
+MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
+MAX_STEERING_SPEED = 40.0  # deg/s
 
 class CarStateNode(Node):
     def __init__(self):
         super().__init__('car_state_node')
-        self.declare_parameter('max_brakeforce', MAX_BRAKEFORCE)
-        self.max_brakeforce = float(self.get_parameter('max_brakeforce').value)
 
         self.pos_x = 0.0
         self.pos_y = 0.0
@@ -25,18 +25,12 @@ class CarStateNode(Node):
         self.desired_angle: Optional[float] = None
         self.last_time = self.get_clock().now()
 
-        self.create_subscription(Float32, '/vehicle/speed', self.speed_cb, 10)
-        self.create_subscription(Float32, '/vehicle/steering_angle', self.angle_cb, 10)
         self.create_subscription(Float32, '/vehicle/desired_speed', self.desired_speed_cb, 10)
         self.create_subscription(Float32, '/path_to_y_axis_angle', self.desired_angle_cb, 10)
         self.state_pub = self.create_publisher(Pose2D, '/vehicle/car_state', 10)
+        self.speed_pub = self.create_publisher(Float32, '/vehicle/actual_speed', 10)
+        self.steering_pub = self.create_publisher(Float32, '/vehicle/actual_steering', 10)
         self.timer = self.create_timer(0.05, self.update)
-
-    def speed_cb(self, msg: Float32):
-        self.speed = float(msg.data)
-
-    def angle_cb(self, msg: Float32):
-        self.steering_angle = float(msg.data)
 
     def desired_speed_cb(self, msg: Float32):
         self.desired_speed = float(msg.data)
@@ -49,21 +43,39 @@ class CarStateNode(Node):
         dt = (now - self.last_time).nanoseconds * 1e-9
         self.last_time = now
 
-        # simple kinematic update
+        # adjust speed towards desired speed
+        if self.desired_speed is not None:
+            if self.speed < self.desired_speed:
+                self.speed += ACCELERATION * dt
+                if self.speed > self.desired_speed:
+                    self.speed = self.desired_speed
+            elif self.speed > self.desired_speed:
+                diff = self.speed - self.desired_speed
+                brake = min(MAX_BRAKE_BAR, diff)
+                self.get_logger().info(f'ASB active: {brake:.0f} bar')
+                self.speed -= brake * dt
+                if self.speed < self.desired_speed:
+                    self.speed = self.desired_speed
+
+        # adjust steering angle towards desired angle
+        if self.desired_angle is not None:
+            diff = self.desired_angle - self.steering_angle
+            max_change = MAX_STEERING_SPEED * dt
+            if diff > max_change:
+                diff = max_change
+            elif diff < -max_change:
+                diff = -max_change
+            self.steering_angle += diff
+
+        # simple kinematic update of pose
         self.pos_x += math.sin(math.radians(self.yaw)) * self.speed * dt
         self.pos_y += math.cos(math.radians(self.yaw)) * self.speed * dt
         self.yaw += self.steering_angle * dt
 
         pose = Pose2D(x=float(self.pos_x), y=float(self.pos_y), theta=float(self.yaw))
         self.state_pub.publish(pose)
-
-        if self.desired_speed is not None:
-            if self.desired_speed - self.speed < self.max_brakeforce:
-                self.get_logger().warn('EBS triggered due to speed difference')
-        if self.desired_angle is not None:
-            diff = abs(self.desired_angle - self.steering_angle)
-            if diff > 45.0:
-                self.get_logger().warn('EBS triggered due to steering difference')
+        self.speed_pub.publish(Float32(data=float(self.speed)))
+        self.steering_pub.publish(Float32(data=float(self.steering_angle)))
 
 def main(args=None):
     rclpy.init(args=args)
