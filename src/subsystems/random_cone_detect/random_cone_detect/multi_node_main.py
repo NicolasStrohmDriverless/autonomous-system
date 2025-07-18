@@ -112,7 +112,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort),
         TrackPublisher(mode=mode),
         DetectionNode(publish_all=True),
-        PathNode(start_offset=2.0 if mode == "accel" else 0.0),
+        PathNode(start_offset=0.0),
         MappingNode(),
         SlamNode(),
         CarStateNode(),
