@@ -9,7 +9,12 @@ import argparse
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from rclpy.qos import (
+    QoSProfile,
+    QoSReliabilityPolicy,
+    QoSHistoryPolicy,
+    QoSDurabilityPolicy,
+)
 from geometry_msgs.msg import Pose2D
 
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Cone3D
@@ -26,7 +31,13 @@ class DetectionNode(Node):
             depth=10,
         )
         self.pub = self.create_publisher(ConeArray3D, "/cone_detections_3d", qos)
-        self.create_subscription(ConeArray2D, "/track/cones", self.track_cb, 10)
+        track_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+        )
+        self.create_subscription(ConeArray2D, "/track/cones", self.track_cb, track_qos)
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         self.cones: list[Cone2D] = []
         self.state = Pose2D()
