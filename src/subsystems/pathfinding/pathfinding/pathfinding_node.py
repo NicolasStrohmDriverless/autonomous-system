@@ -247,6 +247,8 @@ class PathNode(Node):
         self.longest_bg = []
         self.longest_or = []
         self.longest_len = 0.0
+        # track whether the initial green path has been generated
+        self.initial_green_done = False
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -539,7 +541,8 @@ class PathNode(Node):
 
         # nur eine Konfiguration (GEGENCHECK = 1)
         for _ in range(GEGENCHECK):
-            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, start_pt, v0, PATH_LENGTH)
+            bg_target = 1.0 if not self.initial_green_done else 0.0
+            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, start_pt, v0, bg_target)
             l_or_max = PATH_LENGTH - l_bg
             p_or, l_or = [], 0.0
             if l_or_max > 0 and len(p_bg) > 1:
@@ -603,6 +606,8 @@ class PathNode(Node):
             self.current_or = cand_or
             self.current_len = cand_len
             self.green_len = cand_green
+            if not self.initial_green_done:
+                self.initial_green_done = True
             self.dist_since_update = 0.0
             self.stop_braked = False
             self.path_id_counter += 1
@@ -785,22 +790,23 @@ class PathNode(Node):
                 np.linalg.norm(np.array(b) - np.array(a))
                 for a, b in zip(combined[:-1], combined[1:])
             )
+            green_len_calc = sum(
+                np.linalg.norm(np.array(b) - np.array(a))
+                for a, b in zip(best_bg[:-1], best_bg[1:])
+            )
         else:
             path_len = 0.0
+            green_len_calc = 0.0
 
+        red_len = path_len - green_len_calc
         angle_val = float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
         if path_len > 0.0:
-            speed = self.max_speed * (
-                (1 - abs(angle_val) / ANGLE_SPEED_DIVISOR + path_len / SPEED_PATH_LENGTH)
-                / 2.0
-            )
+            contrib = (green_len_calc - red_len) / SPEED_PATH_LENGTH
+            speed_raw = (1 - abs(angle_val) / ANGLE_SPEED_DIVISOR + contrib) / 2.0
+            speed = self.max_speed * max(speed_raw, 0.0)
         else:
             speed = 0.0
         speed = min(speed, self.max_speed)
-
-        first_green = len(self.current_bg) >= 2
-        if not first_green:
-            speed = 0.0
 
         if not self.stop_braked and self.dist_since_update >= self.green_len and self.green_len > 0:
             speed = 0.0
