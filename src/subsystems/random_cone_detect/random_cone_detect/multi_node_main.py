@@ -30,6 +30,7 @@ from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from pathfinding.pathfinding_node import PathNode
 from vehicle_control.mapping_node import MappingNode
 from vehicle_control.slam_node import SlamNode
+from vehicle_control.car_state_node import CarStateNode
 from ebs_active.ebs_active_node import EbsActiveNode
 
 MODES = ["accel", "autox", "endu"]
@@ -114,6 +115,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         PathNode(start_offset=2.0 if mode == "accel" else 0.0),
         MappingNode(),
         SlamNode(),
+        CarStateNode(),
         LapCounterNode(
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
