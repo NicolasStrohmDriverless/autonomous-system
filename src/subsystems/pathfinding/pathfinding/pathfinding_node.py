@@ -787,8 +787,6 @@ class PathNode(Node):
         else:
             speed = 0.0
         speed = min(speed, self.max_speed)
-        if self.speed is not None:
-            speed = min(speed, self.speed)
 
         if not self.stop_braked and self.dist_since_update >= self.green_len and self.green_len > 0:
             speed = 0.0
