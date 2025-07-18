@@ -3,14 +3,41 @@
 import math
 from typing import Optional
 
+import numpy as np
+import cv2
+from cv_bridge import CvBridge
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Pose2D
+from sensor_msgs.msg import Image
 
 ACCELERATION = 9.81  # m/s^2
 MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
 MAX_STEERING_SPEED = 40.0  # deg/s
+
+
+def draw_pressure_gauge(pressure: float, max_pressure: float,
+                        width: int = 180, height: int = 30) -> np.ndarray:
+    """Return an image visualizing ``pressure`` as a horizontal gauge."""
+    img = np.ones((height, width, 3), dtype=np.uint8) * 255
+    start_x, end_x = 10, width - 10
+    y0, y1 = height // 2 - 5, height // 2 + 5
+    cv2.rectangle(img, (start_x, y0), (end_x, y1), (0, 0, 0), 1)
+    frac = 0.0 if max_pressure <= 0 else max(0.0, min(1.0, pressure / max_pressure))
+    pos = int(start_x + frac * (end_x - start_x))
+    cv2.rectangle(img, (start_x, y0), (pos, y1), (0, 255, 0), -1)
+    cv2.putText(
+        img,
+        f"{pressure:.0f} bar",
+        (10, height - 5),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 0, 0),
+        1,
+    )
+    return img
 
 class CarStateNode(Node):
     def __init__(self):
@@ -30,6 +57,9 @@ class CarStateNode(Node):
         self.state_pub = self.create_publisher(Pose2D, '/vehicle/car_state', 10)
         self.speed_pub = self.create_publisher(Float32, '/vehicle/actual_speed', 10)
         self.steering_pub = self.create_publisher(Float32, '/vehicle/actual_steering', 10)
+        self.brake_pub = self.create_publisher(Float32, '/vehicle/asb_pressure', 10)
+        self.brake_image_pub = self.create_publisher(Image, '/path_status/brake_image', 1)
+        self.bridge = CvBridge()
         self.timer = self.create_timer(0.05, self.update)
 
     def desired_speed_cb(self, msg: Float32):
@@ -43,6 +73,8 @@ class CarStateNode(Node):
         dt = (now - self.last_time).nanoseconds * 1e-9
         self.last_time = now
 
+        brake = 0.0
+
         # adjust speed towards desired speed
         if self.desired_speed is not None:
             if self.speed < self.desired_speed:
@@ -52,7 +84,6 @@ class CarStateNode(Node):
             elif self.speed > self.desired_speed:
                 diff = self.speed - self.desired_speed
                 brake = min(MAX_BRAKE_BAR, diff)
-                self.get_logger().info(f'ASB active: {brake:.0f} bar')
                 self.speed -= brake * dt
                 if self.speed < self.desired_speed:
                     self.speed = self.desired_speed
@@ -76,6 +107,12 @@ class CarStateNode(Node):
         self.state_pub.publish(pose)
         self.speed_pub.publish(Float32(data=float(self.speed)))
         self.steering_pub.publish(Float32(data=float(self.steering_angle)))
+        self.brake_pub.publish(Float32(data=float(brake)))
+
+        img = draw_pressure_gauge(brake, MAX_BRAKE_BAR)
+        img_msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        img_msg.header.stamp = now.to_msg()
+        self.brake_image_pub.publish(img_msg)
 
 def main(args=None):
     rclpy.init(args=args)
