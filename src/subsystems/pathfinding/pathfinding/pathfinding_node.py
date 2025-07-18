@@ -175,8 +175,9 @@ def draw_angle_gauge(angle: float, max_angle: float,
 
 
 class PathNode(Node):
-    def __init__(self):
+    def __init__(self, start_offset: float = 0.0):
         super().__init__('midpoint_path_node')
+        self.start_offset = float(start_offset)
 
         # Subscriber mit Best-Effort QoS
         self.sub = self.create_subscription(
@@ -357,11 +358,11 @@ class PathNode(Node):
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
-        start_pt = (0.0, 0.0)
+        start_pt = (0.0, self.start_offset)
         # Zusätzliche Mittelpunkte zwischen Ursprung und erstem blauen
-        # sowie erstem gelben Kegel erzeugen. Der Startpunkt bleibt dabei
-        # im Koordinatenursprung, es werden lediglich Zwischenpunkte
-        # eingefügt, damit zu Beginn mehr valide Punkte existieren.
+        # sowie erstem gelben Kegel erzeugen. Der Startpunkt kann einen
+        # Y-Versatz besitzen, es werden lediglich Zwischenpunkte eingefügt,
+        # damit zu Beginn mehr valide Punkte existieren.
         if cones['blue'] and cones['yellow']:
             # naheliegendste Kegel bestimmen (Distanz zum Ursprung)
             first_blue = min(cones['blue'], key=lambda p: np.linalg.norm(p[:2]))

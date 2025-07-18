@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import math
 from typing import List
+import argparse
 
 import rclpy
 from rclpy.node import Node
@@ -15,9 +16,9 @@ from oak_cone_detect_interfaces.msg import ConeArray3D, Cone3D
 
 
 class DetectionNode(Node):
-    """Publish cones that are located in front of the vehicle."""
+    """Publish cones based on ground truth positions."""
 
-    def __init__(self) -> None:
+    def __init__(self, publish_all: bool = False) -> None:
         super().__init__("cone_detection_node")
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -29,6 +30,7 @@ class DetectionNode(Node):
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         self.cones: list[Cone3D] = []
         self.state = Pose2D()
+        self.publish_all = self.declare_parameter("publish_all", publish_all).value
         self.timer = self.create_timer(0.1, self.publish_visible)
 
     # ------------------------------------------------------------------
@@ -54,20 +56,23 @@ class DetectionNode(Node):
         out.header.frame_id = "map"
 
         for c in self.cones:
-            dx = float(c.x) - px
-            dy = float(c.y) - py
-            dist = math.hypot(dx, dy)
-            if dist > 30.0:
-                continue
-            if dx * dir_x + dy * dir_y < 0:
-                continue
+            if not self.publish_all:
+                dx = float(c.x) - px
+                dy = float(c.y) - py
+                dist = math.hypot(dx, dy)
+                if dist > 30.0:
+                    continue
+                if dx * dir_x + dy * dir_y < 0:
+                    continue
             new_c = Cone3D(
                 id=c.id,
                 label=c.label,
                 conf=c.conf,
+                # Track publisher uses (x, y, 0). Transform to (x, 0, y) so
+                # downstream nodes treat ``z`` as the forward axis.
                 x=c.x,
-                y=c.y,
-                z=c.z,
+                y=0.0,
+                z=c.y,
                 color=c.color,
             )
             out.cones.append(new_c)
@@ -77,8 +82,16 @@ class DetectionNode(Node):
 
 
 def main(args: List[str] | None = None) -> None:
-    rclpy.init(args=args)
-    node = DetectionNode()
+    parser = argparse.ArgumentParser(description="Cone detection node")
+    parser.add_argument(
+        "--publish-all",
+        action="store_true",
+        help="publish all cones without visibility filtering",
+    )
+    parsed_args = parser.parse_args(args)
+
+    rclpy.init(args=None)
+    node = DetectionNode(publish_all=parsed_args.publish_all)
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
