@@ -23,6 +23,7 @@ from depth_tracking.depth_node import DepthTrackingNode
 from path_viz.path_viz_node import PathVizNode
 from art_slam.art_slam_node import ArtSlamNode
 from imu_viz.imu_viz_node import ImuVizNode
+from vehicle_control.car_state_node import CarStateNode
 
 
 class SystemUsageNode(Node):
@@ -67,6 +68,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         ArtSlamNode(),
         ImuVizNode(),
         SystemUsageNode(),
+        CarStateNode(),
     ]
     for n in nodes:
         executor.add_node(n)

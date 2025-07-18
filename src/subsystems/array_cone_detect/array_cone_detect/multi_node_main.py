@@ -19,6 +19,7 @@ from array_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
 from path_viz.path_viz_node import PathVizNode
 from art_slam.art_slam_node import ArtSlamNode
+from vehicle_control.car_state_node import CarStateNode
 
 
 MODES = ["accel", "autox", "endu"]
@@ -33,8 +34,9 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
     path = PathNode()
     viz = PathVizNode()
     slam = ArtSlamNode()
+    car_state = CarStateNode()
 
-    nodes = [mission, path, viz, slam]
+    nodes = [mission, path, viz, slam, car_state]
     for n in nodes:
         executor.add_node(n)
 
