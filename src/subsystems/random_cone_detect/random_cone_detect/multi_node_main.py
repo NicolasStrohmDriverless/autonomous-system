@@ -22,7 +22,7 @@ import numpy as np
 import cv2
 
 from random_cone_detect.lap_counter_node import LapCounterNode
-from random_cone_detect.idle_monitor_node import IdleMonitorNode
+from random_cone_detect.detection_monitor_node import DetectionMonitorNode
 from random_cone_detect.map_output_node import MapOutputNode
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import DetectionNode
@@ -38,10 +38,12 @@ MODES = ["accel", "autox", "endu"]
 class MultiWatchdogNode(Node):
     """Internal watchdog checking that important nodes stay alive."""
 
-    def __init__(self, watched_nodes):
+    def __init__(self, watched_nodes, on_failure=None):
         super().__init__("multi_watchdog_node")
         self.watched_nodes = list(watched_nodes)
         self.status = {name: True for name in self.watched_nodes}
+        self.miss_count = {name: 0 for name in self.watched_nodes}
+        self.on_failure = on_failure
         self.bridge = CvBridge()
         self.image_pub = self.create_publisher(Image, "/watchdog/image", 1)
         self.timer = self.create_timer(0.25, self.check_nodes)
@@ -49,7 +51,19 @@ class MultiWatchdogNode(Node):
     def check_nodes(self) -> None:
         alive = set(self.get_node_names())
         for name in self.watched_nodes:
-            self.status[name] = name in alive
+            if name in alive:
+                self.status[name] = True
+                self.miss_count[name] = 0
+            else:
+                self.status[name] = False
+                self.miss_count[name] += 1
+                if self.miss_count[name] >= 3:
+                    if self.on_failure is not None:
+                        try:
+                            self.on_failure()
+                        finally:
+                            pass
+                    self.miss_count[name] = 0
         self.publish_image()
 
     def publish_image(self) -> None:
@@ -82,8 +96,8 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
     stop_event = threading.Event()
     ebs_node = EbsActiveNode()
 
-    def idle_abort() -> None:
-        """Trigger the emergency brake when idle timeout fires."""
+    def abort() -> None:
+        """Trigger the emergency brake and stop the current mission."""
         ebs_node.trigger()
         stop_event.set()
     nodes = [
@@ -93,8 +107,8 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
             "slam_node",
             "mapping_node",
             "midpoint_path_node",
-        ]),
-        SafetyWatchdogNode(["multi_watchdog_node"]),
+        ], on_failure=abort),
+        SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort),
         TrackPublisher(mode=mode),
         DetectionNode(),
         PathNode(),
@@ -103,7 +117,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         LapCounterNode(
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
-        IdleMonitorNode(on_timeout=idle_abort),
+        DetectionMonitorNode(on_failure=abort),
         MapOutputNode(),
         ebs_node,
     ]
@@ -117,7 +131,7 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         pass
 
     if stop_event.is_set():
-        print("Idle timeout reached, aborting mission.")
+        print("EBS event triggered, aborting mission.")
         ebs_node.trigger()
         # Give other nodes a short time to react to the EBS trigger before
         # tearing everything down.
