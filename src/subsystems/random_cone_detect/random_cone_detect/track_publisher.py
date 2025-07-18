@@ -16,7 +16,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from sensor_msgs.msg import Image
 
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D
-from random_cone_detect.utils import load_yaml_track, generate_accel_track
+from random_cone_detect.utils import load_yaml_track
 
 
 class TrackPublisher(Node):
@@ -59,9 +59,6 @@ class TrackPublisher(Node):
     def _load_track(
         self,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        if self.mode == "accel":
-            self._track_path = Path("generated")
-            return generate_accel_track()
         path = self._track_file()
         self._track_path = path
         return load_yaml_track(str(path))
