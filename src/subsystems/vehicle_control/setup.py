@@ -27,6 +27,7 @@ setup(
             'mapping_node = vehicle_control.mapping_node:main',
             'slam_node = vehicle_control.slam_node:main',
             'vehicle_controll_node = vehicle_control.vehicle_controll_node:main',
+            'speed_control_node = vehicle_control.speed_control_node:main',
         ],
     },
 )

@@ -16,6 +16,7 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 from geometry_msgs.msg import Pose2D
+from std_msgs.msg import Float32
 
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Cone3D
 
@@ -41,8 +42,11 @@ class DetectionNode(Node):
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         self.cones: list[Cone2D] = []
         self.state = Pose2D()
+        self.speed = 0.0
         self.publish_all = self.declare_parameter("publish_all", publish_all).value
         self.timer = self.create_timer(0.1, self.publish_visible)
+
+        self.create_subscription(Float32, "/vehicle/speed", self.speed_cb, 10)
 
     # ------------------------------------------------------------------
     def track_cb(self, msg: ConeArray2D) -> None:
@@ -51,6 +55,10 @@ class DetectionNode(Node):
     # ------------------------------------------------------------------
     def state_cb(self, msg: Pose2D) -> None:
         self.state = msg
+
+    # ------------------------------------------------------------------
+    def speed_cb(self, msg: Float32) -> None:
+        self.speed = float(msg.data)
 
     # ------------------------------------------------------------------
     def publish_visible(self) -> None:
@@ -66,12 +74,13 @@ class DetectionNode(Node):
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = "map"
 
+        max_dist = 30.0 + self.speed
         for c in self.cones:
             if not self.publish_all:
                 dx = float(c.x) - px
                 dy = float(c.y) - py
                 dist = math.hypot(dx, dy)
-                if dist > 30.0:
+                if dist > max_dist:
                     continue
                 if dx * dir_x + dy * dir_y < 0:
                     continue
