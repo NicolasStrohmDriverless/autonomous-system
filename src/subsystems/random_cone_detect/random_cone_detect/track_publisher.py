@@ -2,8 +2,6 @@
 """Publish predefined tracks and a scaled image of the cones."""
 
 from __future__ import annotations
-
-import math
 import random
 from pathlib import Path
 from typing import List
@@ -44,6 +42,9 @@ class TrackPublisher(Node):
         self.image_pub = self.create_publisher(Image, "/vehicle/car_image", 10)
         self.bridge = CvBridge()
         self.mode = mode
+        # cache track so we don't change it between publishes
+        self.left, self.right, self.centerline, self.start = self._load_track()
+        self.timer = self.create_timer(1.0, self.publish_track)
         self.publish_track()
 
     # ------------------------------------------------------------------
@@ -56,17 +57,28 @@ class TrackPublisher(Node):
         return track_dir / random.choice(self.FS_TRACKS)
 
     # ------------------------------------------------------------------
-    def publish_track(self) -> None:
+    def _load_track(
+        self,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         if self.mode == "accel":
-            left, right, centerline, start = generate_accel_track()
-            path = Path("generated")
-        else:
-            path = self._track_file()
-            left, right, centerline, start = load_yaml_track(str(path))
+            self._track_path = Path("generated")
+            return generate_accel_track()
+        path = self._track_file()
+        self._track_path = path
+        return load_yaml_track(str(path))
+
+    # ------------------------------------------------------------------
+    def publish_track(self) -> None:
+        left = self.left
+        right = self.right
+        start = self.start
+        path = getattr(self, "_track_path", Path("generated"))
 
         msg = ConeArray3D()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
+
+        color_counts = {"blue": 0, "yellow": 0, "orange": 0}
 
         for i, (x, y, col) in enumerate(left):
             c = Cone3D(
@@ -79,6 +91,8 @@ class TrackPublisher(Node):
                 color=str(col),
             )
             msg.cones.append(c)
+            if str(col) in color_counts:
+                color_counts[str(col)] += 1
         off = len(msg.cones)
         for i, (x, y, col) in enumerate(right):
             c = Cone3D(
@@ -91,6 +105,8 @@ class TrackPublisher(Node):
                 color=str(col),
             )
             msg.cones.append(c)
+            if str(col) in color_counts:
+                color_counts[str(col)] += 1
         for i, (x, y, col) in enumerate(start, start=off + len(right)):
             c = Cone3D(
                 id=f"S{i}",
@@ -102,16 +118,30 @@ class TrackPublisher(Node):
                 color=str(col),
             )
             msg.cones.append(c)
+            if str(col) in color_counts:
+                color_counts[str(col)] += 1
 
         self.cone_pub.publish(msg)
         self.publish_image(left, right, start)
-        self.get_logger().info(
-            f"Published {len(msg.cones)} cones from {path.name} in mode {self.mode}"
+        count = len(msg.cones)
+        log_msg = (
+            f"Published {count} cones from {path.name} in mode {self.mode}. "
+            f"blue={color_counts['blue']} "
+            f"yellow={color_counts['yellow']} "
+            f"orange={color_counts['orange']}"
         )
+        self.get_logger().info(log_msg)
 
     # ------------------------------------------------------------------
-    def publish_image(self, left: np.ndarray, right: np.ndarray, start: np.ndarray) -> None:
-        cones = np.vstack([left[:, :2].astype(float), right[:, :2].astype(float)])
+    def publish_image(
+        self, left: np.ndarray, right: np.ndarray, start: np.ndarray
+    ) -> None:
+        cones = np.vstack(
+            [
+                left[:, :2].astype(float),
+                right[:, :2].astype(float),
+            ]
+        )
         if cones.size == 0:
             return
         min_x, max_x = cones[:, 0].min(), cones[:, 0].max()
@@ -149,8 +179,7 @@ class TrackPublisher(Node):
 def main(args: List[str] | None = None) -> None:
     rclpy.init(args=args)
     node = TrackPublisher()
-    # spin once so the message actually gets sent
-    rclpy.spin_once(node, timeout_sec=0.1)
+    rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
 
