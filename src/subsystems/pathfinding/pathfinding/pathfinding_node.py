@@ -325,43 +325,10 @@ class PathNode(Node):
                 m.color = ColorRGBA(r=r, g=g, b=b, a=a)
                 markers.markers.append(m)
 
-        # → Orange-Sequenz in Rot verbinden, wenn ≥ 4 Kegel
-        orange_pts = cones['orange']
-        if len(orange_pts) >= 4:
-            pts_sorted = sorted(orange_pts, key=lambda p: p[1])
-            m_seq = Marker()
-            m_seq.header = msg.header
-            m_seq.ns     = 'orange_sequence'
-            m_seq.id     = 50000
-            m_seq.type   = Marker.LINE_STRIP
-            m_seq.action = Marker.ADD
-            m_seq.scale.x = 0.05
-            m_seq.points = [Point(x=float(p[0]), y=float(p[1]), z=float(p[2]))
-                            for p in pts_sorted]
-            m_seq.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)
-            markers.markers.append(m_seq)
-
-        # → Kegel-Sequenzen verbinden
-        def add_cone_sequence(name, pts, color):
-            if len(pts) < 2:
-                return
-            pts_sorted = sorted(pts, key=lambda p: p[1])
-            m_seq = Marker()
-            m_seq.header = msg.header
-            m_seq.ns     = name
-            m_seq.id     = hash(name) % 1000 + 50000
-            m_seq.type   = Marker.LINE_STRIP
-            m_seq.action = Marker.ADD
-            m_seq.scale.x = 0.05
-            m_seq.points = [Point(x=float(p[0]), y=float(p[1]), z=float(p[2]))
-                            for p in pts_sorted]
-            r, g, b = color
-            m_seq.color = ColorRGBA(r=r, g=g, b=b, a=1.0)
-            markers.markers.append(m_seq)
-
-        add_cone_sequence('orange_sequence', cones['orange'], (1.0, 0.0, 0.0))
-        add_cone_sequence('blue_sequence', cones['blue'], (0.0, 0.0, 1.0))
-        add_cone_sequence('yellow_sequence', cones['yellow'], (1.0, 1.0, 0.0))
+        # Verbindungslinien zwischen Kegeln nicht mehr zeichnen
+        # Ursprünglich wurden hier orange, blaue und gelbe Kegel
+        # mittels LINE_STRIP-Markern verbunden. Diese Marker wurden
+        # entfernt, sodass nur noch der Hauptpfad dargestellt wird.
 
         # 3) Mittelpunkte via Delaunay
         pts2d, cols2d = [], []
@@ -458,68 +425,10 @@ class PathNode(Node):
             m.color   = ColorRGBA(r=1.0, g=0.6, b=0.3, a=1.0)
             markers.markers.append(m)
 
-        # → Midpoints in Grün verbinden
-        if mids_bg:
-            m_mb = Marker()
-            m_mb.header = msg.header
-            m_mb.ns     = 'midpoints_bg_path'
-            m_mb.id     = 60000
-            m_mb.type   = Marker.LINE_STRIP
-            m_mb.action = Marker.ADD
-            m_mb.scale.x = 0.05
-            m_mb.points = [Point(x=mx, y=my, z=0.0) for mx, my in mids_bg]
-            m_mb.color  = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
-            markers.markers.append(m_mb)
-
-        if mids_or:
-            m_mo = Marker()
-            m_mo.header = msg.header
-            m_mo.ns     = 'midpoints_or_path'
-            m_mo.id     = 60001
-            m_mo.type   = Marker.LINE_STRIP
-            m_mo.action = Marker.ADD
-            m_mo.scale.x = 0.05
-            m_mo.points = [Point(x=mx, y=my, z=0.0) for mx, my in mids_or]
-            m_mo.color  = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
-            markers.markers.append(m_mo)
-
-        # → Mittelpunkte als eine Sequenz verbinden
-        all_mids = mids_bg + mids_or
-
-        def segments_intersect(p1, p2, q1, q2):
-            def ccw(a, b, c):
-                return (c[1]-a[1]) * (b[0]-a[0]) > (b[1]-a[1]) * (c[0]-a[0])
-            return ccw(p1, q1, q2) != ccw(p2, q1, q2) and ccw(p1, p2, q1) != ccw(p1, p2, q2)
-
-        # Sammle äußere Verbindungssegmente
-        outer_segments = []
-        for seq in [cones['blue'], cones['yellow'], cones['orange']]:
-            if len(seq) >= 2:
-                pts_sorted = sorted(seq, key=lambda p: p[1])
-                for a, b in zip(pts_sorted[:-1], pts_sorted[1:]):
-                    outer_segments.append(((a[0], a[1]), (b[0], b[1])))
-
-        touches_outer = False
-        for a, b in zip(all_mids[:-1], all_mids[1:]):
-            seg1 = ((a[0], a[1]), (b[0], b[1]))
-            for c, d in outer_segments:
-                if segments_intersect(seg1[0], seg1[1], c, d):
-                    touches_outer = True
-                    break
-            if touches_outer:
-                break
-
-        if all_mids and not touches_outer:
-            m_mp = Marker()
-            m_mp.header = msg.header
-            m_mp.ns     = 'midpoints_path'
-            m_mp.id     = 60002
-            m_mp.type   = Marker.LINE_STRIP
-            m_mp.action = Marker.ADD
-            m_mp.scale.x = 0.05
-            m_mp.points = [Point(x=mx, y=my, z=0.0) for mx, my in all_mids]
-            m_mp.color  = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
-            markers.markers.append(m_mp)
+        # Verbindungslinien zwischen Mittelpunkten nicht mehr zeichnen
+        # Zuvor wurden hier Midpoints zu einem Pfad verbunden. Diese
+        # Marker werden jetzt weggelassen, damit lediglich der Hauptpfad
+        # sichtbar bleibt.
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
