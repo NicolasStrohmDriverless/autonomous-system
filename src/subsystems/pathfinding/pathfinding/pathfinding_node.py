@@ -207,9 +207,9 @@ class PathNode(Node):
         self.declare_parameter('max_speed', MAX_SPEED)
         self.max_speed = float(self.get_parameter('max_speed').value)
 
-        # Geschwindigkeit aus IMU (optional)
+        # Geschwindigkeit des Fahrzeugs
         self.speed = None
-        self.create_subscription(Float32, '/vehicle/speed', self.speed_callback, 10)
+        self.create_subscription(Float32, '/vehicle/actual_speed', self.speed_callback, 10)
 
         # Geteilter Status mit anderen Nodes
         self.speed_cmd_pub = self.create_publisher(Float32, '/vehicle/desired_speed', 10)
