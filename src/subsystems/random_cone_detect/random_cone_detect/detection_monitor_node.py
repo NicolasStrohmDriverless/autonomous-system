@@ -3,6 +3,7 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from oak_cone_detect_interfaces.msg import ConeArray3D
 
 
@@ -16,11 +17,16 @@ class DetectionMonitorNode(Node):
         self.miss_count = 0
         self.started = False
         self.last_msg_time = self.get_clock().now()
+        cone_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10,
+        )
         self.create_subscription(
             ConeArray3D,
             '/cone_detections_3d',
             self.detection_cb,
-            10,
+            cone_qos,
         )
         self.timer = self.create_timer(0.1, self.check_timeout)
 
