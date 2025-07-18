@@ -4,6 +4,7 @@
 import numpy as np
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import Image
 from visualization_msgs.msg import MarkerArray
@@ -38,8 +39,13 @@ class MapOutputNode(Node):
         self.path = []
 
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
+        cone_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10,
+        )
         self.create_subscription(
-            ConeArray3D, "/cone_detections_3d", self.cone_cb, 10
+            ConeArray3D, "/cone_detections_3d", self.cone_cb, cone_qos
         )
         self.create_subscription(
             MarkerArray, "/best_path_marker", self.path_cb, 10
