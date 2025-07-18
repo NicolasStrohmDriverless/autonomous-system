@@ -470,10 +470,8 @@ class PathNode(Node):
 
         def find_greedy_path(mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST):
             if not mids:
-                # Fallback: ohne erkannte Mittelpunkte einen kurzen Pfad nach vorn erzeugen
-                fallback_len = min(max_len, FALLBACK_DIST)
-                fallback_pt = tuple((np.array(start_pt) + last_vec * fallback_len).tolist())
-                return [tuple(start_pt), fallback_pt], fallback_len, last_vec
+                # Keine Pfadgenerierung ohne erkannte Mittelpunkte
+                return [], 0.0, last_vec
             arr  = np.array(mids)
             path = [tuple(start_pt)]
             used = set()
