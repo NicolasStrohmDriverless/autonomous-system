@@ -37,7 +37,7 @@ class TrackPublisher(Node):
         super().__init__("track_publisher")
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
-            history=QoSReliabilityPolicy.KEEP_LAST,
+            history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
         )
         self.cone_pub = self.create_publisher(ConeArray3D, "/track/cones", qos)
