@@ -33,6 +33,26 @@ This ROS node uses the CAR_STATE from the SLAM and calculates which path the veh
 
 ![](.drawio/system_workflow.png)
 
+## Quick Start
+
+To run the provided ROS2 nodes, first build and source the workspace:
+
+```bash
+cd ~/autonomous-system
+colcon build
+source install/setup.bash
+```
+
+Afterwards you can start the multi-node launcher:
+
+```bash
+ros2 run random_cone_detect multi_node_main
+```
+
+If `colcon build` is not executed or the `setup.bash` file is not sourced, you
+may see import errors such as ``ModuleNotFoundError: No module named
+'ebs_active'``.
+
 ## Documentation
 
 If you have access to this Repository you also can have a look at the documentation [here](strohm-und-soehne.gitlab.io/driverless/autonomous-system/). This includes Onboarding and installation.
