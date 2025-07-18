@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Simple cone detection node using pre-defined cone positions."""
+"""Publish simulated cone detections in the vehicle coordinate frame.
+
+Cones are loaded from the track publisher and transformed so that the
+vehicle pose (:msg:`Pose2D`) represents the origin. Only cones within a
+semicircle in front of the vehicle (30 m radius and ±15 m lateral
+span) are published.
+"""
 
 from __future__ import annotations
 
@@ -59,31 +65,37 @@ class DetectionNode(Node):
         px = float(self.state.x)
         py = float(self.state.y)
         yaw = math.radians(float(self.state.theta))
-        dir_x = math.cos(yaw)
-        dir_y = math.sin(yaw)
+        cos_yaw = math.cos(yaw)
+        sin_yaw = math.sin(yaw)
 
         out = ConeArray3D()
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = "map"
 
         for c in self.cones:
+            dx = float(c.x) - px
+            dy = float(c.y) - py
+            # transform to vehicle coordinate frame
+            local_x = cos_yaw * dx + sin_yaw * dy
+            local_y = -sin_yaw * dx + cos_yaw * dy
+
             if not self.publish_all:
-                dx = float(c.x) - px
-                dy = float(c.y) - py
-                dist = math.hypot(dx, dy)
+                dist = math.hypot(local_x, local_y)
                 if dist > 30.0:
                     continue
-                if dx * dir_x + dy * dir_y < 0:
+                if local_y < 0.0:
                     continue
+                if abs(local_x) > 15.0:
+                    continue
+
             new_c = Cone3D(
                 id=c.id,
                 label=c.label,
                 conf=c.conf,
-                # Track publisher provides 2D positions. Transform to (x, 0, y)
-                # so downstream nodes treat ``z`` as the forward axis.
-                x=c.x,
+                # Output cones in vehicle coordinates (z is forward axis)
+                x=local_x,
                 y=0.0,
-                z=c.y,
+                z=local_y,
                 color=c.color,
             )
             out.cones.append(new_c)
