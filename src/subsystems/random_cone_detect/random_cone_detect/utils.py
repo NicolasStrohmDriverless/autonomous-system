@@ -159,22 +159,13 @@ def load_yaml_track(path: str, num_center_points: int = 400):
         gate_center = (
             cones_time[0, :2].astype(float) + cones_time[1, :2].astype(float)
         ) / 2.0
-        gate_vec = (
-            cones_time[1, :2].astype(float) - cones_time[0, :2].astype(float)
-        )
-        track_angle = math.atan2(gate_vec[1], gate_vec[0]) + math.pi / 2
     else:
         gate_center = np.zeros(2)
-        track_angle = 0.0
-
-    c, s = math.cos(-track_angle), math.sin(-track_angle)
 
     def _transform(arr: np.ndarray) -> np.ndarray:
         if arr.size == 0:
             return arr
-        xy = arr[:, :2].astype(float) - gate_center
-        arr[:, 0] = xy[:, 0] * c - xy[:, 1] * s
-        arr[:, 1] = xy[:, 0] * s + xy[:, 1] * c
+        arr[:, :2] = arr[:, :2].astype(float) - gate_center
         return arr
 
     cones_left = _transform(cones_left)
