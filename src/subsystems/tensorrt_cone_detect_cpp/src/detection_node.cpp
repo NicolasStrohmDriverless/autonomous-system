@@ -375,7 +375,8 @@ private:
       }
       c.x=(x1+x2)/2.0f;
       c.y=(y1+y2)/2.0f;
-      arr2d.cones.push_back(c);
+      if(c.y > 0)
+        arr2d.cones.push_back(c);
     }
 
     pub_detections_->publish(arr2d);

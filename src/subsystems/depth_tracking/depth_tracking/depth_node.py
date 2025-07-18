@@ -103,6 +103,9 @@ class DepthTrackingNode(Node):
             Y_m = (yi - CAM_CY) * z / FY
             Z_m = z
 
+            if Y_m <= 0:
+                continue
+
             c3 = Cone3D()
             c3.id = det.id
             c3.x, c3.y, c3.z = X_m, Y_m, Z_m
