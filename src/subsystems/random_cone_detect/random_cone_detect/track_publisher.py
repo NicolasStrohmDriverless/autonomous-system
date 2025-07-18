@@ -12,7 +12,12 @@ from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from rclpy.qos import (
+    QoSProfile,
+    QoSReliabilityPolicy,
+    QoSHistoryPolicy,
+    QoSDurabilityPolicy,
+)
 from sensor_msgs.msg import Image
 
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D
@@ -37,6 +42,7 @@ class TrackPublisher(Node):
             reliability=QoSReliabilityPolicy.RELIABLE,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
         )
         self.cone_pub = self.create_publisher(ConeArray2D, "/track/cones", qos)
         self.image_pub = self.create_publisher(Image, "/vehicle/car_image", 10)
