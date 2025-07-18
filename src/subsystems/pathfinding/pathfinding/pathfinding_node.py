@@ -325,6 +325,22 @@ class PathNode(Node):
                 m.color = ColorRGBA(r=r, g=g, b=b, a=a)
                 markers.markers.append(m)
 
+        # → Orange-Sequenz in Rot verbinden, wenn ≥ 4 Kegel
+        orange_pts = cones['orange']
+        if len(orange_pts) >= 4:
+            pts_sorted = sorted(orange_pts, key=lambda p: p[1])
+            m_seq = Marker()
+            m_seq.header = msg.header
+            m_seq.ns     = 'orange_sequence'
+            m_seq.id     = 50000
+            m_seq.type   = Marker.LINE_STRIP
+            m_seq.action = Marker.ADD
+            m_seq.scale.x = 0.05
+            m_seq.points = [Point(x=float(p[0]), y=float(p[1]), z=float(p[2]))
+                            for p in pts_sorted]
+            m_seq.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)
+            markers.markers.append(m_seq)
+
         # 3) Mittelpunkte via Delaunay
         pts2d, cols2d = [], []
         for col, pts in cones.items():
@@ -419,6 +435,31 @@ class PathNode(Node):
             m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
             m.color   = ColorRGBA(r=1.0, g=0.6, b=0.3, a=1.0)
             markers.markers.append(m)
+
+        # → Midpoints in Grün verbinden
+        if mids_bg:
+            m_mb = Marker()
+            m_mb.header = msg.header
+            m_mb.ns     = 'midpoints_bg_path'
+            m_mb.id     = 60000
+            m_mb.type   = Marker.LINE_STRIP
+            m_mb.action = Marker.ADD
+            m_mb.scale.x = 0.05
+            m_mb.points = [Point(x=mx, y=my, z=0.0) for mx, my in mids_bg]
+            m_mb.color  = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            markers.markers.append(m_mb)
+
+        if mids_or:
+            m_mo = Marker()
+            m_mo.header = msg.header
+            m_mo.ns     = 'midpoints_or_path'
+            m_mo.id     = 60001
+            m_mo.type   = Marker.LINE_STRIP
+            m_mo.action = Marker.ADD
+            m_mo.scale.x = 0.05
+            m_mo.points = [Point(x=mx, y=my, z=0.0) for mx, my in mids_or]
+            m_mo.color  = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            markers.markers.append(m_mo)
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
@@ -787,6 +828,10 @@ class PathNode(Node):
         else:
             speed = 0.0
         speed = min(speed, self.max_speed)
+
+        first_green = len(self.current_bg) >= 2
+        if not first_green:
+            speed = 0.0
 
         if not self.stop_braked and self.dist_since_update >= self.green_len and self.green_len > 0:
             speed = 0.0
