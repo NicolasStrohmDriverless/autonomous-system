@@ -12,6 +12,7 @@ from __future__ import annotations
 import math
 from typing import List
 import argparse
+import random
 
 import rclpy
 from rclpy.node import Node
@@ -24,6 +25,10 @@ from rclpy.qos import (
 from geometry_msgs.msg import Pose2D
 
 from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Cone3D
+
+
+# Global toggle to add random noise simulating camera shake
+CAMERA_SHAKE = False
 
 
 class DetectionNode(Node):
@@ -78,6 +83,11 @@ class DetectionNode(Node):
             # transform to vehicle coordinate frame
             local_x = cos_yaw * dx + sin_yaw * dy
             local_y = -sin_yaw * dx + cos_yaw * dy
+
+            if CAMERA_SHAKE:
+                # Add small random jitter to simulate a shaky camera
+                local_x += random.uniform(-0.05, 0.05)
+                local_y += random.uniform(-0.05, 0.05)
 
             if not self.publish_all:
                 dist = math.hypot(local_x, local_y)
