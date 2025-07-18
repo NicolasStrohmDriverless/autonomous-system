@@ -210,7 +210,8 @@ class DepthAIDriver(Node):
                     c.color='blue'
                 c.x=float(cx)
                 c.y=float(cy)
-                arr2d.cones.append(c)
+                if c.y > 0:
+                    arr2d.cones.append(c)
             self.pub_det2d.publish(arr2d)
 
             # Publish FPS als Topic
