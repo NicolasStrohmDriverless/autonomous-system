@@ -49,6 +49,10 @@ Afterwards you can start the multi-node launcher:
 ros2 run random_cone_detect multi_node_main
 ```
 
+The `car_state_node` provides a `max_yaw_accel` parameter which limits the
+angular acceleration used when updating the vehicle pose. Adjust this parameter
+when launching the node to modify the vehicle's turning behaviour.
+
 If `colcon build` is not executed or the `setup.bash` file is not sourced, you
 may see import errors such as ``ModuleNotFoundError: No module named
 'ebs_active'``.
