@@ -35,6 +35,8 @@ class MapOutputNode(Node):
         self.bridge = CvBridge()
         self.pos_x = 0.0
         self.pos_y = 0.0
+        # store seen cones and planned paths so the map keeps previous
+        # information instead of showing only the latest frame
         self.cones = []
         self.path = []
 
@@ -113,18 +115,20 @@ class MapOutputNode(Node):
         self.publish_map()
 
     def cone_cb(self, msg: ConeArray3D) -> None:
-        self.cones = [(c.x, c.y, c.color) for c in msg.cones]
+        # extend the stored list of cones so detections remain visible
+        self.cones.extend((c.x, c.y, c.color) for c in msg.cones)
         self.publish_map()
 
     def path_cb(self, msg: MarkerArray) -> None:
         for m in msg.markers:
             if m.ns == "best_path" and m.type == m.LINE_STRIP:
-                self.path = [(p.x, p.y) for p in m.points]
+                # append the new path to keep previous path segments on the map
+                self.path.extend((p.x, p.y) for p in m.points)
                 break
         self.publish_map()
 
     def publish_map(self) -> None:
-        self.map[:] = 0
+        # keep previous drawings so the map builds up over time
         self.draw_cones()
         self.draw_path()
         self.draw_car(self.pos_x, self.pos_y)
