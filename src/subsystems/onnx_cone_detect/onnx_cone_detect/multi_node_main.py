@@ -48,7 +48,7 @@ class SystemUsageNode(Node):
         self.gpu_pub.publish(Float32(data=float(usage)))
 
 
-MODES = ["accel", "autox", "endu"]
+MODES = ["accel", "skidpad", "autox", "endu"]
 
 CONTROL_MODULE = "vehicle_control.control_main"
 
@@ -119,7 +119,7 @@ def main(argv=None) -> None:
                 try:
                     inp = (
                         input(
-                            "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                            "Modus wählen ('accel' = Acceleration Track, 'skidpad' = Skidpad, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
                         )
                         .strip()
                         .lower()
