@@ -30,6 +30,12 @@ from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Con
 # Global toggle to add random noise simulating camera shake
 CAMERA_SHAKE = False
 
+# Global toggle to add distance dependent noise
+DISTANCE_NOISE = False
+
+# Maximum positional deviation at 30m distance in meters
+MAX_DISTORTION_30M = 1.0
+
 
 class DetectionNode(Node):
     """Publish cones based on ground truth positions."""
@@ -83,6 +89,13 @@ class DetectionNode(Node):
             # transform to vehicle coordinate frame
             local_x = cos_yaw * dx + sin_yaw * dy
             local_y = -sin_yaw * dx + cos_yaw * dy
+
+            dist = math.hypot(local_x, local_y)
+
+            if DISTANCE_NOISE:
+                noise = min(dist / 30.0, 1.0) * MAX_DISTORTION_30M
+                local_x += random.uniform(-noise, noise)
+                local_y += random.uniform(-noise, noise)
 
             if CAMERA_SHAKE:
                 # Add small random jitter to simulate a shaky camera
