@@ -23,7 +23,6 @@ import cv2
 
 from random_cone_detect.lap_counter_node import LapCounterNode
 from random_cone_detect.detection_monitor_node import DetectionMonitorNode
-from random_cone_detect.map_output_node import MapOutputNode
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import DetectionNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
@@ -75,14 +74,23 @@ class MultiWatchdogNode(Node):
             center = (width - 20, i * row_h + row_h // 2)
             color = (0, 255, 0) if self.status.get(name, False) else (0, 0, 255)
             cv2.circle(img, center, 10, color, -1)
-            cv2.putText(img, name, (10, i * row_h + row_h // 2 + 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            cv2.putText(
+                img,
+                name,
+                (10, i * row_h + row_h // 2 + 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 0, 0),
+                1,
+            )
         msg = self.bridge.cv2_to_imgmsg(img, "bgr8")
         msg.header.stamp = self.get_clock().now().to_msg()
         self.image_pub.publish(msg)
 
 
-def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = False) -> None:
+def run_mode(
+    mode: str, executor: MultiThreadedExecutor, auto_start: bool = False
+) -> None:
     if auto_start:
         ready_ok = True
     else:
@@ -101,14 +109,18 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         """Trigger the emergency brake and stop the current mission."""
         ebs_node.trigger()
         stop_event.set()
+
     nodes = [
-        MultiWatchdogNode([
-            "safety_watchdog_node",
-            "ebs_active_node",
-            "slam_node",
-            "mapping_node",
-            "midpoint_path_node",
-        ], on_failure=abort),
+        MultiWatchdogNode(
+            [
+                "safety_watchdog_node",
+                "ebs_active_node",
+                "slam_node",
+                "mapping_node",
+                "midpoint_path_node",
+            ],
+            on_failure=abort,
+        ),
         SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort),
         TrackPublisher(mode=mode),
         DetectionNode(publish_all=True),
@@ -120,7 +132,6 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
             max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
         ),
         DetectionMonitorNode(on_failure=abort),
-        MapOutputNode(),
         ebs_node,
     ]
     for n in nodes:
