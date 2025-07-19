@@ -66,6 +66,11 @@ If `colcon build` is not executed or the `setup.bash` file is not sourced, you
 may see import errors such as ``ModuleNotFoundError: No module named
 'ebs_active'``.
 
+Likewise, if additional message types were added after your last build, you may
+encounter errors like ``ImportError: cannot import name 'PathPrediction'``. Run
+``colcon build`` again and re-source ``install/setup.bash`` to regenerate the
+interfaces.
+
 ## Documentation
 
 If you have access to this Repository you also can have a look at the documentation [here](strohm-und-soehne.gitlab.io/driverless/autonomous-system/). This includes Onboarding and installation.
