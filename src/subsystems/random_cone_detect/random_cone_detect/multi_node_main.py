@@ -32,7 +32,7 @@ from vehicle_control.slam_node import SlamNode
 from vehicle_control.car_state_node import CarStateNode
 from ebs_active.ebs_active_node import EbsActiveNode
 
-MODES = ["accel", "autox", "endu"]
+MODES = ["accel", "skidpad", "autox", "endu"]
 
 
 class MultiWatchdogNode(Node):
@@ -129,7 +129,8 @@ def run_mode(
         SlamNode(),
         CarStateNode(),
         LapCounterNode(
-            max_laps=1 if mode == "accel" else (22 if mode == "endu" else 2)
+            max_laps=
+            1 if mode == "accel" else (4 if mode == "skidpad" else (22 if mode == "endu" else 2))
         ),
         DetectionMonitorNode(on_failure=abort),
         ebs_node,
@@ -184,7 +185,7 @@ def main(argv=None) -> None:
                 try:
                     inp = (
                         input(
-                            "Modus wählen ('accel' = Acceleration Track, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                            "Modus wählen ('accel' = Acceleration Track, 'skidpad' = Skidpad, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
                         )
                         .strip()
                         .lower()
