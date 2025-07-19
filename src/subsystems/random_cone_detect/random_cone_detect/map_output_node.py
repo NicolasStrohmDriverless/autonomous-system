@@ -12,8 +12,9 @@ from oak_cone_detect_interfaces.msg import ConeArray3D
 from cv_bridge import CvBridge
 
 MAP_SIZE = 1000
-CAR_WIDTH = 2.0
-CAR_LENGTH = 4.0
+SCALE = 10  # 1 dm per pixel
+CAR_WIDTH_PX = 2
+CAR_LENGTH_PX = 4
 
 # simple BGR colors for drawing additional objects
 CONE_COLORS = {
@@ -53,6 +54,7 @@ class MapOutputNode(Node):
             MarkerArray, "/best_path_marker", self.path_cb, 10
         )
         self.image_pub = self.create_publisher(Image, "/mapping/image", 1)
+        self.track_image_pub = self.create_publisher(Image, "/track/image", 1)
         self.create_timer(1.0, self.publish_map)
 
         # draw initial car position at the origin so a map is available even
@@ -61,19 +63,18 @@ class MapOutputNode(Node):
         self.publish_map()
 
     def draw_car(self, x: float, y: float) -> None:
-        ix = int(x) + self.origin
-        iy = int(y) + self.origin
-        w = int(CAR_WIDTH)
-        l = int(CAR_LENGTH)
-        x0 = max(ix - w // 2, 0)
-        x1 = min(ix + w // 2, MAP_SIZE - 1)
-        y0 = max(iy - l // 2, 0)
-        y1 = min(iy + l // 2, MAP_SIZE - 1)
-        self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 255, 255]
+        ix, iy = self.world_to_map(x, y)
+        w = CAR_WIDTH_PX
+        l = CAR_LENGTH_PX
+        x0 = max(int(ix - w / 2), 0)
+        x1 = min(int(ix + w / 2 - 1), MAP_SIZE - 1)
+        y0 = max(int(iy - l / 2), 0)
+        y1 = min(int(iy + l / 2 - 1), MAP_SIZE - 1)
+        self.map[y0 : y1 + 1, x0 : x1 + 1] = [0, 0, 255]
 
     def world_to_map(self, x: float, y: float) -> tuple[int, int]:
-        ix = int(round(x)) + self.origin
-        iy = int(round(y)) + self.origin
+        ix = int(round(x * SCALE)) + self.origin
+        iy = int(round(y * SCALE)) + self.origin
         return ix, iy
 
     def draw_cones(self) -> None:
@@ -136,6 +137,7 @@ class MapOutputNode(Node):
         img_msg = self.bridge.cv2_to_imgmsg(self.map, "bgr8")
         img_msg.header.stamp = self.get_clock().now().to_msg()
         self.image_pub.publish(img_msg)
+        self.track_image_pub.publish(img_msg)
 
 
 def main(args=None):
