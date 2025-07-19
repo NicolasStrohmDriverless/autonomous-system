@@ -144,28 +144,46 @@ def draw_speed_gauge(speed: float, max_speed: float,
 
 
 def draw_angle_gauge(angle: float, max_angle: float,
-                     width: int = 180, height: int = 30) -> np.ndarray:
-    """Return an image visualizing ``angle`` as a centered gauge."""
+                     width: int = 180, height: int = 90) -> np.ndarray:
+    """Return an image visualizing ``angle`` as a semicircular gauge.
+
+    The design resembles the tachometer of a car and replaces the degree
+    symbol with the word "Grad".
+    """
     img = np.ones((height, width, 3), dtype=np.uint8) * 255
-    start_x, end_x = 10, width - 10
-    center = (start_x + end_x) // 2
-    half = (end_x - start_x) // 2
-    y0, y1 = height // 2 - 5, height // 2 + 5
-    cv2.rectangle(img, (start_x, y0), (end_x, y1), (0, 0, 0), 1)
-    cv2.line(img, (center, y0), (center, y1), (0, 0, 0), 1)
+
+    center = (width // 2, height - 10)
+    radius = min(width // 2 - 10, height - 20)
+
+    # draw outer semicircle
+    cv2.ellipse(img, center, (radius, radius), 0, 180, 360, (0, 0, 0), 2)
+
+    # draw tick marks
+    for i in range(-5, 6):
+        tick_angle = 270 + (i / 5.0) * 90
+        a = math.radians(tick_angle)
+        x1 = int(center[0] + (radius - 5) * math.cos(a))
+        y1 = int(center[1] + (radius - 5) * math.sin(a))
+        x2 = int(center[0] + radius * math.cos(a))
+        y2 = int(center[1] + radius * math.sin(a))
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
+
     if max_angle > 0:
         frac = max(-1.0, min(1.0, angle / max_angle))
     else:
         frac = 0.0
-    pos = int(center + frac * half)
-    if pos >= center:
-        cv2.rectangle(img, (center, y0), (pos, y1), (0, 255, 0), -1)
-    else:
-        cv2.rectangle(img, (pos, y0), (center, y1), (0, 255, 0), -1)
+
+    # needle position
+    needle_angle = 270 + frac * 90
+    a = math.radians(needle_angle)
+    x = int(center[0] + (radius - 10) * math.cos(a))
+    y = int(center[1] + (radius - 10) * math.sin(a))
+    cv2.line(img, center, (x, y), (0, 0, 255), 2)
+
     cv2.putText(
         img,
-        f"{angle:.1f}\xb0",
-        (10, height - 5),
+        f"{angle:.1f} Grad",
+        (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
         (0, 0, 0),
