@@ -991,7 +991,7 @@ class PathNode(Node):
         combined = best_bg + best_or
 
         # 6) Winkel berechnen, filtern und publizieren
-        angle_source = frame_best_path if len(frame_best_path) >= 2 else best_bg
+        angle_source = best_bg
         if len(angle_source) >= 2:
             v = np.array(angle_source[1])
             raw_angle = float(np.degrees(np.arctan2(v[0], v[1])))
@@ -1131,10 +1131,10 @@ class PathNode(Node):
                 self.track_global_pub.publish(track_msg)
 
         # Geschwindigkeit anhand Pfadlänge und Lenkwinkel berechnen
-        if len(combined) >= 2:
+        if len(best_bg) >= 2:
             path_len = sum(
                 np.linalg.norm(np.array(b) - np.array(a))
-                for a, b in zip(combined[:-1], combined[1:])
+                for a, b in zip(best_bg[:-1], best_bg[1:])
             )
         else:
             path_len = 0.0
@@ -1186,7 +1186,7 @@ class PathNode(Node):
         self.last_speed = speed
 
         # Predict speed and steering angle along the current path
-        speeds, angles = predict_speed_angle(combined, self.max_speed)
+        speeds, angles = predict_speed_angle(best_bg, self.max_speed)
         pred_msg = PathPrediction()
         pred_msg.header.stamp = msg.header.stamp
         pred_msg.speeds = [float(s) for s in speeds]
