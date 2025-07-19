@@ -53,6 +53,11 @@ The `car_state_node` provides a `max_yaw_accel` parameter which limits the
 angular acceleration used when updating the vehicle pose. Adjust this parameter
 when launching the node to modify the vehicle's turning behaviour.
 
+The cone detection node offers a `DISTANCE_NOISE` toggle to enable
+distance-dependent position noise. The amount of deviation scales with the
+detected cone's range and is capped by the `MAX_DISTORTION_30M` setting,
+representing the maximum offset applied at a distance of 30&nbsp;m.
+
 If `colcon build` is not executed or the `setup.bash` file is not sourced, you
 may see import errors such as ``ModuleNotFoundError: No module named
 'ebs_active'``.
