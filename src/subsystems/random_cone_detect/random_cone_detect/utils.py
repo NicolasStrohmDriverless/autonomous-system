@@ -149,7 +149,11 @@ def load_yaml_track(path: str, num_center_points: int = 400):
             pos = item.get("position", [0.0, 0.0, 0.0])
             cls = item.get("class", "unknown")
             cones.append([float(pos[0]), float(pos[1]), cls])
-        return np.array(cones, dtype=object)
+        arr = np.array(cones, dtype=object)
+        if arr.size == 0:
+            # Ensure the array has the expected 2D shape even when empty
+            arr = arr.reshape(0, 3)
+        return arr
 
     cones_left = _parse("left")
     cones_right = _parse("right")
