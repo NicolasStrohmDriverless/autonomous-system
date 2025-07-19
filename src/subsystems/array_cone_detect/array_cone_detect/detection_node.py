@@ -24,6 +24,7 @@ class ConeArrayPublisher(Node):
 
         # Timer zum Umschalten der Kegellisten
         self.timer = self.create_timer(self.switch_interval, self.publish_cones)
+        self.get_logger().info('ConeArrayPublisher started')
 
     def load_cone_sets(self):
         # Pfade zu den JSON-Dateien

@@ -121,6 +121,7 @@ class DepthAIDriver(Node):
         # Tracker for 2D detections
         self.tracker = Sort(max_age=5, min_hits=1, iou_threshold=0.3)
 
+        self.get_logger().info('DepthAIDriver started')
         self.get_logger().info("DepthAIDriver: v11n_416x416.onnx geladen, starte Inferenz auf GPU")
 
         # Flag f\u00fcr einmaliges Logging, wenn kein Kamerabild vorhanden ist

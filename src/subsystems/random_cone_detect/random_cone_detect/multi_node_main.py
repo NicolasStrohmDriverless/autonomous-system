@@ -48,6 +48,7 @@ class MultiWatchdogNode(Node):
         self.bridge = CvBridge()
         self.image_pub = self.create_publisher(Image, "/watchdog/image", 1)
         self.timer = self.create_timer(0.25, self.check_nodes)
+        self.get_logger().info('MultiWatchdogNode started')
 
     def check_nodes(self) -> None:
         alive = set(self.get_node_names())
@@ -99,6 +100,7 @@ class SystemUsageNode(Node):
         self.cpu_temp_pub = self.create_publisher(Float32, '/system/cpu_temp', 10)
         self.gpu_temp_pub = self.create_publisher(Float32, '/system/gpu_temp', 10)
         self.create_timer(1.0, self.publish_usage)
+        self.get_logger().info('SystemUsageNode started')
 
     def publish_usage(self) -> None:
         import psutil

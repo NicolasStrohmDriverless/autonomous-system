@@ -67,6 +67,7 @@ class DepthAIDriver(Node):
         self.last_inference_time = None
         self.current_fps = 0.0
         self.tracker = Sort(max_age=5, min_hits=1, iou_threshold=0.3)
+        self.get_logger().info('DepthAIDriver started')
 
         # DepthAI-Pipeline Setup
         pipeline = dai.Pipeline()

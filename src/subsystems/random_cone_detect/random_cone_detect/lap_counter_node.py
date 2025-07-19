@@ -16,6 +16,7 @@ class LapCounterNode(Node):
         self.create_subscription(Int32, '/lap_count', self.lap_callback, 10)
         self.image_pub = self.create_publisher(Image, '/lap_counter/image', 1)
         self.timer = self.create_timer(0.5, self.publish_image)
+        self.get_logger().info('LapCounterNode started')
 
     def lap_callback(self, msg: Int32):
         self.lap = int(msg.data)

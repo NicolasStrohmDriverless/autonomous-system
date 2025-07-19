@@ -407,6 +407,7 @@ class PathNode(Node):
         self._ignore_next_speed_msg = False
 
         self.bridge = CvBridge()
+        self.get_logger().info('PathNode started')
 
         # Confirm initialization (logger disabled)
 
