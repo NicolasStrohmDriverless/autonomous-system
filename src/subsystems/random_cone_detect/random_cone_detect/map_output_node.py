@@ -11,7 +11,7 @@ from visualization_msgs.msg import MarkerArray
 from oak_cone_detect_interfaces.msg import ConeArray3D
 from cv_bridge import CvBridge
 
-MAP_SIZE = 1000
+MAP_SIZE = 2000
 SCALE = 10  # 1 dm per pixel
 CAR_WIDTH_PX = 2
 CAR_LENGTH_PX = 4
@@ -30,7 +30,7 @@ class MapOutputNode(Node):
 
     def __init__(self):
         super().__init__("map_output_node")
-        self.map = np.zeros((MAP_SIZE, MAP_SIZE, 3), dtype=np.uint8)
+        self.map = np.full((MAP_SIZE, MAP_SIZE, 3), 255, dtype=np.uint8)
         self.origin = MAP_SIZE // 2
         self.bridge = CvBridge()
         self.pos_x = 0.0
@@ -100,7 +100,7 @@ class MapOutputNode(Node):
         """Render the current map image and publish it."""
 
         # start with a blank map so only the current state is shown
-        self.map[:] = 0
+        self.map[:] = 255
 
         # draw static track elements and the current car position
         self.draw_cones()
