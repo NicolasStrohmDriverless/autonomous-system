@@ -8,6 +8,7 @@ import numpy as np
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from geometry_msgs.msg import Pose2D
 from std_msgs.msg import Header
 from oak_cone_detect_interfaces.msg import ConeArray3D
@@ -34,7 +35,12 @@ class MappingNode(Node):
             "red": (255, 0, 0),
         }
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
-        self.create_subscription(ConeArray3D, "/cone_detections_3d", self.cone_cb, 10)
+        cone_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10,
+        )
+        self.create_subscription(ConeArray3D, "/cone_detections_3d", self.cone_cb, cone_qos)
         self.map_pub = self.create_publisher(Header, "/mapping/update", 10)
         self.image_pub = self.create_publisher(Image, "/mapping/image", 1)
         self.bridge = CvBridge()
