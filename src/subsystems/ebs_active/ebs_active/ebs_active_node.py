@@ -17,6 +17,7 @@ class EbsActiveNode(Node):
         self.ready = False
         self.reset_timer = None
         self.publish_state()
+        self.get_logger().info('EbsActiveNode started')
 
     def announce_ready(self):
         """Publish a readiness flag without activating the EBS."""

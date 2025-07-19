@@ -44,6 +44,7 @@ class MappingNode(Node):
         self.map_pub = self.create_publisher(Header, "/mapping/update", 10)
         self.image_pub = self.create_publisher(Image, "/mapping/image", 1)
         self.bridge = CvBridge()
+        self.get_logger().info('MappingNode started')
 
     def state_cb(self, msg: Pose2D):
         # store state and draw rectangle at current position

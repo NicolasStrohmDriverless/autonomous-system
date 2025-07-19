@@ -60,6 +60,7 @@ class DetectionNode(Node):
         self.state = Pose2D()
         self.publish_all = self.declare_parameter("publish_all", publish_all).value
         self.timer = self.create_timer(0.1, self.publish_visible)
+        self.get_logger().info('DetectionNode started')
 
     # ------------------------------------------------------------------
     def track_cb(self, msg: ConeArray2D) -> None:

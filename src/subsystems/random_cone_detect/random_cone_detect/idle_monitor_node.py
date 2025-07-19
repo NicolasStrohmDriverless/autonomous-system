@@ -24,6 +24,7 @@ class IdleMonitorNode(Node):
             10,
         )
         self.timer = self.create_timer(1.0, self.check_timeout)
+        self.get_logger().info('IdleMonitorNode started')
 
     def speed_callback(self, msg: Float32):
         speed = float(msg.data)

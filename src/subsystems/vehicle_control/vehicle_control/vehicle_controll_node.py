@@ -19,6 +19,7 @@ class VehicleControllNode(Node):
         self.create_subscription(Pose2D, '/vehicle/car_state', self.state_cb, 10)
         self.image_pub = self.create_publisher(Image, '/vehicle/car_image', 10)
         self.timer = self.create_timer(0.1, self.publish_image)
+        self.get_logger().info('VehicleControllNode started')
 
     def state_cb(self, msg: Pose2D):
         self.position = msg

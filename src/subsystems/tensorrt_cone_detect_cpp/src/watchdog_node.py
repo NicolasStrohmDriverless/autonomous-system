@@ -24,6 +24,7 @@ class WatchdogNode(Node):
         self.image_pub = self.create_publisher(Image, '/watchdog/image', 1)
         self.get_logger().info(
             f'Watching nodes: {", ".join(self.watched_nodes)}')
+        self.get_logger().info('WatchdogNode started')
 
     def check_nodes(self):
         alive_nodes = set(self.get_node_names())

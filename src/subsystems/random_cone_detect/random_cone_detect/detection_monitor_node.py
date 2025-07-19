@@ -29,6 +29,7 @@ class DetectionMonitorNode(Node):
             cone_qos,
         )
         self.timer = self.create_timer(0.1, self.check_timeout)
+        self.get_logger().info('DetectionMonitorNode started')
 
     def detection_cb(self, msg: ConeArray3D) -> None:
         self.started = True

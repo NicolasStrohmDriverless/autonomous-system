@@ -20,6 +20,7 @@ class SlamNode(Node):
         self.create_subscription(ConeArray3D, '/cone_detections_3d', self.cone_cb, cone_qos)
         self.create_subscription(Point, '/path_point', self.path_cb, 10)
         self.map_pub = self.create_publisher(Header, '/slam/update', 10)
+        self.get_logger().info('SlamNode started')
 
     def cone_cb(self, msg: ConeArray3D):
         self.cones.extend([(c.x, c.y, c.color) for c in msg.cones])

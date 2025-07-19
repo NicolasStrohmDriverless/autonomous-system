@@ -115,6 +115,7 @@ class CarStateNode(Node):
         )
         self.bridge = CvBridge()
         self.timer = self.create_timer(0.05, self.update)
+        self.get_logger().info('CarStateNode started')
 
     def desired_speed_cb(self, msg: Float32):
         self.desired_speed = float(msg.data)

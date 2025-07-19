@@ -52,6 +52,7 @@ class TrackPublisher(Node):
         # cache track so we don't change it between publishes
         self.left, self.right, self.centerline, self.start = self._load_track()
         self.publish_track()
+        self.get_logger().info('TrackPublisher started')
 
     # ------------------------------------------------------------------
     def _track_file(self) -> Path:
