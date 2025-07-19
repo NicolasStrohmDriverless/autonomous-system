@@ -12,6 +12,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ConeArray3D.msg"
   "msg/Cone2D.msg"
   "msg/ConeArray2D.msg"
+  "msg/PathPrediction.msg"
   DEPENDENCIES std_msgs geometry_msgs
 )
 

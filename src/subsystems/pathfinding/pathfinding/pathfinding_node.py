@@ -19,7 +19,7 @@ from rclpy.qos import (
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
-from oak_cone_detect_interfaces.msg import ConeArray3D
+from oak_cone_detect_interfaces.msg import ConeArray3D, PathPrediction
 
 # QoS nur für den Subscriber: Best Effort, volatile, depth=1
 qos_sub = QoSProfile(
@@ -58,6 +58,7 @@ ANGLE_WINDOW = 7  # Anzahl der letzten Winkel für Median
 ANGLE_JUMP_THRESH = 30.0  # Maximal erlaubter Sprung in °
 ANGLE_SMOOTH_ALPHA = 0.3  # Faktor für exponentielle Glättung des Winkels
 MAX_SPEED = 5.0  # Maximale Geschwindigkeit in m/s
+PREDICTION_INTERVAL = 0.5  # Abstand zwischen Vorhersagepunkten in m
 
 # Lenkrad-Anzeige
 MAX_STEERING_ANGLE = 30.0  # maximale Lenkwinkelanzeige in Grad
@@ -135,6 +136,48 @@ def path_length(pts):
     return sum(
         np.linalg.norm(np.array(b) - np.array(a)) for a, b in zip(pts[:-1], pts[1:])
     )
+
+
+def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
+    """Return lists of speeds and steering angles along ``path``."""
+    if len(path) < 2:
+        return [], []
+
+    # cumulative distances along the path
+    cum = [0.0]
+    for a, b in zip(path[:-1], path[1:]):
+        cum.append(cum[-1] + float(np.linalg.norm(np.array(b) - np.array(a))))
+
+    total = cum[-1]
+    speeds = []
+    angles = []
+    idx = 0
+    dist = 0.0
+    while dist <= total and idx < len(path) - 1:
+        while idx < len(cum) - 1 and cum[idx + 1] < dist:
+            idx += 1
+        if idx >= len(path) - 1:
+            break
+        p0 = np.array(path[idx])
+        p1 = np.array(path[idx + 1])
+        seg_len = cum[idx + 1] - cum[idx]
+        r = 0.0 if seg_len == 0.0 else (dist - cum[idx]) / seg_len
+        interp = p0 + (p1 - p0) * r
+        vec = p1 - p0
+        if np.linalg.norm(vec) > 1e-6:
+            angle = float(np.degrees(np.arctan2(vec[0], vec[1])))
+        else:
+            angle = 0.0
+        remain = total - dist
+        speed = max_speed * (
+            (1 - abs(angle) / ANGLE_SPEED_DIVISOR + remain / SPEED_PATH_LENGTH) / 2.0
+        )
+        speed = min(max(speed, 0.0), max_speed)
+        speeds.append(float(speed))
+        angles.append(float(angle))
+        dist += step
+
+    return speeds, angles
 
 
 def draw_speed_gauge(
@@ -280,6 +323,9 @@ class PathNode(Node):
         )
         self.speed_image_pub = self.create_publisher(
             Image, "/path_status/speed_image", 1
+        )
+        self.prediction_pub = self.create_publisher(
+            PathPrediction, "/prediction", 10
         )
         # Publishes the track image for status monitoring and for generic UI
         # components. Keep the original topic for backwards compatibility.
@@ -1054,6 +1100,14 @@ class PathNode(Node):
             self.speed_cmd_pub.publish(Float32(data=float(speed)))
 
         self.last_speed = speed
+
+        # Predict speed and steering angle along the current path
+        speeds, angles = predict_speed_angle(combined, self.max_speed)
+        pred_msg = PathPrediction()
+        pred_msg.header.stamp = msg.header.stamp
+        pred_msg.speeds = [float(s) for s in speeds]
+        pred_msg.steering_angles = [float(a) for a in angles]
+        self.prediction_pub.publish(pred_msg)
 
         # 8) FPS berechnen & publizieren
         dt = time.time() - t0
