@@ -45,7 +45,7 @@ class TrackPublisher(Node):
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
         )
         self.cone_pub = self.create_publisher(ConeArray2D, "/track/cones", qos)
-        self.image_pub = self.create_publisher(Image, "/vehicle/car_image", 10)
+        self.image_pub = self.create_publisher(Image, "/track/image", 10)
         self.bridge = CvBridge()
         self.mode = mode
         # cache track so we don't change it between publishes
@@ -173,6 +173,7 @@ class TrackPublisher(Node):
         msg = self.bridge.cv2_to_imgmsg(img, encoding="rgba8")
         msg.header.stamp = self.get_clock().now().to_msg()
         self.image_pub.publish(msg)
+        self.get_logger().info("Published /track/image")
 
 
 def main(args: List[str] | None = None) -> None:

@@ -6,7 +6,8 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 os.chdir(here)
 
-package_name = 'random_cone_detect'
+package_name = "random_cone_detect"
+
 
 def list_rel_files(subdir):
     """Return list of file paths like 'subdir/filename' for everything in subdir/"""
@@ -21,52 +22,49 @@ def list_rel_files(subdir):
             result.append(os.path.join(subdir, fname))
     return result
 
+
 setup(
     name=package_name,
-    version='0.0.1',
+    version="0.0.1",
     # findet automatisch random_cone_detect und alle Unter-Module (inkl. utils.py)
     packages=find_packages(include=[package_name, f"{package_name}.*"]),
-
     install_requires=[
-        'setuptools',
-        'rclpy',
-        'numpy',
-        'scipy',
-        'shapely',
-        'gpxpy',
-        'art_slam',
-        'ebs_active',
+        "setuptools",
+        "rclpy",
+        "numpy",
+        "scipy",
+        "shapely",
+        "gpxpy",
+        "art_slam",
+        "ebs_active",
     ],
     zip_safe=True,
-    maintainer='Nicolas Müller',
-    maintainer_email='nicolas.mueller@strohmleitung.de',
-    description='OAK-D basierte Kegelerkennung mit DepthAI und YOLO in Python',
-    license='MIT',
-
+    maintainer="Nicolas Müller",
+    maintainer_email="nicolas.mueller@strohmleitung.de",
+    description="OAK-D basierte Kegelerkennung mit DepthAI und YOLO in Python",
+    license="MIT",
     data_files=[
         (
-            'share/ament_index/resource_index/packages',
-            [f'resource/{package_name}'],
+            "share/ament_index/resource_index/packages",
+            [f"resource/{package_name}"],
         ),
         # 2) package.xml
-        (f'share/{package_name}', ['package.xml']),
+        (f"share/{package_name}", ["package.xml"]),
         # 3) launch files
-        (f'share/{package_name}/launch', list_rel_files('launch')),
+        (f"share/{package_name}/launch", list_rel_files("launch")),
         # 4) config files
-        (f'share/{package_name}/config', list_rel_files('config')),
+        (f"share/{package_name}/config", list_rel_files("config")),
         # 5) other resources
-        (f'share/{package_name}/resource', list_rel_files('resource')),
+        (f"share/{package_name}/resource", list_rel_files("resource")),
     ],
-
     entry_points={
-        'console_scripts': [
-            'detection_node        = random_cone_detect.detection_node:main',
-            'depth_node            = random_cone_detect.depth_node:main',
-            'multi_node_main       = random_cone_detect.multi_node_main:main',
-            'safety_watchdog_node = random_cone_detect.safety_watchdog_node:main',
-            'track_publisher_node  = random_cone_detect.track_publisher_node:main',
-            'lap_counter_node      = random_cone_detect.lap_counter_node:main',
-            'map_output_node       = random_cone_detect.map_output_node:main',
+        "console_scripts": [
+            "detection_node        = random_cone_detect.detection_node:main",
+            "depth_node            = random_cone_detect.depth_node:main",
+            "multi_node_main       = random_cone_detect.multi_node_main:main",
+            "safety_watchdog_node = random_cone_detect.safety_watchdog_node:main",
+            "track_publisher_node  = random_cone_detect.track_publisher_node:main",
+            "lap_counter_node      = random_cone_detect.lap_counter_node:main",
         ],
     },
 )
