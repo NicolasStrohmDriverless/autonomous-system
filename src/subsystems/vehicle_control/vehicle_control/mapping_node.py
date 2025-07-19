@@ -25,16 +25,17 @@ class MappingNode(Node):
         self.bridge = CvBridge()
 
     def state_cb(self, msg: Pose2D):
-        # place simple rectangle for car position
-        ix = int(msg.x) + self.origin
-        iy = int(msg.y) + self.origin
-        w = int(CAR_WIDTH)
-        length = int(CAR_LENGTH)
-        x0 = max(ix - w // 2, 0)
-        x1 = min(ix + w // 2, MAP_SIZE - 1)
-        y0 = max(iy - length // 2, 0)
-        y1 = min(iy + length // 2, MAP_SIZE - 1)
-        self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 255, 255]
+        # place simple rectangle for current car position only
+        self.map.fill(0)
+        ix = int(round(msg.x)) + self.origin
+        iy = int(round(msg.y)) + self.origin
+        w = 2
+        length = 4
+        x0 = max(int(ix - w / 2), 0)
+        x1 = min(x0 + w - 1, MAP_SIZE - 1)
+        y0 = max(int(iy - length / 2), 0)
+        y1 = min(y0 + length - 1, MAP_SIZE - 1)
+        self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 0, 0]
         self.map_pub.publish(Header())
         img_msg = self.bridge.cv2_to_imgmsg(self.map, "rgb8")
         img_msg.header.stamp = self.get_clock().now().to_msg()

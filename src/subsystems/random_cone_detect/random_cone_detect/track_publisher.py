@@ -139,18 +139,22 @@ class TrackPublisher(Node):
             [
                 left[:, :2].astype(float),
                 right[:, :2].astype(float),
+                start[:, :2].astype(float),
             ]
         )
         if cones.size == 0:
             return
+
+        width = 400
+        height = 400
+        scale = 2.0  # 0.5 meter per pixel
+
         min_x, max_x = cones[:, 0].min(), cones[:, 0].max()
         min_y, max_y = cones[:, 1].min(), cones[:, 1].max()
-        span = max(max_x - min_x, max_y - min_y, 1e-3)
-        scale = 180.0 / span
-        off_x = (200 - (max_x - min_x) * scale) / 2 - min_x * scale
-        off_y = (200 - (max_y - min_y) * scale) / 2 - min_y * scale
+        off_x = (width - (max_x - min_x) * scale) / 2 - min_x * scale
+        off_y = (height - (max_y - min_y) * scale) / 2 - min_y * scale
 
-        img = np.zeros((200, 200, 4), dtype=np.uint8)
+        img = np.zeros((height, width, 4), dtype=np.uint8)
 
         colors = {
             "blue": (255, 0, 0, 255),
@@ -162,7 +166,7 @@ class TrackPublisher(Node):
         def draw(cones_arr: np.ndarray) -> None:
             for x, y, col in cones_arr:
                 xi = int(x * scale + off_x)
-                yi = int(200 - (y * scale + off_y))
+                yi = int(height - (y * scale + off_y))
                 color = colors.get(str(col), (255, 255, 255, 255))
                 cv2.circle(img, (xi, yi), 3, color, -1)
 
