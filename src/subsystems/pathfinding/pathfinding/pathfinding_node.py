@@ -66,12 +66,25 @@ MAX_STEERING_ANGLE = 30.0  # maximale Lenkwinkelanzeige in Grad
 STEERING_RATIO = 15.0  # Übersetzung Lenkrad zu Rad
 # Lenkwinkelgeschwindigkeit ~ θ_dot = R * v × i
 
-# Use a custom steering wheel image if available
-WHEEL_IMAGE_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg"
-)
-_WHEEL_IMAGE = cv2.imread(WHEEL_IMAGE_PATH)
-# ``_WHEEL_IMAGE`` is ``None`` if the file does not exist.
+# Use a custom steering wheel image if available.  Search both the
+# development layout (``resource`` folder next to this file) and the
+# installed share directory for the package.
+def _load_wheel_image() -> tuple[str, 'np.ndarray']:
+    path = os.path.join(os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg")
+    if not os.path.isfile(path):
+        try:
+            from ament_index_python.packages import get_package_share_directory
+
+            share = get_package_share_directory("pathfinding")
+            alt = os.path.join(share, "resource", "f1_wheel.jpg")
+            if os.path.isfile(alt):
+                path = alt
+        except Exception:
+            pass
+    return path, cv2.imread(path)
+
+
+WHEEL_IMAGE_PATH, _WHEEL_IMAGE = _load_wheel_image()
 
 
 def smooth_path(path, alpha=SMOOTH_ALPHA):
