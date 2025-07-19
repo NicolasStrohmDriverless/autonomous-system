@@ -113,8 +113,10 @@ def smooth_spline(path, num_points=100):
 
     x, y = zip(*unique)
     try:
-        tck, _ = splprep([x, y], s=0)
-    except ValueError:
+        # adapt spline degree to available points to avoid ``m > k`` errors
+        k = min(3, len(unique) - 1)
+        tck, _ = splprep([x, y], s=0, k=k)
+    except Exception:
         # fallback to the unique path if inputs are still invalid
         return unique
 
