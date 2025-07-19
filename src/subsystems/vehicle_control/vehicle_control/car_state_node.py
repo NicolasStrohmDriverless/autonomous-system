@@ -17,6 +17,7 @@ ACCELERATION = 9.81  # m/s^2
 MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
 MAX_STEERING_ANGLE = 30.0  # deg
 STEERING_TRANSLATION = 15.0  # ratio
+MAX_YAW_ACCEL = 180.0  # deg/s^2
 # Lenkwinkelgeschwindigkeit
 # θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
@@ -69,11 +70,15 @@ class CarStateNode(Node):
         self.pos_x = 0.0
         self.pos_y = 0.0
         self.yaw = 0.0
+        self.yaw_rate = 0.0
         self.speed = 0.0
         self.desired_speed: Optional[float] = None
         self.steering_angle = 0.0
         self.desired_angle: Optional[float] = None
         self.last_time = self.get_clock().now()
+
+        self.declare_parameter("max_yaw_accel", MAX_YAW_ACCEL)
+        self.max_yaw_accel = float(self.get_parameter("max_yaw_accel").value)
 
         self.create_subscription(
             Float32, "/vehicle/desired_speed", self.desired_speed_cb, 10
@@ -136,7 +141,16 @@ class CarStateNode(Node):
         # simple kinematic update of pose
         self.pos_x += math.sin(math.radians(self.yaw)) * self.speed * dt
         self.pos_y += math.cos(math.radians(self.yaw)) * self.speed * dt
-        self.yaw += self.steering_angle * self.speed * dt
+
+        desired_yaw_rate = self.steering_angle * self.speed
+        diff_rate = desired_yaw_rate - self.yaw_rate
+        max_rate_change = self.max_yaw_accel * dt
+        if diff_rate > max_rate_change:
+            diff_rate = max_rate_change
+        elif diff_rate < -max_rate_change:
+            diff_rate = -max_rate_change
+        self.yaw_rate += diff_rate
+        self.yaw += self.yaw_rate * dt
 
         pose = Pose2D(x=float(self.pos_x), y=float(self.pos_y), theta=float(self.yaw))
         self.state_pub.publish(pose)
