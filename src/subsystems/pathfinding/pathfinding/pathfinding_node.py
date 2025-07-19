@@ -57,6 +57,11 @@ ANGLE_JUMP_THRESH   = 30.0  # Maximal erlaubter Sprung in °
 ANGLE_SMOOTH_ALPHA  = 0.3   # Faktor für exponentielle Glättung des Winkels
 MAX_SPEED          = 5.0    # Maximale Geschwindigkeit in m/s
 
+# Lenkrad-Anzeige
+MAX_STEERING_ANGLE = 30.0   # maximale Lenkwinkelanzeige in Grad
+STEERING_RATIO     = 15.0   # Übersetzung Lenkrad zu Rad
+# Lenkwinkelgeschwindigkeit ~ θ_dot = R * v × i
+
 def smooth_path(path, alpha=SMOOTH_ALPHA):
     """Exponentielle Glättung eines Pfades."""
     if not path:
@@ -207,6 +212,53 @@ def draw_angle_gauge(angle: float, max_angle: float,
         img,
         f"{angle:.1f} Grad",
         (10, 20),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 0, 0),
+        1,
+    )
+    return img
+
+
+def draw_steering_wheel(angle: float, max_angle: float,
+                        ratio: float,
+                        size: int = 180) -> np.ndarray:
+    """Return an image visualizing ``angle`` as a steering wheel.
+
+    The wheel is drawn as a circle with two spokes representing the
+    current steering wheel rotation. ``ratio`` specifies the conversion
+    from wheel angle to steering wheel rotation.
+    """
+    img = np.ones((size, size, 3), dtype=np.uint8) * 255
+
+    center = (size // 2, size // 2)
+    radius = size // 2 - 10
+
+    # outer circle
+    cv2.circle(img, center, radius, (0, 0, 0), 2)
+
+    # clamp and convert to wheel rotation
+    angle = max(-max_angle, min(max_angle, angle))
+    wheel_angle = math.radians(angle * ratio)
+
+    spoke_len = radius - 10
+    x1 = int(center[0] + spoke_len * math.cos(wheel_angle))
+    y1 = int(center[1] + spoke_len * math.sin(wheel_angle))
+    x2 = int(center[0] - spoke_len * math.cos(wheel_angle))
+    y2 = int(center[1] - spoke_len * math.sin(wheel_angle))
+    cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
+
+    wheel_angle += math.pi / 2
+    x3 = int(center[0] + spoke_len * math.cos(wheel_angle))
+    y3 = int(center[1] + spoke_len * math.sin(wheel_angle))
+    x4 = int(center[0] - spoke_len * math.cos(wheel_angle))
+    y4 = int(center[1] - spoke_len * math.sin(wheel_angle))
+    cv2.line(img, (x3, y3), (x4, y4), (0, 0, 0), 2)
+
+    cv2.putText(
+        img,
+        f"{angle:.1f} Grad",
+        (10, size - 10),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
         (0, 0, 0),
@@ -848,7 +900,7 @@ class PathNode(Node):
         # store newly calculated speed as desired speed
         self.desired_speed = speed
 
-        angle_img = draw_angle_gauge(angle_val, MAX_ANGLE)
+        angle_img = draw_steering_wheel(angle_val, MAX_STEERING_ANGLE, STEERING_RATIO)
         angle_msg = self.bridge.cv2_to_imgmsg(angle_img, 'bgr8')
         angle_msg.header.stamp = msg.header.stamp
         self.angle_image_pub.publish(angle_msg)

@@ -15,7 +15,10 @@ from sensor_msgs.msg import Image
 
 ACCELERATION = 9.81  # m/s^2
 MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
-MAX_STEERING_SPEED = 40.0  # deg/s
+MAX_STEERING_ANGLE = 30.0  # deg
+STEERING_TRANSLATION = 15.0  # ratio
+# Lenkwinkelgeschwindigkeit
+# θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
 
 def draw_pressure_gauge(pressure: float, max_pressure: float,
@@ -114,12 +117,16 @@ class CarStateNode(Node):
         # adjust steering angle towards desired angle
         if self.desired_angle is not None:
             diff = self.desired_angle - self.steering_angle
-            max_change = MAX_STEERING_SPEED * dt
+            max_change = STEERING_TRANSLATION * abs(self.speed) * dt
             if diff > max_change:
                 diff = max_change
             elif diff < -max_change:
                 diff = -max_change
             self.steering_angle += diff
+            self.steering_angle = max(
+                -MAX_STEERING_ANGLE,
+                min(MAX_STEERING_ANGLE, self.steering_angle),
+            )
 
         # simple kinematic update of pose
         self.pos_x += math.sin(math.radians(self.yaw)) * self.speed * dt
