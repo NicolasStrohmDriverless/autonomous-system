@@ -4,6 +4,7 @@
 from __future__ import annotations
 import random
 from pathlib import Path
+from ament_index_python.packages import get_package_share_directory
 from typing import List
 
 import cv2
@@ -54,7 +55,7 @@ class TrackPublisher(Node):
 
     # ------------------------------------------------------------------
     def _track_file(self) -> Path:
-        track_dir = Path(__file__).resolve().parents[1] / "tracks"
+        track_dir = Path(get_package_share_directory('random_cone_detect')) / 'tracks'
         if self.mode == "accel":
             return track_dir / "acceleration.yaml"
         if self.mode == "skidpad":

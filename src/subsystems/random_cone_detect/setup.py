@@ -37,6 +37,7 @@ setup(
         "gpxpy",
         "art_slam",
         "ebs_active",
+        "ament_index_python",
     ],
     zip_safe=True,
     maintainer="Nicolas Müller",
@@ -56,6 +57,8 @@ setup(
         (f"share/{package_name}/config", list_rel_files("config")),
         # 5) other resources
         (f"share/{package_name}/resource", list_rel_files("resource")),
+        # 6) track yaml files
+        (f"share/{package_name}/tracks", list_rel_files("tracks")),
     ],
     entry_points={
         "console_scripts": [
