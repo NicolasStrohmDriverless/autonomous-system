@@ -388,6 +388,12 @@ class PathNode(Node):
             Float32, "/vehicle/actual_speed", self.speed_callback, 10
         )
 
+        # aktueller Lenkwinkel des Fahrzeugs
+        self.actual_steering = 0.0
+        self.create_subscription(
+            Float32, "/vehicle/actual_steering", self.actual_steering_cb, 10
+        )
+
         # Geteilter Status mit anderen Nodes
         self.speed_cmd_pub = self.create_publisher(
             Float32, "/vehicle/desired_speed", 10
@@ -446,6 +452,9 @@ class PathNode(Node):
 
     def angle_shared_callback(self, msg: Float32):
         self.shared_angle = float(msg.data)
+
+    def actual_steering_cb(self, msg: Float32):
+        self.actual_steering = float(msg.data)
 
     def _update_longest_path(
         self, prev_angle, curr_angle, move_dist, avg_dx, avg_dy, matches
@@ -1155,9 +1164,7 @@ class PathNode(Node):
         else:
             path_len = 0.0
 
-        angle_val = (
-            float(self._angle_smoothed) if self._angle_smoothed is not None else 0.0
-        )
+        angle_val = float(self.actual_steering)
         if path_len > 0.0:
             speed = self.max_speed * (
                 (
