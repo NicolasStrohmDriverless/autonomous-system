@@ -21,8 +21,9 @@ STEERING_TRANSLATION = 15.0  # ratio
 # θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
 
-def draw_pressure_gauge(pressure: float, max_pressure: float,
-                        width: int = 180, height: int = 90) -> np.ndarray:
+def draw_pressure_gauge(
+    pressure: float, max_pressure: float, width: int = 180, height: int = 90
+) -> np.ndarray:
     """Return an image visualizing ``pressure`` as a semicircular gauge.
 
     The gauge resembles the tachometer of a car.
@@ -54,20 +55,16 @@ def draw_pressure_gauge(pressure: float, max_pressure: float,
     y = int(center[1] + (radius - 10) * math.sin(a))
     cv2.line(img, center, (x, y), (0, 0, 255), 2)
 
-    cv2.putText(
-        img,
-        f"{pressure:.0f} bar",
-        (10, 20),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.5,
-        (0, 0, 0),
-        1,
-    )
+    text = f"{pressure:.0f} bar"
+    text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    text_pos = (center[0] - text_size[0] // 2, height - 5)
+    cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
     return img
+
 
 class CarStateNode(Node):
     def __init__(self):
-        super().__init__('car_state_node')
+        super().__init__("car_state_node")
 
         self.pos_x = 0.0
         self.pos_y = 0.0
@@ -78,13 +75,21 @@ class CarStateNode(Node):
         self.desired_angle: Optional[float] = None
         self.last_time = self.get_clock().now()
 
-        self.create_subscription(Float32, '/vehicle/desired_speed', self.desired_speed_cb, 10)
-        self.create_subscription(Float32, '/path_to_y_axis_angle', self.desired_angle_cb, 10)
-        self.state_pub = self.create_publisher(Pose2D, '/vehicle/car_state', 10)
-        self.speed_pub = self.create_publisher(Float32, '/vehicle/actual_speed', 10)
-        self.steering_pub = self.create_publisher(Float32, '/vehicle/actual_steering', 10)
-        self.brake_pub = self.create_publisher(Float32, '/vehicle/asb_pressure', 10)
-        self.brake_image_pub = self.create_publisher(Image, '/path_status/brake_image', 1)
+        self.create_subscription(
+            Float32, "/vehicle/desired_speed", self.desired_speed_cb, 10
+        )
+        self.create_subscription(
+            Float32, "/path_to_y_axis_angle", self.desired_angle_cb, 10
+        )
+        self.state_pub = self.create_publisher(Pose2D, "/vehicle/car_state", 10)
+        self.speed_pub = self.create_publisher(Float32, "/vehicle/actual_speed", 10)
+        self.steering_pub = self.create_publisher(
+            Float32, "/vehicle/actual_steering", 10
+        )
+        self.brake_pub = self.create_publisher(Float32, "/vehicle/asb_pressure", 10)
+        self.brake_image_pub = self.create_publisher(
+            Image, "/path_status/brake_image", 1
+        )
         self.bridge = CvBridge()
         self.timer = self.create_timer(0.05, self.update)
 
@@ -140,9 +145,10 @@ class CarStateNode(Node):
         self.brake_pub.publish(Float32(data=float(brake)))
 
         img = draw_pressure_gauge(brake, MAX_BRAKE_BAR)
-        img_msg = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        img_msg = self.bridge.cv2_to_imgmsg(img, "bgr8")
         img_msg.header.stamp = now.to_msg()
         self.brake_image_pub.publish(img_msg)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -151,5 +157,6 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
