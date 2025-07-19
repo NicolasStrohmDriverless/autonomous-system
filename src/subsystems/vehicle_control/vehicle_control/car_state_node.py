@@ -19,19 +19,42 @@ MAX_STEERING_SPEED = 40.0  # deg/s
 
 
 def draw_pressure_gauge(pressure: float, max_pressure: float,
-                        width: int = 180, height: int = 30) -> np.ndarray:
-    """Return an image visualizing ``pressure`` as a horizontal gauge."""
+                        width: int = 180, height: int = 90) -> np.ndarray:
+    """Return an image visualizing ``pressure`` as a semicircular gauge.
+
+    The gauge resembles the tachometer of a car.
+    """
     img = np.ones((height, width, 3), dtype=np.uint8) * 255
-    start_x, end_x = 10, width - 10
-    y0, y1 = height // 2 - 5, height // 2 + 5
-    cv2.rectangle(img, (start_x, y0), (end_x, y1), (0, 0, 0), 1)
+
+    center = (width // 2, height - 10)
+    radius = min(width // 2 - 10, height - 20)
+
+    # draw outer semicircle
+    cv2.ellipse(img, center, (radius, radius), 0, 180, 360, (0, 0, 0), 2)
+
+    # draw tick marks
+    for i in range(11):
+        tick_angle = 180 + (i / 10.0) * 180
+        a = math.radians(tick_angle)
+        x1 = int(center[0] + (radius - 5) * math.cos(a))
+        y1 = int(center[1] + (radius - 5) * math.sin(a))
+        x2 = int(center[0] + radius * math.cos(a))
+        y2 = int(center[1] + radius * math.sin(a))
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
+
     frac = 0.0 if max_pressure <= 0 else max(0.0, min(1.0, pressure / max_pressure))
-    pos = int(start_x + frac * (end_x - start_x))
-    cv2.rectangle(img, (start_x, y0), (pos, y1), (0, 255, 0), -1)
+
+    # needle position
+    needle_angle = 180 + frac * 180
+    a = math.radians(needle_angle)
+    x = int(center[0] + (radius - 10) * math.cos(a))
+    y = int(center[1] + (radius - 10) * math.sin(a))
+    cv2.line(img, center, (x, y), (0, 0, 255), 2)
+
     cv2.putText(
         img,
         f"{pressure:.0f} bar",
-        (10, height - 5),
+        (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
         (0, 0, 0),
