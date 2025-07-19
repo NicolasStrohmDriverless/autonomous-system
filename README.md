@@ -53,6 +53,10 @@ The `car_state_node` provides a `max_yaw_accel` parameter which limits the
 angular acceleration used when updating the vehicle pose. Adjust this parameter
 when launching the node to modify the vehicle's turning behaviour.
 
+To avoid conflicting commands, braking pressure is only applied when the
+desired speed is zero. When a path ends, the controller gradually reduces the
+actual speed until it reaches exactly zero before releasing the brake.
+
 The cone detection node offers a `DISTANCE_NOISE` toggle to enable
 distance-dependent position noise. The amount of deviation scales with the
 detected cone's range and is capped by the `MAX_DISTORTION_30M` setting,

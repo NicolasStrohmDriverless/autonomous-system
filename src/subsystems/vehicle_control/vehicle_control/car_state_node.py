@@ -14,6 +14,7 @@ from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import Image
 
 ACCELERATION = 9.81  # m/s^2
+DECELERATION = 9.81  # m/s^2 used when slowing down without braking
 MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
 MAX_STEERING_ANGLE = 30.0  # deg
 STEERING_TRANSLATION = 15.0  # ratio
@@ -47,7 +48,10 @@ def draw_pressure_gauge(
         y2 = int(center[1] + radius * math.sin(a))
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
 
-    frac = 0.0 if max_pressure <= 0 else max(0.0, min(1.0, pressure / max_pressure))
+    if max_pressure <= 0:
+        frac = 0.0
+    else:
+        frac = max(0.0, min(1.0, pressure / max_pressure))
 
     # needle position
     needle_angle = 180 + frac * 180
@@ -59,7 +63,15 @@ def draw_pressure_gauge(
     text = f"{pressure:.0f} bar"
     text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     text_pos = (center[0] - text_size[0] // 2, height - 5)
-    cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+    cv2.putText(
+        img,
+        text,
+        text_pos,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 0, 0),
+        1,
+    )
     return img
 
 
@@ -86,12 +98,18 @@ class CarStateNode(Node):
         self.create_subscription(
             Float32, "/path_to_y_axis_angle", self.desired_angle_cb, 10
         )
-        self.state_pub = self.create_publisher(Pose2D, "/vehicle/car_state", 10)
-        self.speed_pub = self.create_publisher(Float32, "/vehicle/actual_speed", 10)
+        self.state_pub = self.create_publisher(
+            Pose2D, "/vehicle/car_state", 10
+        )
+        self.speed_pub = self.create_publisher(
+            Float32, "/vehicle/actual_speed", 10
+        )
         self.steering_pub = self.create_publisher(
             Float32, "/vehicle/actual_steering", 10
         )
-        self.brake_pub = self.create_publisher(Float32, "/vehicle/asb_pressure", 10)
+        self.brake_pub = self.create_publisher(
+            Float32, "/vehicle/asb_pressure", 10
+        )
         self.brake_image_pub = self.create_publisher(
             Image, "/path_status/brake_image", 1
         )
@@ -113,16 +131,28 @@ class CarStateNode(Node):
 
         # adjust speed towards desired speed
         if self.desired_speed is not None:
-            if self.speed < self.desired_speed:
-                self.speed += ACCELERATION * dt
-                if self.speed > self.desired_speed:
-                    self.speed = self.desired_speed
-            elif self.speed > self.desired_speed:
-                diff = self.speed - self.desired_speed
-                brake = min(MAX_BRAKE_BAR, diff)
-                self.speed -= brake * dt
+            if self.desired_speed > 0.0:
                 if self.speed < self.desired_speed:
-                    self.speed = self.desired_speed
+                    self.speed += ACCELERATION * dt
+                    if self.speed > self.desired_speed:
+                        self.speed = self.desired_speed
+                elif self.speed > self.desired_speed:
+                    decel = min(
+                        DECELERATION * dt,
+                        self.speed - self.desired_speed,
+                    )
+                    self.speed -= decel
+                    if self.speed < self.desired_speed:
+                        self.speed = self.desired_speed
+            else:
+                if self.speed > 0.0:
+                    diff = self.speed
+                    brake = min(MAX_BRAKE_BAR, diff)
+                    self.speed -= brake * dt
+                    if self.speed < 0.0:
+                        self.speed = 0.0
+                if abs(self.speed) < 1e-2:
+                    self.speed = 0.0
 
         # adjust steering angle towards desired angle
         if self.desired_angle is not None:
@@ -152,10 +182,21 @@ class CarStateNode(Node):
         self.yaw_rate += diff_rate
         self.yaw += self.yaw_rate * dt
 
-        pose = Pose2D(x=float(self.pos_x), y=float(self.pos_y), theta=float(self.yaw))
+        pose = Pose2D(
+            x=float(self.pos_x),
+            y=float(self.pos_y),
+            theta=float(self.yaw),
+        )
         self.state_pub.publish(pose)
         self.speed_pub.publish(Float32(data=float(self.speed)))
         self.steering_pub.publish(Float32(data=float(self.steering_angle)))
+        if brake > 0.0 and (
+            self.desired_speed is not None and abs(self.desired_speed) > 1e-3
+        ):
+            self.get_logger().warn(
+                'Brake engaged while desired speed is non-zero'
+            )
+
         self.brake_pub.publish(Float32(data=float(brake)))
 
         img = draw_pressure_gauge(brake, MAX_BRAKE_BAR)
