@@ -31,12 +31,25 @@ class SystemUsageNode(Node):
         super().__init__('system_usage_node')
         self.cpu_pub = self.create_publisher(Float32, '/system/cpu_load', 10)
         self.gpu_pub = self.create_publisher(Float32, '/system/gpu_load', 10)
+        self.cpu_temp_pub = self.create_publisher(Float32, '/system/cpu_temp', 10)
+        self.gpu_temp_pub = self.create_publisher(Float32, '/system/gpu_temp', 10)
         self.create_timer(1.0, self.publish_usage)
 
     def publish_usage(self):
         import psutil
         cpu_percent = psutil.cpu_percent(interval=None)
         self.cpu_pub.publish(Float32(data=float(cpu_percent)))
+        cpu_temp = 0.0
+        try:
+            temps = psutil.sensors_temperatures()
+            for label in ('cpu-thermal', 'cpu_thermal', 'coretemp'):
+                if label in temps and temps[label]:
+                    cpu_temp = float(temps[label][0].current)
+                    break
+        except Exception:
+            cpu_temp = 0.0
+        self.cpu_temp_pub.publish(Float32(data=float(cpu_temp)))
+
         try:
             import subprocess as sp
             result = sp.check_output(
@@ -47,6 +60,18 @@ class SystemUsageNode(Node):
         except Exception:
             usage = 0.0
         self.gpu_pub.publish(Float32(data=float(usage)))
+
+        gpu_temp = 0.0
+        try:
+            import subprocess as sp
+            result = sp.check_output(
+                ['nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader,nounits'],
+                encoding='utf-8'
+            )
+            gpu_temp = float(result.strip().split('\n')[0])
+        except Exception:
+            gpu_temp = 0.0
+        self.gpu_temp_pub.publish(Float32(data=float(gpu_temp)))
 
 
 MODES = ["accel", "skidpad", "autox", "endu"]
