@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import math
 import time
+import os
 
 import numpy as np
 from scipy.spatial import Delaunay
@@ -61,6 +62,13 @@ MAX_SPEED = 5.0  # Maximale Geschwindigkeit in m/s
 MAX_STEERING_ANGLE = 30.0  # maximale Lenkwinkelanzeige in Grad
 STEERING_RATIO = 15.0  # Übersetzung Lenkrad zu Rad
 # Lenkwinkelgeschwindigkeit ~ θ_dot = R * v × i
+
+# Use a custom steering wheel image if available
+WHEEL_IMAGE_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg"
+)
+_WHEEL_IMAGE = cv2.imread(WHEEL_IMAGE_PATH)
+# ``_WHEEL_IMAGE`` is ``None`` if the file does not exist.
 
 
 def smooth_path(path, alpha=SMOOTH_ALPHA):
@@ -219,65 +227,33 @@ def draw_steering_wheel(
 ) -> np.ndarray:
     """Return an image visualizing ``angle`` as a steering wheel.
 
-    The style roughly resembles a Formula 1 wheel. ``ratio`` specifies the
-    conversion from wheel angle to steering wheel rotation.
+    If the image at :data:`WHEEL_IMAGE_PATH` is available it will be rotated
+    according to ``angle`` and used as the wheel graphic. Otherwise a blank
+    image is returned. ``ratio`` specifies the conversion from wheel angle to
+    steering wheel rotation.
     """
-    img = np.ones((size, size, 3), dtype=np.uint8) * 255
 
-    center = (size // 2, size // 2)
     angle = max(-max_angle, min(max_angle, angle))
-    rot = math.radians(angle * ratio)
-    cos_a, sin_a = math.cos(rot), math.sin(rot)
 
-    wheel_w = int(size * 0.8)
-    wheel_h = int(size * 0.4)
-    handle_r = wheel_h // 2
-
-    rect = np.array(
-        [
-            [-wheel_w // 2 + handle_r, -wheel_h // 2],
-            [wheel_w // 2 - handle_r, -wheel_h // 2],
-            [wheel_w // 2 - handle_r, wheel_h // 2],
-            [-wheel_w // 2 + handle_r, wheel_h // 2],
-        ],
-        dtype=np.float32,
-    )
-
-    R = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
-    rect_rot = rect @ R.T + np.array(center)
-    cv2.polylines(img, [rect_rot.astype(int)], True, (0, 0, 0), 2)
-
-    left_c = np.array([-wheel_w // 2 + handle_r, 0], dtype=np.float32) @ R.T + np.array(
-        center
-    )
-    right_c = np.array([wheel_w // 2 - handle_r, 0], dtype=np.float32) @ R.T + np.array(
-        center
-    )
-    angle_deg = math.degrees(rot)
-    cv2.ellipse(
-        img,
-        tuple(left_c.astype(int)),
-        (handle_r, handle_r),
-        angle_deg,
-        90,
-        270,
-        (0, 0, 0),
-        2,
-    )
-    cv2.ellipse(
-        img,
-        tuple(right_c.astype(int)),
-        (handle_r, handle_r),
-        angle_deg,
-        270,
-        90,
-        (0, 0, 0),
-        2,
-    )
+    if _WHEEL_IMAGE is not None:
+        img = cv2.resize(_WHEEL_IMAGE, (size, size))
+        rot_deg = angle * ratio
+        center = (size // 2, size // 2)
+        M = cv2.getRotationMatrix2D(center, -rot_deg, 1.0)
+        img = cv2.warpAffine(
+            img,
+            M,
+            (size, size),
+            flags=cv2.INTER_LINEAR,
+            borderMode=cv2.BORDER_CONSTANT,
+            borderValue=(255, 255, 255),
+        )
+    else:
+        img = np.ones((size, size, 3), dtype=np.uint8) * 255
 
     text = f"{angle:.1f} Grad"
     text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-    text_pos = (center[0] - text_size[0] // 2, size - 5)
+    text_pos = (size // 2 - text_size[0] // 2, size - 5)
     cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
     return img
