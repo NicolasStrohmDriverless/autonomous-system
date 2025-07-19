@@ -391,7 +391,7 @@ class PathNode(Node):
         # 1) Kegel sammeln
         cones = {col: [] for col in COLOR_MAP}
         for c in msg.cones:
-            if c.y < 0 or c.y > MAX_MARKER_Y:
+            if c.z < 0 or c.z > MAX_MARKER_Y:
                 continue
             if c.color not in cones:
                 # ignore unknown colors
