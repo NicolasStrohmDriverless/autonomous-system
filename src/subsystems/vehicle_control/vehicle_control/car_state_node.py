@@ -124,7 +124,7 @@ class CarStateNode(Node):
         # simple kinematic update of pose
         self.pos_x += math.sin(math.radians(self.yaw)) * self.speed * dt
         self.pos_y += math.cos(math.radians(self.yaw)) * self.speed * dt
-        self.yaw += self.steering_angle * dt
+        self.yaw += self.steering_angle * self.speed * dt
 
         pose = Pose2D(x=float(self.pos_x), y=float(self.pos_y), theta=float(self.yaw))
         self.state_pub.publish(pose)
