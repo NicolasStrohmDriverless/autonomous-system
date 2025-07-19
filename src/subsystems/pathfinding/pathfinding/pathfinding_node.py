@@ -707,6 +707,7 @@ class PathNode(Node):
 
         best_bg, best_or = [], []
         max_pts, best_len, abort = 0, 0.0, ""
+        frame_candidate_paths = []
 
         # nur eine Konfiguration (GEGENCHECK = 1)
         for _ in range(GEGENCHECK):
@@ -719,6 +720,8 @@ class PathNode(Node):
                 p_or, l_or, _ = find_greedy_path(
                     mids_or, check_side_or, p_bg[-1], v1, l_or_max
                 )
+
+            frame_candidate_paths.append(smooth_path(p_bg) + smooth_path(p_or))
 
             pts_count = len(p_bg) + len(p_or)
             total_len = l_bg + l_or
@@ -913,7 +916,6 @@ class PathNode(Node):
         if len(combined_display) >= 2:
             # keep path anchored at the origin
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined_display]
-            n_bg = len(cand_bg)
             m = Marker()
             m.header = msg.header
             m.ns = "best_path"
@@ -922,12 +924,7 @@ class PathNode(Node):
             m.action = Marker.ADD
             m.scale.x = 0.08
             m.points = pts
-            m.colors = []
-            for i in range(len(pts)):
-                if i < n_bg:
-                    m.colors.append(ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0))
-                else:
-                    m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
+            m.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
             path_markers.markers.append(m)
 
             cand_clr = Marker()
@@ -936,16 +933,20 @@ class PathNode(Node):
             cand_clr.ns = "frame_best"
             cand_clr.id = 41000
             path_markers.markers.append(cand_clr)
-            if len(frame_best_path) >= 2:
+            for idx, cand in enumerate(frame_candidate_paths):
+                if len(cand) < 2:
+                    continue
                 cand_pts = [
                     Point(x=float(x), y=float(y), z=0.0)
-                    for x, y in frame_best_path
+                    for x, y in cand
                     if 0.0 < y < MAX_MARKER_Y
                 ]
+                if len(cand_pts) < 2:
+                    continue
                 cand_m = Marker()
                 cand_m.header = msg.header
                 cand_m.ns = "frame_best"
-                cand_m.id = 31000
+                cand_m.id = 31000 + idx
                 cand_m.type = Marker.LINE_STRIP
                 cand_m.action = Marker.ADD
                 cand_m.scale.x = 0.04
