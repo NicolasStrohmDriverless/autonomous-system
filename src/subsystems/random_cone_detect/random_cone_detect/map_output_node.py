@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish a map image showing car, detected cones and the best path."""
+"""Publish a map image showing detected track cones and the current car position."""
 
 import numpy as np
 import rclpy
@@ -23,7 +23,6 @@ CONE_COLORS = {
     "orange": (0, 165, 255),
     "red": (0, 0, 255),
 }
-PATH_COLOR = (0, 255, 0)
 
 
 class MapOutputNode(Node):
@@ -36,10 +35,8 @@ class MapOutputNode(Node):
         self.bridge = CvBridge()
         self.pos_x = 0.0
         self.pos_y = 0.0
-        # store seen cones and planned paths so the map keeps previous
-        # information instead of showing only the latest frame
+        # store seen cones so the map keeps detected track information
         self.cones = []
-        self.path = []
 
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         cone_qos = QoSProfile(
@@ -83,32 +80,6 @@ class MapOutputNode(Node):
             if 0 <= ix < MAP_SIZE and 0 <= iy < MAP_SIZE:
                 self.map[iy, ix] = CONE_COLORS.get(color, (255, 0, 255))
 
-    def draw_path(self) -> None:
-        if len(self.path) < 2:
-            return
-        for (x0, y0), (x1, y1) in zip(self.path[:-1], self.path[1:]):
-            x0i, y0i = self.world_to_map(x0, y0)
-            x1i, y1i = self.world_to_map(x1, y1)
-            self._draw_line(x0i, y0i, x1i, y1i, PATH_COLOR)
-
-    def _draw_line(self, x0: int, y0: int, x1: int, y1: int, color) -> None:
-        dx = abs(x1 - x0)
-        dy = -abs(y1 - y0)
-        sx = 1 if x0 < x1 else -1
-        sy = 1 if y0 < y1 else -1
-        err = dx + dy
-        while True:
-            if 0 <= x0 < MAP_SIZE and 0 <= y0 < MAP_SIZE:
-                self.map[y0, x0] = color
-            if x0 == x1 and y0 == y1:
-                break
-            e2 = 2 * err
-            if e2 >= dy:
-                err += dy
-                x0 += sx
-            if e2 <= dx:
-                err += dx
-                y0 += sy
 
     def state_cb(self, msg: Pose2D) -> None:
         self.pos_x = float(msg.x)
@@ -121,17 +92,18 @@ class MapOutputNode(Node):
         self.publish_map()
 
     def path_cb(self, msg: MarkerArray) -> None:
-        for m in msg.markers:
-            if m.ns == "best_path" and m.type == m.LINE_STRIP:
-                # append the new path to keep previous path segments on the map
-                self.path.extend((p.x, p.y) for p in m.points)
-                break
+        """Ignore path updates but trigger a map refresh."""
+
         self.publish_map()
 
     def publish_map(self) -> None:
-        # keep previous drawings so the map builds up over time
+        """Render the current map image and publish it."""
+
+        # start with a blank map so only the current state is shown
+        self.map[:] = 0
+
+        # draw static track elements and the current car position
         self.draw_cones()
-        self.draw_path()
         self.draw_car(self.pos_x, self.pos_y)
 
         img_msg = self.bridge.cv2_to_imgmsg(self.map, "bgr8")
