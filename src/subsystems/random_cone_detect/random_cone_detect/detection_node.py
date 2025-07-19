@@ -36,6 +36,9 @@ DISTANCE_NOISE = False
 # Maximum positional deviation at 30m distance in meters
 MAX_DISTORTION_30M = 1.0
 
+# Minimum distance driven before updating the orientation used for detection
+DELAY_DISTANCE = 0.5  # meters
+
 
 class DetectionNode(Node):
     """Publish cones based on ground truth positions."""
@@ -58,6 +61,8 @@ class DetectionNode(Node):
         self.create_subscription(Pose2D, "/vehicle/car_state", self.state_cb, 10)
         self.cones: list[Cone2D] = []
         self.state = Pose2D()
+        self.delayed_yaw = 0.0
+        self._yaw_update_pos: tuple[float, float] | None = None
         self.publish_all = self.declare_parameter("publish_all", publish_all).value
         self.timer = self.create_timer(0.1, self.publish_visible)
         self.get_logger().info('DetectionNode started')
@@ -68,6 +73,17 @@ class DetectionNode(Node):
 
     # ------------------------------------------------------------------
     def state_cb(self, msg: Pose2D) -> None:
+        if self._yaw_update_pos is None:
+            self._yaw_update_pos = (float(msg.x), float(msg.y))
+            self.delayed_yaw = float(msg.theta)
+        else:
+            dist = math.hypot(
+                float(msg.x) - self._yaw_update_pos[0],
+                float(msg.y) - self._yaw_update_pos[1],
+            )
+            if dist >= DELAY_DISTANCE:
+                self.delayed_yaw = float(msg.theta)
+                self._yaw_update_pos = (float(msg.x), float(msg.y))
         self.state = msg
 
     # ------------------------------------------------------------------
@@ -76,7 +92,7 @@ class DetectionNode(Node):
             return
         px = float(self.state.x)
         py = float(self.state.y)
-        yaw = math.radians(float(self.state.theta))
+        yaw = math.radians(float(self.delayed_yaw))
         cos_yaw = math.cos(yaw)
         sin_yaw = math.sin(yaw)
 
