@@ -12,6 +12,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import rclpy
+from scipy.interpolate import splprep, splev
 from rclpy.node import Node
 from rclpy.qos import (
     QoSProfile,
@@ -81,6 +82,17 @@ def smooth_path(path, alpha=SMOOTH_ALPHA):
     for p in path[1:]:
         smoothed.append(alpha * np.array(p) + (1 - alpha) * smoothed[-1])
     return [tuple(p) for p in smoothed]
+
+
+def smooth_spline(path, num_points=100):
+    """Smooth ``path`` using a B-spline and return ``num_points`` samples."""
+    if len(path) < 3:
+        return path
+    x, y = zip(*path)
+    tck, _ = splprep([x, y], s=0)
+    u_new = np.linspace(0, 1, num_points)
+    x_new, y_new = splev(u_new, tck)
+    return list(zip(x_new, y_new))
 
 
 def transform_path(path, prev_angle, curr_angle, distance):
@@ -669,6 +681,57 @@ class PathNode(Node):
                 (pr > 0) & (dist < SIDE_CHECK_RADIUS)
             )
 
+        def find_best_path(mids, check_fn, start_pt, init_vec, max_len):
+            """Return path visiting maximum points within ``max_len``."""
+            if not mids:
+                return [tuple(start_pt)], 0.0, init_vec
+
+            mids_arr = np.array(mids)
+            best_midpoints = []
+
+            def dfs(last_pt, last_vec, used, curr, length):
+                nonlocal best_midpoints
+                if len(curr) > len(best_midpoints):
+                    best_midpoints = list(curr)
+                for i, p in enumerate(mids_arr):
+                    if i in used:
+                        continue
+                    d = float(np.linalg.norm(p - last_pt))
+                    if d < 0.1 or length + d > max_len:
+                        continue
+                    dirv = (p - last_pt) / d
+                    ang = abs(
+                        math.degrees(
+                            math.acos(np.clip(np.dot(last_vec, dirv), -1.0, 1.0))
+                        )
+                    )
+                    if ang > MAX_ANGLE:
+                        continue
+                    if not check_fn(p, last_pt, p):
+                        continue
+                    used.add(i)
+                    curr.append(tuple(p))
+                    dfs(p, dirv, used, curr, length + d)
+                    curr.pop()
+                    used.remove(i)
+
+            dfs(np.array(start_pt), init_vec, set(), [], 0.0)
+            path = [tuple(start_pt)] + best_midpoints
+            if len(path) >= 2:
+                lv = np.array(path[-1]) - np.array(path[-2])
+                lv = lv / np.linalg.norm(lv)
+            else:
+                lv = init_vec
+            total = (
+                sum(
+                    np.linalg.norm(np.array(b) - np.array(a))
+                    for a, b in zip(path[:-1], path[1:])
+                )
+                if len(path) >= 2
+                else 0.0
+            )
+            return path, total, lv
+
         def find_greedy_path(
             mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST
         ):
@@ -757,17 +820,19 @@ class PathNode(Node):
 
         # nur eine Konfiguration (GEGENCHECK = 1)
         for _ in range(GEGENCHECK):
-            p_bg, l_bg, v1 = find_greedy_path(
+            p_bg, l_bg, v1 = find_best_path(
                 mids_bg, check_side_bg, start_pt, v0, PATH_LENGTH
             )
             l_or_max = PATH_LENGTH - l_bg
             p_or, l_or = [], 0.0
             if l_or_max > 0 and len(p_bg) > 1:
-                p_or, l_or, _ = find_greedy_path(
+                p_or, l_or, _ = find_best_path(
                     mids_or, check_side_or, p_bg[-1], v1, l_or_max
                 )
 
-            frame_candidate_paths.append(smooth_path(p_bg) + smooth_path(p_or))
+            frame_candidate_paths.append(
+                smooth_spline(p_bg + p_or, num_points=int(PATH_LENGTH / PREDICTION_INTERVAL))
+            )
 
             pts_count = len(p_bg) + len(p_or)
             total_len = l_bg + l_or
@@ -801,11 +866,15 @@ class PathNode(Node):
                 else:
                     best_bg.append(ext_pt)
 
-        # 5) Pfad glätten
+        # 5) Pfad glätten und kurvige Darstellung erzeugen
         best_bg = smooth_path(best_bg)
         best_or = smooth_path(best_or)
-        cand_bg = best_bg
-        cand_or = best_or
+        curved = smooth_spline(
+            best_bg + best_or,
+            num_points=int(PATH_LENGTH / PREDICTION_INTERVAL),
+        )
+        cand_bg = curved
+        cand_or = []
 
         # --- Pfadaktualisierung nach Längenvergleich ---
         cand_combined = cand_bg + cand_or
