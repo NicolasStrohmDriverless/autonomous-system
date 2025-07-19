@@ -27,6 +27,8 @@ setup(
             [f'resource/{package_name}'],
         ),
         (f'share/{package_name}', ['package.xml']),
+        # install steering wheel image for runtime access
+        (f'share/{package_name}/resource', ['resource/f1_wheel.jpg']),
     ],
     entry_points={
         'console_scripts': [
