@@ -772,8 +772,8 @@ class PathNode(Node):
             pts_count = len(p_bg) + len(p_or)
             total_len = l_bg + l_or
 
-            # Auswahl: zuerst mehr Punkte, dann längere Strecke
-            if (pts_count > max_pts) or (pts_count == max_pts and total_len > best_len):
+            # Auswahl: Pfad mit den meisten Mittelpunkten
+            if pts_count > max_pts:
                 max_pts = pts_count
                 best_len = total_len
                 best_bg = p_bg
