@@ -909,10 +909,10 @@ class PathNode(Node):
         clr.id = 40000
         path_markers.markers.append(clr)
 
-        combined_display = [p for p in frame_best_path if 0.0 < p[1] < MAX_MARKER_Y]
+        combined_display = [p for p in frame_best_path if 0.0 <= p[1] < MAX_MARKER_Y]
         if self.current_len < 1.0:
             combined_display = self.longest_bg + self.longest_or
-        combined_display = [p for p in combined_display if 0.0 < p[1] < MAX_MARKER_Y]
+        combined_display = [p for p in combined_display if 0.0 <= p[1] < MAX_MARKER_Y]
         if len(combined_display) >= 2:
             # keep path anchored at the origin
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined_display]
