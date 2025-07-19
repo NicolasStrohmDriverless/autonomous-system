@@ -39,6 +39,7 @@ MIDPOINT_MARKER_SCALE = 0.1
 DEFAULT_CONE_SCALE = (0.228, 0.228, 0.325)
 LARGE_ORANGE_CONE_SCALE = (0.285, 0.285, 0.505)
 CONE_POSITION_SCALE = (1.0, 1.0, 1.0)
+MAX_MARKER_Y = 30.0
 COLOR_MAP = {
     "blue": [0.0, 0.0, 1.0, 1.0],
     "yellow": [1.0, 1.0, 0.0, 1.0],
@@ -390,7 +391,7 @@ class PathNode(Node):
         # 1) Kegel sammeln
         cones = {col: [] for col in COLOR_MAP}
         for c in msg.cones:
-            if c.y < 0:
+            if c.y < 0 or c.y > MAX_MARKER_Y:
                 continue
             if c.color not in cones:
                 # ignore unknown colors
@@ -455,7 +456,7 @@ class PathNode(Node):
                         mid = tuple(
                             ((np.array(pts2d[a]) + np.array(pts2d[b])) / 2).round(4)
                         )
-                        if mid[1] <= 0:
+                        if mid[1] <= 0 or mid[1] > MAX_MARKER_Y:
                             continue
                         vec = np.array(pts2d[b]) - np.array(pts2d[a])
                         ang = abs(np.degrees(np.arctan2(vec[0], vec[1])))
@@ -469,7 +470,9 @@ class PathNode(Node):
                 pass
 
         # Erstes Sortieren, bevor Zusatzpunkte ergänzt werden
+        mids_bg = [m for m in mids_bg if 0.0 < m[1] < MAX_MARKER_Y]
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_or = [m for m in mids_or if 0.0 < m[1] < MAX_MARKER_Y]
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
         start_pt = (0.0, self.start_offset)
@@ -490,11 +493,15 @@ class PathNode(Node):
                 if extra[1] > 0:
                     mids_bg.append(extra)
 
+        mids_bg = [m for m in mids_bg if 0.0 < m[1] < MAX_MARKER_Y]
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_or = [m for m in mids_or if 0.0 < m[1] < MAX_MARKER_Y]
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
         # Mittelpunkte markieren
         for idx, (mx, my) in enumerate(mids_bg):
+            if not (0.0 < my < MAX_MARKER_Y):
+                continue
             m = Marker()
             m.header = msg.header
             m.ns = "midpoints_bg"
@@ -507,6 +514,8 @@ class PathNode(Node):
             m.color = ColorRGBA(r=r, g=g, b=b, a=a)
             markers.markers.append(m)
         for idx, (mx, my) in enumerate(mids_or):
+            if not (0.0 < my < MAX_MARKER_Y):
+                continue
             m = Marker()
             m.header = msg.header
             m.ns = "midpoints_or"
@@ -520,6 +529,8 @@ class PathNode(Node):
 
         # Mittelpunkte markieren
         for idx, (mx, my) in enumerate(mids_bg):
+            if not (0.0 < my < MAX_MARKER_Y):
+                continue
             m = Marker()
             m.header = msg.header
             m.ns = "midpoints_bg"
@@ -532,6 +543,8 @@ class PathNode(Node):
             m.color = ColorRGBA(r=r, g=g, b=b, a=a)
             markers.markers.append(m)
         for idx, (mx, my) in enumerate(mids_or):
+            if not (0.0 < my < MAX_MARKER_Y):
+                continue
             m = Marker()
             m.header = msg.header
             m.ns = "midpoints_or"
@@ -893,9 +906,10 @@ class PathNode(Node):
         clr.id = 40000
         path_markers.markers.append(clr)
 
-        combined_display = frame_best_path
+        combined_display = [p for p in frame_best_path if 0.0 < p[1] < MAX_MARKER_Y]
         if self.current_len < 1.0:
             combined_display = self.longest_bg + self.longest_or
+        combined_display = [p for p in combined_display if 0.0 < p[1] < MAX_MARKER_Y]
         if len(combined_display) >= 2:
             # keep path anchored at the origin
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined_display]
@@ -924,7 +938,9 @@ class PathNode(Node):
             path_markers.markers.append(cand_clr)
             if len(frame_best_path) >= 2:
                 cand_pts = [
-                    Point(x=float(x), y=float(y), z=0.0) for x, y in frame_best_path
+                    Point(x=float(x), y=float(y), z=0.0)
+                    for x, y in frame_best_path
+                    if 0.0 < y < MAX_MARKER_Y
                 ]
                 cand_m = Marker()
                 cand_m.header = msg.header
