@@ -88,8 +88,23 @@ def smooth_spline(path, num_points=100):
     """Smooth ``path`` using a B-spline and return ``num_points`` samples."""
     if len(path) < 3:
         return path
-    x, y = zip(*path)
-    tck, _ = splprep([x, y], s=0)
+
+    # remove duplicate consecutive points to avoid invalid spline inputs
+    unique = [path[0]]
+    for pt in path[1:]:
+        if np.linalg.norm(np.array(pt) - np.array(unique[-1])) > 1e-6:
+            unique.append(pt)
+
+    if len(unique) < 3:
+        return unique
+
+    x, y = zip(*unique)
+    try:
+        tck, _ = splprep([x, y], s=0)
+    except ValueError:
+        # fallback to the unique path if inputs are still invalid
+        return unique
+
     u_new = np.linspace(0, 1, num_points)
     x_new, y_new = splev(u_new, tck)
     return list(zip(x_new, y_new))
