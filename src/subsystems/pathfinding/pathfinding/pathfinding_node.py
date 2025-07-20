@@ -668,20 +668,21 @@ class PathNode(Node):
                     for i in range(3):
                         a, b = s[i], s[(i + 1) % 3]
                         cs = {cols2d[a], cols2d[b]}
-                        mid = tuple(
-                            ((np.array(pts2d[a]) + np.array(pts2d[b])) / 2).round(4)
-                        )
-                        if mid[1] <= 0 or mid[1] > MAX_MARKER_Y:
-                            continue
-                        vec = np.array(pts2d[b]) - np.array(pts2d[a])
+                        pa = np.array(pts2d[a])
+                        pb = np.array(pts2d[b])
+                        vec = pb - pa
                         ang = abs(np.degrees(np.arctan2(vec[0], vec[1])))
                         if ang > MAX_ANGLE:
                             continue
-                        if cs == {"blue", "yellow"}:
-                            mids_bg.append(mid)
-                        if cs == {"orange"}:
-                            mids_or.append(mid)
-            except:
+                        for frac in (0.25, 0.5, 0.75):
+                            mid = tuple(np.round(pa * (1 - frac) + pb * frac, 4))
+                            if mid[1] <= 0 or mid[1] > MAX_MARKER_Y:
+                                continue
+                            if cs == {"blue", "yellow"}:
+                                mids_bg.append(mid)
+                            if cs == {"orange"}:
+                                mids_or.append(mid)
+            except Exception:
                 pass
 
         # Erstes Sortieren, bevor Zusatzpunkte ergänzt werden
@@ -701,7 +702,7 @@ class PathNode(Node):
             first_yellow = min(cones["yellow"], key=lambda p: np.linalg.norm(p[:2]))
             mid_first = (first_blue[:2] + first_yellow[:2]) / 2
             # mehrere Punkte auf der Strecke Ursprung -> Mittelpunkt einfügen
-            steps = 4
+            steps = 8
             for i in range(1, steps + 1):
                 frac = i / (steps + 1)
                 extra = tuple(np.round(mid_first * frac, 4))
@@ -1024,17 +1025,8 @@ class PathNode(Node):
                     best_bg.append(ext_pt)
 
         coarse = best_bg + best_or
-        refined = rrt_star_refine(
-            coarse,
-            [tuple(p) for p in cones["blue"]]
-            + [tuple(p) for p in cones["yellow"]]
-            + [tuple(p) for p in cones["orange"]],
-            iterations=250,
-            step_size=0.5,
-            goal_bias=0.2,
-            corridor_width=1.0,
-        )
-        path_to_smooth = refined if refined else coarse
+        # RRT* refinement disabled for now
+        path_to_smooth = coarse
 
         # 5) Pfad glätten und kurvige Darstellung erzeugen
         best_bg = smooth_path(path_to_smooth)
@@ -1066,83 +1058,30 @@ class PathNode(Node):
             else 0.0
         )
 
-        accept = False
-        if not self.current_bg:
-            accept = True
-        elif cand_len > (self.current_len - self.dist_since_update):
-            accept = True
-
-        if accept:
-            self.current_bg = cand_bg
-            self.current_or = cand_or
-            self.current_len = cand_len
-            self.green_len = cand_green
-            self.dist_since_update = 0.0
-            self.stop_braked = False
-            self.path_id_counter += 1
-            self.current_path_id = self.path_id_counter
-            angle_curr = (
-                self.shared_angle
-                if self.shared_angle is not None
-                else (self._angle_smoothed if self._angle_smoothed is not None else 0.0)
-            )
-            self._update_longest_path(
-                prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
-            )
-            if self.current_len > self.longest_len:
-                self.longest_bg = list(self.current_bg)
-                self.longest_or = list(self.current_or)
-                self.longest_len = self.current_len
-            self.last_angle = angle_curr
-            best_bg = self.current_bg
-            best_or = self.current_or
-        else:
-            angle_curr = (
-                self.shared_angle
-                if self.shared_angle is not None
-                else (
-                    self._angle_smoothed
-                    if self._angle_smoothed is not None
-                    else self.last_angle
-                )
-            )
-            self.current_bg = transform_path(
-                self.current_bg,
-                self.last_angle,
-                angle_curr,
-                move_dist,
-            )
-            self.current_or = transform_path(
-                self.current_or,
-                self.last_angle,
-                angle_curr,
-                move_dist,
-            )
-            if matches > 0:
-                self.current_bg = [(x + avg_dx, y + avg_dy) for x, y in self.current_bg]
-                self.current_or = [(x + avg_dx, y + avg_dy) for x, y in self.current_or]
-
-            colors = ["bg"] * len(self.current_bg) + ["or"] * len(self.current_or)
-            combined, colors = crop_path(
-                self.current_bg + self.current_or,
-                colors,
-                move_dist,
-            )
-            self.current_bg = [p for p, c in zip(combined, colors) if c == "bg"]
-            self.current_or = [p for p, c in zip(combined, colors) if c == "or"]
-            self.current_len = path_length(combined)
-            self.green_len = path_length(self.current_bg)
-            self.dist_since_update = 0.0
-            self._update_longest_path(
-                prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
-            )
-            if self.current_len > self.longest_len:
-                self.longest_bg = list(self.current_bg)
-                self.longest_or = list(self.current_or)
-                self.longest_len = self.current_len
-            self.last_angle = angle_curr
-            best_bg = self.current_bg
-            best_or = self.current_or
+        # Always accept the current frame's path
+        self.current_bg = cand_bg
+        self.current_or = cand_or
+        self.current_len = cand_len
+        self.green_len = cand_green
+        self.dist_since_update = 0.0
+        self.stop_braked = False
+        self.path_id_counter += 1
+        self.current_path_id = self.path_id_counter
+        angle_curr = (
+            self.shared_angle
+            if self.shared_angle is not None
+            else (self._angle_smoothed if self._angle_smoothed is not None else 0.0)
+        )
+        self._update_longest_path(
+            prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
+        )
+        if self.current_len > self.longest_len:
+            self.longest_bg = list(self.current_bg)
+            self.longest_or = list(self.current_or)
+            self.longest_len = self.current_len
+        self.last_angle = angle_curr
+        best_bg = self.current_bg
+        best_or = self.current_or
         combined = best_bg + best_or
 
         # 6) Winkel berechnen, filtern und publizieren
