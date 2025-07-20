@@ -2,51 +2,12 @@ track:
   version: 1.0
   lanesFirstWithLastConnected: false
   start:
-    position: [0.0, 16.68, 0.0]
+    position: [-0.0, 16.68, 0.0]
     orientation: [0.0, 0.0, 0.0]
   earthToTrack:
-    position: [0.0, -0.0, 0.0]
+    position: [-0.0, -0.0, 0.0]
     orientation: [0.0, 0.0, 0.0]
   left:
-  - position: [1.65, 20.0, 0.0]
-    class: invisible
-  - position: [1.65, 15.0, 0.0]
-    class: small-orange
-  - position: [1.65, 11.25, 0.0]
-    class: small-orange
-  - position: [1.65, 7.760476789476275, 0.0]
-    class: yellow
-  - position: [5.001586016266157, 9.954801962809116, 0.0]
-    class: yellow
-  - position: [9.125, 10.775, 0.0]
-    class: yellow
-  - position: [13.248413983733842, 9.954801962809116, 0.0]
-    class: yellow
-  - position: [16.744075567285048, 7.6190755672850505, 0.0]
-    class: yellow
-  - position: [19.079801962809114, 4.123413983733844, 0.0]
-    class: yellow
-  - position: [19.9, 1.3195569260812732e-15, 0.0]
-    class: yellow
-  - position: [19.079801962809114, -4.123413983733841, 0.0]
-    class: yellow
-  - position: [16.74407556728505, -7.619075567285049, 0.0]
-    class: yellow
-  - position: [13.248413983733847, -9.954801962809112, 0.0]
-    class: yellow
-  - position: [9.125000000000002, -10.775, 0.0]
-    class: yellow
-  - position: [5.001586016266155, -9.954801962809114, 0.0]
-    class: yellow
-  - position: [1.65, -7.760476789476275, 0.0]
-    class: yellow
-  - position: [1.65, -11.0, 0.0]
-    class: small-orange
-  - position: [1.65, -16.0, 0.0]
-    class: small-orange
-  - position: [1.65, -21.0, 0.0]
-    class: small-orange
-  right:
   - position: [-1.65, 20.0, 0.0]
     class: invisible
   - position: [-1.65, 15.0, 0.0]
@@ -54,118 +15,157 @@ track:
   - position: [-1.65, 11.25, 0.0]
     class: small-orange
   - position: [-1.65, 7.760476789476275, 0.0]
-    class: blue
-  - position: [-5.001586016266155, 9.954801962809114, 0.0]
-    class: blue
-  - position: [-9.125000000000002, 10.775, 0.0]
-    class: blue
-  - position: [-13.248413983733847, 9.954801962809112, 0.0]
-    class: blue
-  - position: [-16.74407556728505, 7.619075567285049, 0.0]
-    class: blue
-  - position: [-19.079801962809114, 4.123413983733841, 0.0]
-    class: blue
-  - position: [-19.9, -1.3195569260812732e-15, 0.0]
-    class: blue
-  - position: [-19.079801962809114, -4.123413983733844, 0.0]
-    class: blue
-  - position: [-16.744075567285048, -7.6190755672850505, 0.0]
-    class: blue
-  - position: [-13.248413983733842, -9.954801962809116, 0.0]
-    class: blue
-  - position: [-9.125, -10.775, 0.0]
-    class: blue
-  - position: [-5.001586016266157, -9.954801962809116, 0.0]
-    class: blue
+    class: yellow
+  - position: [-5.001586016266157, 9.954801962809116, 0.0]
+    class: yellow
+  - position: [-9.125, 10.775, 0.0]
+    class: yellow
+  - position: [-13.248413983733842, 9.954801962809116, 0.0]
+    class: yellow
+  - position: [-16.744075567285048, 7.6190755672850505, 0.0]
+    class: yellow
+  - position: [-19.079801962809114, 4.123413983733844, 0.0]
+    class: yellow
+  - position: [-19.9, 1.3195569260812732e-15, 0.0]
+    class: yellow
+  - position: [-19.079801962809114, -4.123413983733841, 0.0]
+    class: yellow
+  - position: [-16.74407556728505, -7.619075567285049, 0.0]
+    class: yellow
+  - position: [-13.248413983733847, -9.954801962809112, 0.0]
+    class: yellow
+  - position: [-9.125000000000002, -10.775, 0.0]
+    class: yellow
+  - position: [-5.001586016266155, -9.954801962809114, 0.0]
+    class: yellow
   - position: [-1.65, -7.760476789476275, 0.0]
-    class: blue
+    class: yellow
   - position: [-1.65, -11.0, 0.0]
     class: small-orange
   - position: [-1.65, -16.0, 0.0]
     class: small-orange
   - position: [-1.65, -21.0, 0.0]
     class: small-orange
+  right:
+  - position: [1.65, 20.0, 0.0]
+    class: invisible
+  - position: [1.65, 15.0, 0.0]
+    class: small-orange
+  - position: [1.65, 11.25, 0.0]
+    class: small-orange
+  - position: [1.65, 7.760476789476275, 0.0]
+    class: blue
+  - position: [5.001586016266155, 9.954801962809114, 0.0]
+    class: blue
+  - position: [9.125000000000002, 10.775, 0.0]
+    class: blue
+  - position: [13.248413983733847, 9.954801962809112, 0.0]
+    class: blue
+  - position: [16.74407556728505, 7.619075567285049, 0.0]
+    class: blue
+  - position: [19.079801962809114, 4.123413983733841, 0.0]
+    class: blue
+  - position: [19.9, -1.3195569260812732e-15, 0.0]
+    class: blue
+  - position: [19.079801962809114, -4.123413983733844, 0.0]
+    class: blue
+  - position: [16.744075567285048, -7.6190755672850505, 0.0]
+    class: blue
+  - position: [13.248413983733842, -9.954801962809116, 0.0]
+    class: blue
+  - position: [9.125, -10.775, 0.0]
+    class: blue
+  - position: [5.001586016266157, -9.954801962809116, 0.0]
+    class: blue
+  - position: [1.65, -7.760476789476275, 0.0]
+    class: blue
+  - position: [1.65, -11.0, 0.0]
+    class: small-orange
+  - position: [1.65, -16.0, 0.0]
+    class: small-orange
+  - position: [1.65, -21.0, 0.0]
+    class: small-orange
   time_keeping:
-  - position: [3.0, -0.0, 0.0]
-    class: timekeeping
   - position: [-3.0, -0.0, 0.0]
     class: timekeeping
-  - position: [3.0, -10.2, 0.0]
-    class: invisible
+  - position: [3.0, -0.0, 0.0]
+    class: timekeeping
   - position: [-3.0, -10.2, 0.0]
     class: invisible
+  - position: [3.0, -10.2, 0.0]
+    class: invisible
   unknown:
-  - position: [0.0, -21.0, 0.0]
+  - position: [-0.0, -21.0, 0.0]
     class: small-orange
-  - position: [2.0, 1.3, 0.0]
-    class: big-orange
   - position: [-2.0, 1.3, 0.0]
     class: big-orange
-  - position: [2.0, -1.3, 0.0]
+  - position: [2.0, 1.3, 0.0]
     class: big-orange
   - position: [-2.0, -1.3, 0.0]
     class: big-orange
-  - position: [-1.6500000000000004, -0.0, 0.0]
+  - position: [2.0, -1.3, 0.0]
+    class: big-orange
+  - position: [1.6500000000000004, -0.0, 0.0]
     class: yellow
-  - position: [-2.2190004944781316, -2.860558656929046, 0.0]
+  - position: [2.2190004944781316, -2.860558656929046, 0.0]
     class: yellow
-  - position: [-3.839376810630557, -5.285623189369442, 0.0]
+  - position: [3.839376810630557, -5.285623189369442, 0.0]
     class: yellow
-  - position: [-6.264441343070954, -6.905999505521868, 0.0]
+  - position: [6.264441343070954, -6.905999505521868, 0.0]
     class: yellow
-  - position: [-9.125, -7.475, 0.0]
+  - position: [9.125, -7.475, 0.0]
     class: yellow
-  - position: [-11.985558656929046, -6.905999505521868, 0.0]
+  - position: [11.985558656929046, -6.905999505521868, 0.0]
     class: yellow
-  - position: [-14.410623189369442, -5.285623189369443, 0.0]
+  - position: [14.410623189369442, -5.285623189369443, 0.0]
     class: yellow
-  - position: [-16.03099950552187, -2.860558656929047, 0.0]
+  - position: [16.03099950552187, -2.860558656929047, 0.0]
     class: yellow
-  - position: [-16.6, -9.154234823626465e-16, 0.0]
+  - position: [16.6, -9.154234823626465e-16, 0.0]
     class: yellow
-  - position: [-16.03099950552187, 2.860558656929045, 0.0]
+  - position: [16.03099950552187, 2.860558656929045, 0.0]
     class: yellow
-  - position: [-14.410623189369444, 5.285623189369442, 0.0]
+  - position: [14.410623189369444, 5.285623189369442, 0.0]
     class: yellow
-  - position: [-11.98555865692905, 6.905999505521867, 0.0]
+  - position: [11.98555865692905, 6.905999505521867, 0.0]
     class: yellow
-  - position: [-9.125000000000002, 7.475, 0.0]
+  - position: [9.125000000000002, 7.475, 0.0]
     class: yellow
-  - position: [-6.264441343070953, 6.9059995055218675, 0.0]
+  - position: [6.264441343070953, 6.9059995055218675, 0.0]
     class: yellow
-  - position: [-3.839376810630559, 5.285623189369444, 0.0]
+  - position: [3.839376810630559, 5.285623189369444, 0.0]
     class: yellow
-  - position: [-2.2190004944781334, 2.8605586569290504, 0.0]
+  - position: [2.2190004944781334, 2.8605586569290504, 0.0]
     class: yellow
-  - position: [1.6500000000000004, 0.0, 0.0]
+  - position: [-1.6500000000000004, 0.0, 0.0]
     class: blue
-  - position: [2.2190004944781316, 2.860558656929046, 0.0]
+  - position: [-2.2190004944781316, 2.860558656929046, 0.0]
     class: blue
-  - position: [3.839376810630557, 5.285623189369442, 0.0]
+  - position: [-3.839376810630557, 5.285623189369442, 0.0]
     class: blue
-  - position: [6.264441343070954, 6.905999505521868, 0.0]
+  - position: [-6.264441343070954, 6.905999505521868, 0.0]
     class: blue
-  - position: [9.125, 7.475, 0.0]
+  - position: [-9.125, 7.475, 0.0]
     class: blue
-  - position: [11.985558656929046, 6.905999505521868, 0.0]
+  - position: [-11.985558656929046, 6.905999505521868, 0.0]
     class: blue
-  - position: [14.410623189369442, 5.285623189369443, 0.0]
+  - position: [-14.410623189369442, 5.285623189369443, 0.0]
     class: blue
-  - position: [16.03099950552187, 2.860558656929047, 0.0]
+  - position: [-16.03099950552187, 2.860558656929047, 0.0]
     class: blue
-  - position: [16.6, 9.154234823626465e-16, 0.0]
+  - position: [-16.6, 9.154234823626465e-16, 0.0]
     class: blue
-  - position: [16.03099950552187, -2.860558656929045, 0.0]
+  - position: [-16.03099950552187, -2.860558656929045, 0.0]
     class: blue
-  - position: [14.410623189369444, -5.285623189369442, 0.0]
+  - position: [-14.410623189369444, -5.285623189369442, 0.0]
     class: blue
-  - position: [11.98555865692905, -6.905999505521867, 0.0]
+  - position: [-11.98555865692905, -6.905999505521867, 0.0]
     class: blue
-  - position: [9.125000000000002, -7.475, 0.0]
+  - position: [-9.125000000000002, -7.475, 0.0]
     class: blue
-  - position: [6.264441343070953, -6.9059995055218675, 0.0]
+  - position: [-6.264441343070953, -6.9059995055218675, 0.0]
     class: blue
-  - position: [3.839376810630559, -5.285623189369444, 0.0]
+  - position: [-3.839376810630559, -5.285623189369444, 0.0]
     class: blue
-  - position: [2.2190004944781334, -2.8605586569290504, 0.0]
+  - position: [-2.2190004944781334, -2.8605586569290504, 0.0]
     class: blue
