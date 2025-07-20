@@ -709,39 +709,25 @@ class PathNode(Node):
                 if extra[1] > 0:
                     mids_bg.append(extra)
 
+        # weitere Mittelpunkte zwischen allen blauen und gelben Kegeln
+        for pb in cones["blue"]:
+            for py in cones["yellow"]:
+                mid = tuple(np.round((pb[:2] + py[:2]) / 2, 4))
+                if 0.0 < mid[1] < MAX_MARKER_Y:
+                    mids_bg.append(mid)
+
+        # Mittelpunkte für alle Paare oranger Kegel
+        orange_pts = cones["orange"]
+        for i in range(len(orange_pts)):
+            for j in range(i + 1, len(orange_pts)):
+                mid = tuple(np.round((orange_pts[i][:2] + orange_pts[j][:2]) / 2, 4))
+                if 0.0 < mid[1] < MAX_MARKER_Y:
+                    mids_or.append(mid)
+
         mids_bg = [m for m in mids_bg if 0.0 < m[1] < MAX_MARKER_Y]
         mids_bg = sorted(set(mids_bg), key=lambda p: math.hypot(p[0], p[1]))
         mids_or = [m for m in mids_or if 0.0 < m[1] < MAX_MARKER_Y]
         mids_or = sorted(set(mids_or), key=lambda p: math.hypot(p[0], p[1]))
-
-        # Mittelpunkte markieren
-        for idx, (mx, my) in enumerate(mids_bg):
-            if not (0.0 < my < MAX_MARKER_Y):
-                continue
-            m = Marker()
-            m.header = msg.header
-            m.ns = "midpoints_bg"
-            m.id = 10000 + idx
-            m.type = Marker.SPHERE
-            m.action = Marker.ADD
-            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
-            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
-            r, g, b, a = MIDPOINT_COLOR
-            m.color = ColorRGBA(r=r, g=g, b=b, a=a)
-            markers.markers.append(m)
-        for idx, (mx, my) in enumerate(mids_or):
-            if not (0.0 < my < MAX_MARKER_Y):
-                continue
-            m = Marker()
-            m.header = msg.header
-            m.ns = "midpoints_or"
-            m.id = 20000 + idx
-            m.type = Marker.SPHERE
-            m.action = Marker.ADD
-            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
-            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
-            m.color = ColorRGBA(r=1.0, g=0.6, b=0.3, a=1.0)
-            markers.markers.append(m)
 
         # Mittelpunkte markieren
         for idx, (mx, my) in enumerate(mids_bg):
