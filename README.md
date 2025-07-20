@@ -52,6 +52,8 @@ ros2 run random_cone_detect multi_node_main
 The `car_state_node` provides a `max_yaw_accel` parameter which limits the
 angular acceleration used when updating the vehicle pose. Adjust this parameter
 when launching the node to modify the vehicle's turning behaviour.
+Additionally the node now publishes the angle back to the starting position on
+the `/vehicle/angle_to_start` topic.
 
 To avoid conflicting commands, braking pressure is only applied when the
 desired speed is zero. When a path ends, the controller gradually reduces the
