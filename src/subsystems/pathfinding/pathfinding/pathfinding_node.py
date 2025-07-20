@@ -316,6 +316,8 @@ class PathNode(Node):
                         if cs == {'blue','yellow'}:
                             mids_bg.append(mid)
                         if cs == {'orange'}:
+                            if abs(pts2d[a][0] - pts2d[b][0]) <= 0.5:
+                                continue
                             mids_or.append(mid)
             except:
                 pass
@@ -343,6 +345,7 @@ class PathNode(Node):
 
         # geglättete Linie aller Mittelpunkte für Debugging
         all_midpoints = smooth_path(combined_filtered)
+        final_path = [(0.0, self.start_offset)] + all_midpoints
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
@@ -516,8 +519,8 @@ class PathNode(Node):
             markers.markers.append(m)
 
         # 6) Winkel berechnen, filtern und publizieren
-        if len(best_bg) >= 2:
-            v = np.array(best_bg[1])
+        if len(final_path) >= 2:
+            v = np.array(final_path[1]) - np.array(final_path[0])
             raw_angle = float(np.degrees(np.arctan2(v[0], v[1])))
 
             # Ausreißerprüfung
@@ -554,24 +557,18 @@ class PathNode(Node):
         clr.header = msg.header; clr.ns='best_path'; clr.id=40000
         path_markers.markers.append(clr)
 
-        combined = best_bg + best_or
-        if len(combined) >= 2:
-            pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in combined]
-            n_bg = len(best_bg)
+        path_points = final_path
+        if len(path_points) >= 2:
+            pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in path_points]
             m = Marker()
             m.header = msg.header
-            m.ns     = 'best_path'
-            m.id     = 30000
-            m.type   = Marker.LINE_STRIP
+            m.ns = 'best_path'
+            m.id = 30000
+            m.type = Marker.LINE_STRIP
             m.action = Marker.ADD
             m.scale.x = 0.08
-            m.points  = pts
-            m.colors  = []
-            for i in range(len(pts)):
-                if i < n_bg:
-                    m.colors.append(ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0))
-                else:
-                    m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
+            m.points = pts
+            m.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
             path_markers.markers.append(m)
 
         # draw a line through all midpoints for debugging
