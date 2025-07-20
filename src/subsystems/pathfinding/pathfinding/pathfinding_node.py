@@ -323,6 +323,8 @@ class PathNode(Node):
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
+        all_midpoints = mids_bg + mids_or
+
         # wähle mindestens die 5 nächstgelegenen Mittelpunkte zum Koordinatenursprung
         all_mids = [(m, 'bg') for m in mids_bg] + [(m, 'or') for m in mids_or]
         all_mids.sort(key=lambda mc: math.hypot(mc[0][0], mc[0][1]))
@@ -567,6 +569,19 @@ class PathNode(Node):
                 else:
                     m.colors.append(ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0))
             path_markers.markers.append(m)
+
+        # draw a line through all midpoints for debugging
+        if len(all_midpoints) >= 2:
+            mp = Marker()
+            mp.header = msg.header
+            mp.ns = 'midpoint_path'
+            mp.id = 31000
+            mp.type = Marker.LINE_STRIP
+            mp.action = Marker.ADD
+            mp.scale.x = 0.05
+            mp.points = [Point(x=float(x), y=float(y), z=0.0) for x, y in all_midpoints]
+            mp.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            path_markers.markers.append(mp)
 
         # Publisher
         self.marker_pub.publish(markers)
