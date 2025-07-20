@@ -323,22 +323,26 @@ class PathNode(Node):
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
-        all_midpoints = mids_bg + mids_or
-
-        # wähle mindestens die 5 nächstgelegenen Mittelpunkte zum Koordinatenursprung
-        all_mids = [(m, 'bg') for m in mids_bg] + [(m, 'or') for m in mids_or]
-        all_mids.sort(key=lambda mc: math.hypot(mc[0][0], mc[0][1]))
-        filtered = [
-            mc for mc in all_mids
+        # ---- Mittelpunkte filtern und sortieren ----
+        combined = sorted(
+            set(mids_bg + mids_or),
+            key=lambda m: math.hypot(m[0], m[1])
+        )
+        combined_filtered = [
+            m for m in combined
             if (
-                math.hypot(mc[0][0], mc[0][1]) <= PATH_LENGTH and
-                abs(math.degrees(math.atan2(mc[0][0], mc[0][1]))) <= MAX_ANGLE
+                math.hypot(m[0], m[1]) <= PATH_LENGTH and
+                abs(math.degrees(math.atan2(m[0], m[1]))) <= MAX_ANGLE
             )
         ]
-        if len(filtered) < 5:
-            filtered = all_mids[:5]
-        mids_bg = [m for m, c in filtered if c == 'bg']
-        mids_or = [m for m, c in filtered if c == 'or']
+        if len(combined_filtered) < 5:
+            combined_filtered = combined[:5]
+
+        mids_bg = [m for m in combined_filtered if m in mids_bg]
+        mids_or = [m for m in combined_filtered if m in mids_or]
+
+        # geglättete Linie aller Mittelpunkte für Debugging
+        all_midpoints = smooth_path(combined_filtered)
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
