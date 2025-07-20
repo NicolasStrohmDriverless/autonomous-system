@@ -710,11 +710,14 @@ class PathNode(Node):
                     mids_bg.append(extra)
 
         # weitere Mittelpunkte zwischen allen blauen und gelben Kegeln
+        # nur Punkte berücksichtigen, bei denen der blaue Kegel links des
+        # gelben Kegels liegt (X-Koordinate kleiner).
         for pb in cones["blue"]:
             for py in cones["yellow"]:
-                mid = tuple(np.round((pb[:2] + py[:2]) / 2, 4))
-                if 0.0 < mid[1] < MAX_MARKER_Y:
-                    mids_bg.append(mid)
+                if pb[0] < py[0]:
+                    mid = tuple(np.round((pb[:2] + py[:2]) / 2, 4))
+                    if 0.0 < mid[1] < MAX_MARKER_Y:
+                        mids_bg.append(mid)
 
         # Mittelpunkte für alle Paare oranger Kegel
         orange_pts = cones["orange"]
