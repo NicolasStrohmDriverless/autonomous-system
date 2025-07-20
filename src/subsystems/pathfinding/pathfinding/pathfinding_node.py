@@ -613,7 +613,7 @@ class PathNode(Node):
             mp.action = Marker.ADD
             mp.scale.x = 0.05
             mp.points = [Point(x=float(x), y=float(y), z=0.0) for x, y in all_midpoints]
-            mp.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            mp.color = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
             path_markers.markers.append(mp)
 
         # Publisher
