@@ -273,7 +273,7 @@ class PathNode(Node):
                 continue
             if c.color not in cones:
                 continue
-            p = np.array([c.x, c.y, c.z]) * np.array(CONE_POSITION_SCALE)
+            p = np.array([c.x, c.z, 0.0]) * np.array(CONE_POSITION_SCALE)
             cones[c.color].append(p)
 
         # 2) Kegel-Marker
