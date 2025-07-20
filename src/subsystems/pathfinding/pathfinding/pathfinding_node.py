@@ -1066,83 +1066,30 @@ class PathNode(Node):
             else 0.0
         )
 
-        accept = False
-        if not self.current_bg:
-            accept = True
-        elif cand_len > (self.current_len - self.dist_since_update):
-            accept = True
-
-        if accept:
-            self.current_bg = cand_bg
-            self.current_or = cand_or
-            self.current_len = cand_len
-            self.green_len = cand_green
-            self.dist_since_update = 0.0
-            self.stop_braked = False
-            self.path_id_counter += 1
-            self.current_path_id = self.path_id_counter
-            angle_curr = (
-                self.shared_angle
-                if self.shared_angle is not None
-                else (self._angle_smoothed if self._angle_smoothed is not None else 0.0)
-            )
-            self._update_longest_path(
-                prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
-            )
-            if self.current_len > self.longest_len:
-                self.longest_bg = list(self.current_bg)
-                self.longest_or = list(self.current_or)
-                self.longest_len = self.current_len
-            self.last_angle = angle_curr
-            best_bg = self.current_bg
-            best_or = self.current_or
-        else:
-            angle_curr = (
-                self.shared_angle
-                if self.shared_angle is not None
-                else (
-                    self._angle_smoothed
-                    if self._angle_smoothed is not None
-                    else self.last_angle
-                )
-            )
-            self.current_bg = transform_path(
-                self.current_bg,
-                self.last_angle,
-                angle_curr,
-                move_dist,
-            )
-            self.current_or = transform_path(
-                self.current_or,
-                self.last_angle,
-                angle_curr,
-                move_dist,
-            )
-            if matches > 0:
-                self.current_bg = [(x + avg_dx, y + avg_dy) for x, y in self.current_bg]
-                self.current_or = [(x + avg_dx, y + avg_dy) for x, y in self.current_or]
-
-            colors = ["bg"] * len(self.current_bg) + ["or"] * len(self.current_or)
-            combined, colors = crop_path(
-                self.current_bg + self.current_or,
-                colors,
-                move_dist,
-            )
-            self.current_bg = [p for p, c in zip(combined, colors) if c == "bg"]
-            self.current_or = [p for p, c in zip(combined, colors) if c == "or"]
-            self.current_len = path_length(combined)
-            self.green_len = path_length(self.current_bg)
-            self.dist_since_update = 0.0
-            self._update_longest_path(
-                prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
-            )
-            if self.current_len > self.longest_len:
-                self.longest_bg = list(self.current_bg)
-                self.longest_or = list(self.current_or)
-                self.longest_len = self.current_len
-            self.last_angle = angle_curr
-            best_bg = self.current_bg
-            best_or = self.current_or
+        # Use the candidate path as the current path unconditionally
+        self.current_bg = cand_bg
+        self.current_or = cand_or
+        self.current_len = cand_len
+        self.green_len = cand_green
+        self.dist_since_update = 0.0
+        self.stop_braked = False
+        self.path_id_counter += 1
+        self.current_path_id = self.path_id_counter
+        angle_curr = (
+            self.shared_angle
+            if self.shared_angle is not None
+            else (self._angle_smoothed if self._angle_smoothed is not None else 0.0)
+        )
+        self._update_longest_path(
+            prev_angle, angle_curr, move_dist, avg_dx, avg_dy, matches
+        )
+        if self.current_len > self.longest_len:
+            self.longest_bg = list(self.current_bg)
+            self.longest_or = list(self.current_or)
+            self.longest_len = self.current_len
+        self.last_angle = angle_curr
+        best_bg = self.current_bg
+        best_or = self.current_or
         combined = best_bg + best_or
 
         # 6) Winkel berechnen, filtern und publizieren
