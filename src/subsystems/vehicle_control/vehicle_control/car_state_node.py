@@ -88,8 +88,6 @@ class CarStateNode(Node):
         self.steering_angle = 0.0
         self.desired_angle: Optional[float] = None
         self.last_time = self.get_clock().now()
-        self.start_pos = (self.pos_x, self.pos_y)
-        self.angle_to_start = 0.0
 
         self.declare_parameter("max_yaw_accel", MAX_YAW_ACCEL)
         self.max_yaw_accel = float(self.get_parameter("max_yaw_accel").value)
@@ -114,9 +112,6 @@ class CarStateNode(Node):
         )
         self.brake_image_pub = self.create_publisher(
             Image, "/path_status/brake_image", 1
-        )
-        self.angle_pub = self.create_publisher(
-            Float32, "/vehicle/angle_to_start", 10
         )
         self.bridge = CvBridge()
         self.timer = self.create_timer(0.05, self.update)
@@ -188,19 +183,12 @@ class CarStateNode(Node):
         self.yaw_rate += diff_rate
         self.yaw += self.yaw_rate * dt
 
-        dx = self.start_pos[0] - self.pos_x
-        dy = self.start_pos[1] - self.pos_y
-        target_angle = math.degrees(math.atan2(dx, dy))
-        diff_angle = target_angle - self.yaw
-        self.angle_to_start = (diff_angle + 180) % 360 - 180
-
         pose = Pose2D(
             x=float(self.pos_x),
             y=float(self.pos_y),
             theta=float(self.yaw),
         )
         self.state_pub.publish(pose)
-        self.angle_pub.publish(Float32(data=float(self.angle_to_start)))
         self.speed_pub.publish(Float32(data=float(self.speed)))
         self.steering_pub.publish(Float32(data=float(self.steering_angle)))
         if brake > 0.0 and (
