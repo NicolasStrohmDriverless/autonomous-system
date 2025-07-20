@@ -569,9 +569,9 @@ class PathNode(Node):
 
         # Erstes Sortieren, bevor Zusatzpunkte ergänzt werden
         mids_bg = [m for m in mids_bg if 0.0 < m[1] < MAX_MARKER_Y]
-        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_bg = sorted(set(mids_bg), key=lambda p: math.hypot(p[0], p[1]))
         mids_or = [m for m in mids_or if 0.0 < m[1] < MAX_MARKER_Y]
-        mids_or = sorted(set(mids_or), key=lambda x: x[0])
+        mids_or = sorted(set(mids_or), key=lambda p: math.hypot(p[0], p[1]))
 
         start_pt = (0.0, self.start_offset)
         # Zusätzliche Mittelpunkte zwischen Ursprung und erstem blauen
@@ -592,9 +592,9 @@ class PathNode(Node):
                     mids_bg.append(extra)
 
         mids_bg = [m for m in mids_bg if 0.0 < m[1] < MAX_MARKER_Y]
-        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_bg = sorted(set(mids_bg), key=lambda p: math.hypot(p[0], p[1]))
         mids_or = [m for m in mids_or if 0.0 < m[1] < MAX_MARKER_Y]
-        mids_or = sorted(set(mids_or), key=lambda x: x[0])
+        mids_or = sorted(set(mids_or), key=lambda p: math.hypot(p[0], p[1]))
 
         # Mittelpunkte markieren
         for idx, (mx, my) in enumerate(mids_bg):
