@@ -88,9 +88,9 @@ class PathVizNode(Node):
         line.type = Marker.LINE_STRIP
         line.action = Marker.ADD
         line.scale.x = 0.05
-        line.color.r = 1.0
+        line.color.r = 0.0
         line.color.g = 0.0
-        line.color.b = 0.0
+        line.color.b = 1.0
         line.color.a = 1.0
         line.points = self.path_points
         arr.markers.append(line)
