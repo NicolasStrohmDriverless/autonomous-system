@@ -158,6 +158,8 @@ DEFAULT_CONE_SCALE = (0.228, 0.228, 0.325)
 LARGE_ORANGE_CONE_SCALE = (0.285, 0.285, 0.505)
 CONE_POSITION_SCALE = (1.0, 1.0, 1.0)
 MAX_MARKER_Y = 30.0
+MIN_MARKER_X = -15.0
+MAX_MARKER_X = 15.0
 COLOR_MAP = {
     "blue": [0.0, 0.0, 1.0, 1.0],
     "yellow": [1.0, 1.0, 0.0, 1.0],
@@ -556,6 +558,7 @@ class PathNode(Node):
         self.longest_bg = []
         self.longest_or = []
         self.longest_len = 0.0
+        self.midpoint_best_path = []
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -633,6 +636,8 @@ class PathNode(Node):
         markers.markers.append(clear)
         for col, pts in cones.items():
             for idx, p in enumerate(pts):
+                if p[0] < MIN_MARKER_X or p[0] > MAX_MARKER_X:
+                    continue
                 m = Marker()
                 m.header = msg.header
                 m.ns = f"cone_{col}"
@@ -734,7 +739,7 @@ class PathNode(Node):
 
         # Mittelpunkte markieren
         for idx, (mx, my) in enumerate(mids_bg):
-            if not (0.0 < my < MAX_MARKER_Y):
+            if not (0.0 < my < MAX_MARKER_Y) or mx < MIN_MARKER_X or mx > MAX_MARKER_X:
                 continue
             m = Marker()
             m.header = msg.header
@@ -748,7 +753,7 @@ class PathNode(Node):
             m.color = ColorRGBA(r=r, g=g, b=b, a=a)
             markers.markers.append(m)
         for idx, (mx, my) in enumerate(mids_or):
-            if not (0.0 < my < MAX_MARKER_Y):
+            if not (0.0 < my < MAX_MARKER_Y) or mx < MIN_MARKER_X or mx > MAX_MARKER_X:
                 continue
             m = Marker()
             m.header = msg.header
@@ -761,10 +766,47 @@ class PathNode(Node):
             m.color = ColorRGBA(r=1.0, g=0.6, b=0.3, a=1.0)
             markers.markers.append(m)
 
-        # Verbindungslinien zwischen Mittelpunkten nicht mehr zeichnen
-        # Zuvor wurden hier Midpoints zu einem Pfad verbunden. Diese
-        # Marker werden jetzt weggelassen, damit lediglich der Hauptpfad
-        # sichtbar bleibt.
+        # Alle Mittelpunkte ab dem Koordinatenursprung zu einem Pfad verbinden
+        all_mids = [m for m in mids_bg + mids_or if MIN_MARKER_X <= m[0] <= MAX_MARKER_X]
+        all_mids = sorted(set(all_mids), key=lambda p: math.hypot(p[0], p[1]))
+        midpoint_chain = [start_pt] + all_mids
+
+        def _angle(u, v):
+            n = np.linalg.norm(u) * np.linalg.norm(v)
+            if n < 1e-6:
+                return 180.0
+            return abs(math.degrees(math.acos(np.clip(np.dot(u, v) / n, -1.0, 1.0))))
+
+        midpoint_best = [midpoint_chain[0]]
+        if len(midpoint_chain) > 1:
+            last_vec = np.array([0.0, 1.0])
+            last_pt = np.array(midpoint_chain[0])
+            for pt in midpoint_chain[1:]:
+                vec = np.array(pt) - last_pt
+                if np.linalg.norm(vec) < 1e-6:
+                    continue
+                ang = _angle(last_vec, vec)
+                if ang >= MAX_ANGLE:
+                    midpoint_best.append(pt)
+                    last_vec = vec
+                    last_pt = np.array(pt)
+
+        chain_marker = Marker()
+        chain_marker.header = msg.header
+        chain_marker.ns = "midpoint_chain"
+        chain_marker.id = 25000
+        chain_marker.type = Marker.LINE_STRIP
+        chain_marker.action = Marker.ADD
+        chain_marker.scale.x = 0.04
+        chain_marker.points = [
+            Point(x=float(x), y=float(y), z=0.0)
+            for x, y in midpoint_chain
+            if MIN_MARKER_X <= x <= MAX_MARKER_X and 0.0 <= y < MAX_MARKER_Y
+        ]
+        chain_marker.color = ColorRGBA(r=0.5, g=0.5, b=0.5, a=1.0)
+        markers.markers.append(chain_marker)
+
+        self.midpoint_best_path = midpoint_best
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts = (
@@ -1139,6 +1181,24 @@ class PathNode(Node):
             m.points = pts
             m.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
             path_markers.markers.append(m)
+
+            if len(self.midpoint_best_path) >= 2:
+                pts_mid = [
+                    Point(x=float(x), y=float(y), z=0.0)
+                    for x, y in self.midpoint_best_path
+                    if 0.0 <= y < MAX_MARKER_Y and MIN_MARKER_X <= x <= MAX_MARKER_X
+                ]
+                if len(pts_mid) >= 2:
+                    m_mid = Marker()
+                    m_mid.header = msg.header
+                    m_mid.ns = "midpoint_best"
+                    m_mid.id = 30500 + self.current_path_id
+                    m_mid.type = Marker.LINE_STRIP
+                    m_mid.action = Marker.ADD
+                    m_mid.scale.x = 0.05
+                    m_mid.points = pts_mid
+                    m_mid.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+                    path_markers.markers.append(m_mid)
 
             cand_clr = Marker()
             cand_clr.action = Marker.DELETEALL
