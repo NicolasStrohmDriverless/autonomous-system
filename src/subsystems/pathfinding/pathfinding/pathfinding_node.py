@@ -21,6 +21,123 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 from oak_cone_detect_interfaces.msg import ConeArray3D, PathPrediction
+import random
+from heapq import heappush, heappop
+
+
+def point_in_corridor(pt, corridor_polys):
+    """Return ``True`` if ``pt`` lies inside one of ``corridor_polys``."""
+    for poly in corridor_polys:
+        if (
+            cv2.pointPolygonTest(np.array(poly, np.int32), (pt[0], pt[1]), False)
+            >= 0
+        ):
+            return True
+    return False
+
+
+def build_corridor(coarse_path, half_width=1.0):
+    """Generate corridor rectangles for each segment of ``coarse_path``."""
+    corridors = []
+    for a, b in zip(coarse_path[:-1], coarse_path[1:]):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dy)
+        if L < 1e-6:
+            continue
+        ux, uy = dx / L, dy / L
+        nx, ny = -uy, ux
+        p1 = (a[0] + nx * half_width, a[1] + ny * half_width)
+        p2 = (a[0] - nx * half_width, a[1] - ny * half_width)
+        p3 = (b[0] - nx * half_width, b[1] - ny * half_width)
+        p4 = (b[0] + nx * half_width, b[1] + ny * half_width)
+        corridors.append([p1, p2, p3, p4])
+    return corridors
+
+
+def rrt_star_refine(
+    coarse_path,
+    cones,
+    iterations=200,
+    step_size=0.5,
+    goal_bias=0.1,
+    corridor_width=1.0,
+):
+    """Run a small RRT* within a corridor around ``coarse_path``."""
+
+    corridor = build_corridor(coarse_path, half_width=corridor_width)
+
+    obstacles = [(c[0], c[1], 0.3) for c in cones]
+
+    def collision(pt1, pt2):
+        for ox, oy, r in obstacles:
+            if np.hypot(pt2[0] - ox, pt2[1] - oy) < r:
+                return True
+        return False
+
+    nodes = {0: tuple(coarse_path[0])}
+    parents = {0: None}
+    costs = {0: 0.0}
+    goal_id = None
+
+    for i in range(1, iterations + 1):
+        if random.random() < goal_bias:
+            sample = tuple(coarse_path[-1])
+        else:
+            while True:
+                seg = random.choice(coarse_path)
+                frac = random.uniform(-corridor_width, corridor_width)
+                sample = (seg[0] + frac, seg[1] + frac)
+                if point_in_corridor(sample, corridor):
+                    break
+
+        dists = [
+            (idx, np.hypot(sample[0] - pt[0], sample[1] - pt[1]))
+            for idx, pt in nodes.items()
+        ]
+        nearest_id, dist_near = min(dists, key=lambda x: x[1])
+        if dist_near > step_size:
+            pt_near = np.array(nodes[nearest_id])
+            dirv = (np.array(sample) - pt_near) / dist_near
+            sample = tuple(pt_near + dirv * step_size)
+
+        if collision(nodes[nearest_id], sample):
+            continue
+
+        nodes[i] = sample
+        parents[i] = nearest_id
+        costs[i] = costs[nearest_id] + np.hypot(
+            sample[0] - nodes[nearest_id][0], sample[1] - nodes[nearest_id][1]
+        )
+
+        for j, pj in nodes.items():
+            if j == i:
+                continue
+            d = np.hypot(sample[0] - pj[0], sample[1] - pj[1])
+            if d < step_size * 2 and not collision(sample, pj):
+                newcost = costs[i] + d
+                if newcost < costs[j]:
+                    parents[j] = i
+                    costs[j] = newcost
+
+        if (
+            np.hypot(
+                sample[0] - coarse_path[-1][0], sample[1] - coarse_path[-1][1]
+            )
+            < step_size
+        ):
+            goal_id = i
+            break
+
+    if goal_id is None:
+        return None
+
+    path = []
+    cur = goal_id
+    while cur is not None:
+        path.append(nodes[cur])
+        cur = parents[cur]
+    return list(reversed(path))
+
 
 # QoS nur für den Subscriber: Best Effort, volatile, depth=1
 qos_sub = QoSProfile(
@@ -906,11 +1023,24 @@ class PathNode(Node):
                 else:
                     best_bg.append(ext_pt)
 
+        coarse = best_bg + best_or
+        refined = rrt_star_refine(
+            coarse,
+            [tuple(p) for p in cones["blue"]]
+            + [tuple(p) for p in cones["yellow"]]
+            + [tuple(p) for p in cones["orange"]],
+            iterations=250,
+            step_size=0.5,
+            goal_bias=0.2,
+            corridor_width=1.0,
+        )
+        path_to_smooth = refined if refined else coarse
+
         # 5) Pfad glätten und kurvige Darstellung erzeugen
-        best_bg = smooth_path(best_bg)
-        best_or = smooth_path(best_or)
+        best_bg = smooth_path(path_to_smooth)
+        best_or = []
         curved = smooth_spline(
-            best_bg + best_or,
+            best_bg,
             num_points=int(PATH_LENGTH / PREDICTION_INTERVAL),
         )
         cand_bg = curved
