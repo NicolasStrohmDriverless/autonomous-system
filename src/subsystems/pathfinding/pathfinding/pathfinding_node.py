@@ -43,7 +43,8 @@ COLOR_MAP = {
     'yellow': [1.0, 1.0, 0.0, 1.0],
     'orange': [1.0, 0.5, 0.0, 1.0]
 }
-MIDPOINT_COLOR    = [0.5, 0.5, 0.5, 1.0]
+MIDPOINT_COLOR       = [0.5, 0.5, 0.5, 1.0]
+PATH_MIDPOINT_COLOR = [0.0, 1.0, 0.0, 1.0]
 SIDE_CHECK_RADIUS = 2.0
 MAX_STEP_DIST     = 2.0
 GEGENCHECK        = 1
@@ -319,49 +320,8 @@ class PathNode(Node):
             except:
                 pass
 
-        mids_bg = sorted(set(mids_bg), key=lambda x:x[0])
-        mids_or = sorted(set(mids_or), key=lambda x:x[0])
-
-        # Mittelpunkte markieren
-        for idx,(mx,my) in enumerate(mids_bg):
-            m = Marker(); m.header=msg.header; m.ns='midpoints_bg'
-            m.id=10000+idx; m.type=Marker.SPHERE; m.action=Marker.ADD
-            m.pose.position=Point(x=float(mx),y=float(my),z=0.0)
-            m.scale.x=m.scale.y=m.scale.z=MIDPOINT_MARKER_SCALE
-            r,g,b,a=MIDPOINT_COLOR; m.color=ColorRGBA(r=r,g=g,b=b,a=a)
-            markers.markers.append(m)
-        for idx,(mx,my) in enumerate(mids_or):
-            m = Marker(); m.header=msg.header; m.ns='midpoints_or'
-            m.id=20000+idx; m.type=Marker.SPHERE; m.action=Marker.ADD
-            m.pose.position=Point(x=float(mx),y=float(my),z=0.0)
-            m.scale.x=m.scale.y=m.scale.z=MIDPOINT_MARKER_SCALE
-            m.color=ColorRGBA(r=1.0,g=0.6,b=0.3,a=1.0)
-            markers.markers.append(m)
-
-        # Mittelpunkte markieren
-        for idx, (mx, my) in enumerate(mids_bg):
-            m = Marker()
-            m.header = msg.header
-            m.ns     = 'midpoints_bg'
-            m.id     = 10000 + idx
-            m.type   = Marker.SPHERE
-            m.action = Marker.ADD
-            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
-            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
-            r, g, b, a = MIDPOINT_COLOR
-            m.color = ColorRGBA(r=r, g=g, b=b, a=a)
-            markers.markers.append(m)
-        for idx, (mx, my) in enumerate(mids_or):
-            m = Marker()
-            m.header = msg.header
-            m.ns     = 'midpoints_or'
-            m.id     = 20000 + idx
-            m.type   = Marker.SPHERE
-            m.action = Marker.ADD
-            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
-            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
-            m.color   = ColorRGBA(r=1.0, g=0.6, b=0.3, a=1.0)
-            markers.markers.append(m)
+        mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
+        mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
@@ -500,9 +460,39 @@ class PathNode(Node):
             else:
                 best_bg.append(ext_pt)
 
+        used_mids = set(best_bg + best_or)
+
         # 5) Pfad glätten
         best_bg = smooth_path(best_bg)
         best_or = smooth_path(best_or)
+
+        # Mittelpunkte markieren (grün, wenn Teil des Pfades)
+        for idx, (mx, my) in enumerate(mids_bg):
+            m = Marker()
+            m.header = msg.header
+            m.ns = 'midpoints_bg'
+            m.id = 10000 + idx
+            m.type = Marker.SPHERE
+            m.action = Marker.ADD
+            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
+            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
+            color = PATH_MIDPOINT_COLOR if (mx, my) in used_mids else MIDPOINT_COLOR
+            r, g, b, a = color
+            m.color = ColorRGBA(r=r, g=g, b=b, a=a)
+            markers.markers.append(m)
+        for idx, (mx, my) in enumerate(mids_or):
+            m = Marker()
+            m.header = msg.header
+            m.ns = 'midpoints_or'
+            m.id = 20000 + idx
+            m.type = Marker.SPHERE
+            m.action = Marker.ADD
+            m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
+            m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
+            color = PATH_MIDPOINT_COLOR if (mx, my) in used_mids else MIDPOINT_COLOR
+            r, g, b, a = color
+            m.color = ColorRGBA(r=r, g=g, b=b, a=a)
+            markers.markers.append(m)
 
         # 6) Winkel berechnen, filtern und publizieren
         if len(best_bg) >= 2:
