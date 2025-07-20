@@ -345,7 +345,7 @@ class PathNode(Node):
 
         # geglättete Linie aller Mittelpunkte für Debugging
         all_midpoints = smooth_path(combined_filtered)
-        final_path = [(0.0, self.start_offset)] + all_midpoints
+        debug_path = [(0.0, self.start_offset)] + all_midpoints
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
@@ -489,6 +489,38 @@ class PathNode(Node):
         # 5) Pfad glätten
         best_bg = smooth_path(best_bg)
         best_or = smooth_path(best_or)
+
+        # finaler Pfad aus den geglätteten Mittelpunkten
+        final_path = best_bg + best_or
+
+        # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
+        speeds, angles = predict_speed_angle(final_path, self.max_speed)
+        if speeds:
+            self.desired_speed = speeds[0]
+            self.speed_cmd_pub.publish(Float32(data=float(self.desired_speed)))
+            self._ignore_next_speed_msg = True
+        else:
+            self.desired_speed = 0.0
+
+        pred = PathPrediction()
+        pred.header = msg.header
+        pred.speeds = [float(s) for s in speeds]
+        pred.steering_angles = [float(a) for a in angles]
+        self.prediction_pub.publish(pred)
+
+        speed_img = draw_speed_gauge(self.desired_speed, self.max_speed)
+        speed_msg = self.bridge.cv2_to_imgmsg(speed_img, "bgr8")
+        speed_msg.header = msg.header
+        self.speed_image_pub.publish(speed_msg)
+
+        wheel_img = draw_steering_wheel(
+            self._angle_smoothed if self._angle_smoothed is not None else 0.0,
+            MAX_STEERING_ANGLE,
+            STEERING_RATIO,
+        )
+        wheel_msg = self.bridge.cv2_to_imgmsg(wheel_img, "bgr8")
+        wheel_msg.header = msg.header
+        self.angle_image_pub.publish(wheel_msg)
 
         # Mittelpunkte markieren (grün, wenn Teil des Pfades)
         for idx, (mx, my) in enumerate(mids_bg):
