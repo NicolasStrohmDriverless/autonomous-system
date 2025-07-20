@@ -196,7 +196,7 @@ class PathNode(Node):
 
         # Publisher für Kegel-, Pfad- und Winkel-Marker
         self.marker_pub = self.create_publisher(MarkerArray, "/cone_markers", 10)
-        self.path_pub = self.create_publisher(MarkerArray, "/midpoint_path_marker", 10)
+        self.path_pub = self.create_publisher(MarkerArray, "/best_path_marker", 10)
         self.fps_pub = self.create_publisher(Float32, "/path_inference_fps", 10)
         self.angle_pub = self.create_publisher(Float32, "/path_to_y_axis_angle", 10)
         self.angle_image_pub = self.create_publisher(Image, "/path_status/angle_image", 1)
@@ -347,12 +347,151 @@ class PathNode(Node):
         all_midpoints = smooth_path(combined_filtered)
         debug_path = [(0.0, self.start_offset)] + all_midpoints
 
-        # --- 4) Mittelpunkte direkt als Pfad verwenden ---
-        abort = ""
-        used_mids = set(all_midpoints)
+        # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
+        blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
+        yellow_pts = np.array([p[:2] for p in cones['yellow']]) if cones['yellow'] else np.empty((0,2))
+        orange_pts = np.array([p[:2] for p in cones['orange']]) if cones['orange'] else np.empty((0,2))
 
-        # finaler Pfad ist die geglättete Linie aller Mittelpunkte
-        final_path = all_midpoints
+        # Start-Vektor aus vorherigem Pfad (Inertia)
+        if self.prev_bg and len(self.prev_bg) >= 2:
+            vec = np.array(self.prev_bg[-1]) - np.array(self.prev_bg[-2])
+            v0  = vec / np.linalg.norm(vec)
+        else:
+            v0 = np.array([0.0, 1.0])
+
+        def check_side_bg(mid, prev, nxt):
+            v = np.array(nxt) - np.array(prev)
+            if np.linalg.norm(v) < 1e-3: return False
+            v = v / np.linalg.norm(v)
+            ln, rn = np.array([-v[1], v[0]]), np.array([v[1], -v[0]])
+            def sides(pts):
+                if pts.shape[0] == 0: return False, False
+                d    = pts - mid
+                dist = np.linalg.norm(d, axis=1)
+                pl   = np.dot(d, ln); pr = np.dot(d, rn)
+                return np.any((pl>0)&(dist<SIDE_CHECK_RADIUS)), np.any((pr>0)&(dist<SIDE_CHECK_RADIUS))
+            lb, rb = sides(blue_pts)
+            ly, ry = sides(yellow_pts)
+            return (lb and ry or ly and rb) and not (lb and rb) and not (ly and ry)
+
+        def check_side_or(mid, prev, nxt):
+            v = np.array(nxt) - np.array(prev)
+            if np.linalg.norm(v) < 1e-3: return False
+            v = v / np.linalg.norm(v)
+            ln, rn = np.array([-v[1], v[0]]), np.array([v[1], -v[0]])
+            if orange_pts.shape[0] == 0: return False
+            d    = orange_pts - mid
+            dist = np.linalg.norm(d, axis=1)
+            pl   = np.dot(d, ln); pr   = np.dot(d, rn)
+            return np.any((pl>0)&(dist<SIDE_CHECK_RADIUS)) and np.any((pr>0)&(dist<SIDE_CHECK_RADIUS))
+
+        def find_greedy_path(mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST):
+            if not mids:
+                return [], 0.0, last_vec
+            arr  = np.array(mids)
+            path = [tuple(start_pt)]
+            used = set()
+            last = np.array(start_pt)
+            total = 0.0
+            y_axis = np.array([0.0,1.0])
+
+            while total < max_len:
+                dists = np.linalg.norm(arr - last, axis=1)
+                cands = [
+                    (i, mids[i], dists[i]) for i in range(len(mids))
+                    if (i not in used
+                        and dists[i] > 0.1
+                        and dists[i] <= max_step
+                        and total + dists[i] <= max_len
+                        and mids[i][1] > 0)
+                ]
+                if len(path) == 1:
+                    cands = [
+                        (i, p, d) for (i, p, d) in cands
+                        if abs(np.degrees(np.arccos(
+                            np.clip(
+                                np.dot((np.array(p)-last)/np.linalg.norm(np.array(p)-last), y_axis),
+                                -1, 1
+                            )
+                        ))) <= FIRST_STEP_MAX_ANGLE
+                    ]
+                if not cands:
+                    break
+
+                # Greedy-Auswahl: minimaler Abstand
+                best, best_d = None, None
+                for i, p, d in cands:
+                    v = np.array(p) - last
+                    n = np.linalg.norm(v)
+                    if n < 1e-3:
+                        continue
+                    dirv = v / n
+                    if len(path) > 1:
+                        ang = np.degrees(np.arccos(np.clip(np.dot(last_vec, dirv), -1, 1)))
+                        if ang > MAX_ANGLE:
+                            continue
+                    if not check_fn(p, last, p):
+                        continue
+                    if best is None or d < best_d:
+                        best, best_d = (i, p, dirv, d), d
+
+                if best is None:
+                    break
+
+                # Korrektes Entpacken des besten Kandidaten
+                idx, pt, dirv, dist = best
+                path.append(pt)
+                used.add(idx)
+                last = np.array(pt)
+                last_vec = dirv
+                total += dist
+
+            return path, total, last_vec
+
+        best_bg, best_or = [], []
+        max_pts, best_len, abort = 0, 0.0, ""
+
+        # nur eine Konfiguration (GEGENCHECK = 1)
+        for _ in range(GEGENCHECK):
+            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, (0, self.start_offset), v0, PATH_LENGTH)
+            l_or_max = PATH_LENGTH - l_bg
+            p_or, l_or = [], 0.0
+            if l_or_max > 0 and len(p_bg) > 1:
+                p_or, l_or, _ = find_greedy_path(mids_or, check_side_or, p_bg[-1], v1, l_or_max)
+
+            pts_count = len(p_bg) + len(p_or)
+            total_len = l_bg + l_or
+
+            # Auswahl: zuerst mehr Punkte, dann längere Strecke
+            if (pts_count > max_pts) or (pts_count == max_pts and total_len > best_len):
+                max_pts  = pts_count
+                best_len = total_len
+                best_bg  = p_bg
+                best_or  = p_or
+                abort = "" if best_len >= PATH_LENGTH else f"Nur {best_len:.2f}m erreicht ({max_pts} Punkte)."
+
+        # Extrapolation, damit immer genau PATH_LENGTH erreicht wird
+        combined = best_bg + best_or
+        if len(combined) >= 2 and best_len < PATH_LENGTH:
+            prev_pt = np.array(combined[-2])
+            last_pt = np.array(combined[-1])
+            dir_vec = last_pt - prev_pt
+            dir_vec /= np.linalg.norm(dir_vec)
+            missing = PATH_LENGTH - best_len
+            ext_pt  = tuple((last_pt + dir_vec * missing).tolist())
+            if best_or:
+                best_or.append(ext_pt)
+            else:
+                best_bg.append(ext_pt)
+
+        used_mids = set(best_bg + best_or)
+
+        # 5) Pfad glätten
+        best_bg = smooth_path(best_bg)
+        best_or = smooth_path(best_or)
+
+        # finaler Pfad aus den geglätteten Mittelpunkten
+        final_path = best_bg + best_or
 
         # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
         speeds, angles = predict_speed_angle(final_path, self.max_speed)
@@ -447,7 +586,7 @@ class PathNode(Node):
         # Pfad in MarkerArray
         path_markers = MarkerArray()
         clr = Marker(); clr.action = Marker.DELETEALL
-        clr.header = msg.header; clr.ns='midpoint_path'; clr.id=40000
+        clr.header = msg.header; clr.ns='best_path'; clr.id=40000
         path_markers.markers.append(clr)
 
         path_points = final_path
@@ -455,7 +594,7 @@ class PathNode(Node):
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in path_points]
             m = Marker()
             m.header = msg.header
-            m.ns = 'midpoint_path'
+            m.ns = 'best_path'
             m.id = 30000
             m.type = Marker.LINE_STRIP
             m.action = Marker.ADD
@@ -474,7 +613,7 @@ class PathNode(Node):
             mp.action = Marker.ADD
             mp.scale.x = 0.05
             mp.points = [Point(x=float(x), y=float(y), z=0.0) for x, y in all_midpoints]
-            mp.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            mp.color = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
             path_markers.markers.append(mp)
 
         # Publisher
