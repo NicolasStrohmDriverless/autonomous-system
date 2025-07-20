@@ -2,9 +2,10 @@
 """Publish simulated cone detections in the vehicle coordinate frame.
 
 Cones are loaded from the track publisher and transformed so that the
-vehicle pose (:msg:`Pose2D`) represents the origin. Only cones within a
-semicircle in front of the vehicle (30 m radius and ±15 m lateral
-span) are published.
+vehicle pose (:msg:`Pose2D`) represents the origin. By default, cones
+whose lateral position lies between ``-15`` and ``15`` meters are not
+published, effectively hiding objects directly in front of the vehicle
+within that range.
 """
 
 from __future__ import annotations
@@ -125,7 +126,7 @@ class DetectionNode(Node):
                     continue
                 if local_y < 0.0:
                     continue
-                if abs(local_x) > 15.0:
+                if -15.0 <= local_x <= 15.0:
                     continue
 
             new_c = Cone3D(
