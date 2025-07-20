@@ -121,12 +121,9 @@ class DetectionNode(Node):
                 local_y += random.uniform(-0.05, 0.05)
 
             if not self.publish_all:
-                dist = math.hypot(local_x, local_y)
-                if dist > 30.0:
+                if 30.0 < local_y < 0.0:
                     continue
-                if local_y < 0.0:
-                    continue
-                if -15.0 <= local_x <= 15.0:
+                if -15.0 > local_x > 15.0:
                     continue
 
             new_c = Cone3D(
