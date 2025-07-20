@@ -6,8 +6,6 @@ import os
 
 import numpy as np
 from scipy.spatial import Delaunay
-
-from .spline_utils import spline_path
 from std_msgs.msg import ColorRGBA, Float32
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
@@ -186,7 +184,6 @@ def smooth_path(path, alpha=SMOOTH_ALPHA):
     return [tuple(p) for p in smoothed]
 
 
-
 class PathNode(Node):
     def __init__(self, start_offset: float = 0.0):
         super().__init__("midpoint_path_node")
@@ -349,7 +346,6 @@ class PathNode(Node):
         # geglättete Linie aller Mittelpunkte für Debugging
         all_midpoints = smooth_path(combined_filtered)
         final_path = [(0.0, self.start_offset)] + all_midpoints
-        final_path = spline_path(final_path, samples=len(final_path))
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
         blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
@@ -491,8 +487,8 @@ class PathNode(Node):
         used_mids = set(best_bg + best_or)
 
         # 5) Pfad glätten
-        best_bg = spline_path(smooth_path(best_bg), samples=len(best_bg))
-        best_or = spline_path(smooth_path(best_or), samples=len(best_or))
+        best_bg = smooth_path(best_bg)
+        best_or = smooth_path(best_or)
 
         # Mittelpunkte markieren (grün, wenn Teil des Pfades)
         for idx, (mx, my) in enumerate(mids_bg):
