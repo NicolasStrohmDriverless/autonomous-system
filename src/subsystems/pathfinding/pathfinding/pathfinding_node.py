@@ -21,122 +21,8 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 from oak_cone_detect_interfaces.msg import ConeArray3D, PathPrediction
-import random
-from heapq import heappush, heappop
 
 
-def point_in_corridor(pt, corridor_polys):
-    """Return ``True`` if ``pt`` lies inside one of ``corridor_polys``."""
-    for poly in corridor_polys:
-        if (
-            cv2.pointPolygonTest(np.array(poly, np.int32), (pt[0], pt[1]), False)
-            >= 0
-        ):
-            return True
-    return False
-
-
-def build_corridor(coarse_path, half_width=1.0):
-    """Generate corridor rectangles for each segment of ``coarse_path``."""
-    corridors = []
-    for a, b in zip(coarse_path[:-1], coarse_path[1:]):
-        dx, dy = b[0] - a[0], b[1] - a[1]
-        L = math.hypot(dx, dy)
-        if L < 1e-6:
-            continue
-        ux, uy = dx / L, dy / L
-        nx, ny = -uy, ux
-        p1 = (a[0] + nx * half_width, a[1] + ny * half_width)
-        p2 = (a[0] - nx * half_width, a[1] - ny * half_width)
-        p3 = (b[0] - nx * half_width, b[1] - ny * half_width)
-        p4 = (b[0] + nx * half_width, b[1] + ny * half_width)
-        corridors.append([p1, p2, p3, p4])
-    return corridors
-
-
-def rrt_star_refine(
-    coarse_path,
-    cones,
-    iterations=200,
-    step_size=0.5,
-    goal_bias=0.1,
-    corridor_width=1.0,
-):
-    """Run a small RRT* within a corridor around ``coarse_path``."""
-
-    corridor = build_corridor(coarse_path, half_width=corridor_width)
-
-    obstacles = [(c[0], c[1], 0.3) for c in cones]
-
-    def collision(pt1, pt2):
-        for ox, oy, r in obstacles:
-            if np.hypot(pt2[0] - ox, pt2[1] - oy) < r:
-                return True
-        return False
-
-    nodes = {0: tuple(coarse_path[0])}
-    parents = {0: None}
-    costs = {0: 0.0}
-    goal_id = None
-
-    for i in range(1, iterations + 1):
-        if random.random() < goal_bias:
-            sample = tuple(coarse_path[-1])
-        else:
-            while True:
-                seg = random.choice(coarse_path)
-                frac = random.uniform(-corridor_width, corridor_width)
-                sample = (seg[0] + frac, seg[1] + frac)
-                if point_in_corridor(sample, corridor):
-                    break
-
-        dists = [
-            (idx, np.hypot(sample[0] - pt[0], sample[1] - pt[1]))
-            for idx, pt in nodes.items()
-        ]
-        nearest_id, dist_near = min(dists, key=lambda x: x[1])
-        if dist_near > step_size:
-            pt_near = np.array(nodes[nearest_id])
-            dirv = (np.array(sample) - pt_near) / dist_near
-            sample = tuple(pt_near + dirv * step_size)
-
-        if collision(nodes[nearest_id], sample):
-            continue
-
-        nodes[i] = sample
-        parents[i] = nearest_id
-        costs[i] = costs[nearest_id] + np.hypot(
-            sample[0] - nodes[nearest_id][0], sample[1] - nodes[nearest_id][1]
-        )
-
-        for j, pj in nodes.items():
-            if j == i:
-                continue
-            d = np.hypot(sample[0] - pj[0], sample[1] - pj[1])
-            if d < step_size * 2 and not collision(sample, pj):
-                newcost = costs[i] + d
-                if newcost < costs[j]:
-                    parents[j] = i
-                    costs[j] = newcost
-
-        if (
-            np.hypot(
-                sample[0] - coarse_path[-1][0], sample[1] - coarse_path[-1][1]
-            )
-            < step_size
-        ):
-            goal_id = i
-            break
-
-    if goal_id is None:
-        return None
-
-    path = []
-    cur = goal_id
-    while cur is not None:
-        path.append(nodes[cur])
-        cur = parents[cur]
-    return list(reversed(path))
 
 
 # QoS nur für den Subscriber: Best Effort, volatile, depth=1
@@ -321,9 +207,6 @@ def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
             break
         p0 = np.array(path[idx])
         p1 = np.array(path[idx + 1])
-        seg_len = cum[idx + 1] - cum[idx]
-        r = 0.0 if seg_len == 0.0 else (dist - cum[idx]) / seg_len
-        interp = p0 + (p1 - p0) * r
         vec = p1 - p0
         if np.linalg.norm(vec) > 1e-6:
             angle = float(np.degrees(np.arctan2(vec[0], vec[1])))
@@ -376,51 +259,6 @@ def draw_speed_gauge(
     cv2.line(img, center, (x, y), (0, 0, 255), 2)
 
     text = f"{speed:.2f} m/s"
-    text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-    text_pos = (center[0] - text_size[0] // 2, height - 5)
-    cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-    return img
-
-
-def draw_angle_gauge(
-    angle: float, max_angle: float, width: int = 180, height: int = 90
-) -> np.ndarray:
-    """Return an image visualizing ``angle`` as a semicircular gauge.
-
-    The design resembles the tachometer of a car and replaces the degree
-    symbol with the word "Grad".
-    """
-    img = np.ones((height, width, 3), dtype=np.uint8) * 255
-
-    center = (width // 2, height - 10)
-    radius = min(width // 2 - 10, height - 20)
-
-    # draw outer semicircle
-    cv2.ellipse(img, center, (radius, radius), 0, 180, 360, (0, 0, 0), 2)
-
-    # draw tick marks
-    for i in range(-5, 6):
-        tick_angle = 270 + (i / 5.0) * 90
-        a = math.radians(tick_angle)
-        x1 = int(center[0] + (radius - 5) * math.cos(a))
-        y1 = int(center[1] + (radius - 5) * math.sin(a))
-        x2 = int(center[0] + radius * math.cos(a))
-        y2 = int(center[1] + radius * math.sin(a))
-        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 0), 2)
-
-    if max_angle > 0:
-        frac = max(-1.0, min(1.0, angle / max_angle))
-    else:
-        frac = 0.0
-
-    # needle position
-    needle_angle = 270 + frac * 90
-    a = math.radians(needle_angle)
-    x = int(center[0] + (radius - 10) * math.cos(a))
-    y = int(center[1] + (radius - 10) * math.sin(a))
-    cv2.line(img, center, (x, y), (0, 0, 255), 2)
-
-    text = f"{angle:.1f} Grad"
     text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     text_pos = (center[0] - text_size[0] // 2, height - 5)
     cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
