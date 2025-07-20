@@ -185,6 +185,30 @@ def path_length(pts):
     )
 
 
+def limit_path_length(path, max_len):
+    """Return ``path`` cropped to ``max_len`` meters."""
+    if len(path) < 2:
+        return path
+
+    result = [path[0]]
+    total = 0.0
+    for start, end in zip(path[:-1], path[1:]):
+        seg = np.linalg.norm(np.array(end) - np.array(start))
+        if total + seg > max_len:
+            if seg > 1e-6:
+                ratio = (max_len - total) / seg
+                inter = (
+                    float(start[0] + (end[0] - start[0]) * ratio),
+                    float(start[1] + (end[1] - start[1]) * ratio),
+                )
+                result.append(inter)
+            break
+        result.append(end)
+        total += seg
+
+    return result
+
+
 def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
     """Return lists of speeds and steering angles along ``path``."""
     if len(path) < 2:
@@ -904,7 +928,7 @@ class PathNode(Node):
             best_bg,
             num_points=int(PATH_LENGTH / PREDICTION_INTERVAL),
         )
-        cand_bg = curved
+        cand_bg = limit_path_length(curved, PATH_LENGTH)
         cand_or = []
 
         # --- Pfadaktualisierung nach Längenvergleich ---
