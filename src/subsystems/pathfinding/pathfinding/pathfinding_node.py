@@ -270,6 +270,8 @@ class PathNode(Node):
         for c in msg.cones:
             if c.y < 0:
                 continue
+            if c.color not in cones:
+                continue
             p = np.array([c.x, c.y, c.z]) * np.array(CONE_POSITION_SCALE)
             cones[c.color].append(p)
 
