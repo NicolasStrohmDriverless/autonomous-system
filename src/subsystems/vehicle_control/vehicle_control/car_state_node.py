@@ -12,6 +12,7 @@ from rclpy.node import Node
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import Image
+from oak_cone_detect_interfaces.msg import PathPrediction
 
 ACCELERATION = 9.81  # m/s^2
 DECELERATION = 9.81  # m/s^2 used when slowing down without braking
@@ -19,6 +20,10 @@ MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
 MAX_STEERING_ANGLE = 30.0  # deg
 STEERING_TRANSLATION = 15.0  # ratio
 MAX_YAW_ACCEL = 180.0  # deg/s^2
+# PID gains for steering control
+STEERING_KP = 0.5
+STEERING_KI = 0.0
+STEERING_KD = 0.05
 # Lenkwinkelgeschwindigkeit
 # θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
@@ -75,6 +80,28 @@ def draw_pressure_gauge(
     return img
 
 
+class PIDController:
+    """Simple PID controller."""
+
+    def __init__(self, kp: float, ki: float, kd: float) -> None:
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.integral = 0.0
+        self.last_error = 0.0
+
+    def reset(self) -> None:
+        self.integral = 0.0
+        self.last_error = 0.0
+
+    def update(self, setpoint: float, measurement: float, dt: float) -> float:
+        error = setpoint - measurement
+        self.integral += error * dt
+        derivative = (error - self.last_error) / dt if dt > 0 else 0.0
+        self.last_error = error
+        return self.kp * error + self.ki * self.integral + self.kd * derivative
+
+
 class CarStateNode(Node):
     def __init__(self):
         super().__init__("car_state_node")
@@ -87,6 +114,10 @@ class CarStateNode(Node):
         self.desired_speed: Optional[float] = None
         self.steering_angle = 0.0
         self.desired_angle: Optional[float] = None
+        self.predicted_speeds = []
+        self.predicted_angles = []
+        self.prediction_idx = 0
+        self.steering_pid = PIDController(STEERING_KP, STEERING_KI, STEERING_KD)
         self.last_time = self.get_clock().now()
 
         self.declare_parameter("max_yaw_accel", MAX_YAW_ACCEL)
@@ -97,6 +128,9 @@ class CarStateNode(Node):
         )
         self.create_subscription(
             Float32, "/path_to_y_axis_angle", self.desired_angle_cb, 10
+        )
+        self.create_subscription(
+            PathPrediction, "/prediction", self.prediction_cb, 10
         )
         self.state_pub = self.create_publisher(
             Pose2D, "/vehicle/car_state", 10
@@ -123,12 +157,23 @@ class CarStateNode(Node):
     def desired_angle_cb(self, msg: Float32):
         self.desired_angle = float(msg.data)
 
+    def prediction_cb(self, msg: PathPrediction):
+        self.predicted_speeds = list(msg.speeds)
+        self.predicted_angles = list(msg.steering_angles)
+        self.prediction_idx = 0
+
     def update(self):
         now = self.get_clock().now()
         dt = (now - self.last_time).nanoseconds * 1e-9
         self.last_time = now
 
         brake = 0.0
+
+        if self.prediction_idx < len(self.predicted_speeds):
+            self.desired_speed = self.predicted_speeds[self.prediction_idx]
+            if self.predicted_angles:
+                self.desired_angle = self.predicted_angles[self.prediction_idx]
+            self.prediction_idx += 1
 
         # adjust speed towards desired speed
         if self.desired_speed is not None:
@@ -155,15 +200,17 @@ class CarStateNode(Node):
                 if abs(self.speed) < 1e-2:
                     self.speed = 0.0
 
-        # adjust steering angle towards desired angle
+        # adjust steering angle using PID controller
         if self.desired_angle is not None:
-            diff = self.desired_angle - self.steering_angle
+            control = self.steering_pid.update(
+                self.desired_angle, self.steering_angle, dt
+            )
             max_change = STEERING_TRANSLATION * abs(self.speed) * dt
-            if diff > max_change:
-                diff = max_change
-            elif diff < -max_change:
-                diff = -max_change
-            self.steering_angle += diff
+            if control > max_change:
+                control = max_change
+            elif control < -max_change:
+                control = -max_change
+            self.steering_angle += control
             self.steering_angle = max(
                 -MAX_STEERING_ANGLE,
                 min(MAX_STEERING_ANGLE, self.steering_angle),
