@@ -493,6 +493,19 @@ class PathNode(Node):
         # finaler Pfad aus den geglätteten Mittelpunkten
         final_path = best_bg + best_or
 
+        # best-path mit dem Midpoint-Pfad kombinieren
+        if all_midpoints:
+            first_mid = all_midpoints[0]
+            dist_mid = math.hypot(first_mid[0], first_mid[1])
+            prefix = []
+            for x, y in final_path:
+                if math.hypot(x, y) < dist_mid:
+                    prefix.append((x, y))
+                else:
+                    break
+            final_path = prefix + [first_mid] + all_midpoints[1:]
+        self.midpoint_best_path = final_path
+
         # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
         speeds, angles = predict_speed_angle(final_path, self.max_speed)
         if speeds:
