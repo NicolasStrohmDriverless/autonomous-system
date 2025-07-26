@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 from scipy.spatial import Delaunay
+from scipy.interpolate import splprep, splev
 from std_msgs.msg import ColorRGBA, Float32
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
@@ -178,7 +179,7 @@ def draw_steering_wheel(
     cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
     return img
 
-def smooth_path(path, alpha=SMOOTH_ALPHA):
+def exp_smooth_path(path, alpha=SMOOTH_ALPHA):
     """Exponentielle Glättung eines Pfades."""
     if not path:
         return []
@@ -186,6 +187,55 @@ def smooth_path(path, alpha=SMOOTH_ALPHA):
     for p in path[1:]:
         smoothed.append(alpha * np.array(p) + (1 - alpha) * smoothed[-1])
     return [tuple(p) for p in smoothed]
+
+
+def add_linear_prefix(points, length=1.0):
+    """Add a short linear segment from the origin towards the first point."""
+    if not points:
+        return []
+    first = np.array(points[0], dtype=float)
+    if np.allclose(first, [0.0, 0.0]):
+        return list(points)
+    norm = np.linalg.norm(first)
+    if norm == 0.0:
+        return list(points)
+    direction = first / norm
+    prefix = direction * float(length)
+    return [(0.0, 0.0), tuple(prefix)] + list(points)
+
+
+def smooth_path(points, smoothing=1.0, num=200):
+    """Smooth ``points`` using cubic spline interpolation."""
+    if len(points) < 3:
+        return list(points)
+    pts = add_linear_prefix(points)
+    arr = np.array(pts, dtype=float)
+    x, y = arr[:, 0], arr[:, 1]
+    tck, _ = splprep([x, y], s=smoothing)
+    u_fine = np.linspace(0, 1, num)
+    x_s, y_s = splev(u_fine, tck)
+    return list(zip(x_s, y_s))
+
+
+def limit_steering_angles(points, max_angle_deg):
+    """Filter points that produce sharp steering angles."""
+    if len(points) < 3:
+        return list(points)
+    max_angle_rad = math.radians(max_angle_deg)
+    filtered = [points[0]]
+    for i in range(1, len(points) - 1):
+        v1 = np.array(points[i]) - np.array(filtered[-1])
+        v2 = np.array(points[i + 1]) - np.array(points[i])
+        n1 = np.linalg.norm(v1)
+        n2 = np.linalg.norm(v2)
+        if n1 == 0.0 or n2 == 0.0:
+            filtered.append(points[i])
+            continue
+        angle = math.acos(np.clip(np.dot(v1, v2) / (n1 * n2), -1.0, 1.0))
+        if angle < max_angle_rad:
+            filtered.append(points[i])
+    filtered.append(points[-1])
+    return filtered
 
 
 class PathNode(Node):
@@ -491,8 +541,8 @@ class PathNode(Node):
         used_mids = set(best_bg + best_or)
 
         # 5) Pfad glätten
-        best_bg = smooth_path(best_bg)
-        best_or = smooth_path(best_or)
+        best_bg = exp_smooth_path(best_bg)
+        best_or = exp_smooth_path(best_or)
 
         # finaler Pfad aus den geglätteten Mittelpunkten
         base_path = best_bg + best_or
@@ -547,6 +597,10 @@ class PathNode(Node):
                         final_path[1][1] - final_path[0][1],
                     )
                 )
+
+        # finalen Pfad mittels Spline glätten und Lenkwinkel begrenzen
+        final_path = smooth_path(final_path)
+        final_path = limit_steering_angles(final_path, MAX_ANGLE)
 
         self.midpoint_best_path = final_path
 
