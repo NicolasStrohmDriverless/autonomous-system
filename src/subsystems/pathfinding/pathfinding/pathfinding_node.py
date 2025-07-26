@@ -59,7 +59,7 @@ ANGLE_SMOOTH_ALPHA  = 0.3   # Faktor für exponentielle Glättung des Winkels
 SPEED_PATH_LENGTH   = 30.0
 ANGLE_SPEED_DIVISOR = 45.0
 MAX_SPEED           = 5.0
-PREDICTION_INTERVAL = 0.5
+PREDICTION_INTERVAL = 0.1
 MAX_STEERING_ANGLE  = 30.0
 STEERING_RATIO      = 15.0
 
@@ -112,6 +112,8 @@ def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
             (1 - abs(angle) / ANGLE_SPEED_DIVISOR + remain / SPEED_PATH_LENGTH) / 2.0
         )
         speed = min(max(speed, 0.0), max_speed)
+        if abs(angle) > MAX_STEERING_ANGLE:
+            speed = 0.0
         speeds.append(float(speed))
         angles.append(float(angle))
         dist += step
