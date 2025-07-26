@@ -29,16 +29,16 @@ from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Con
 
 
 # Global toggle to add random noise simulating camera shake
-CAMERA_SHAKE = False
+CAMERA_SHAKE = True
 
 # Global toggle to add distance dependent noise
-DISTANCE_NOISE = False
+DISTANCE_NOISE = True
 
 # Maximum positional deviation at 30m distance in meters
-MAX_DISTORTION_30M = 1.0
+MAX_DISTORTION_30M = 0.01
 
 # Minimum distance driven before updating the orientation used for detection
-DELAY_DISTANCE = 0.5  # meters
+DELAY_DISTANCE = 0.1  # meters
 
 
 class DetectionNode(Node):
@@ -65,7 +65,7 @@ class DetectionNode(Node):
         self.delayed_yaw = 0.0
         self._yaw_update_pos: tuple[float, float] | None = None
         self.publish_all = self.declare_parameter("publish_all", publish_all).value
-        self.timer = self.create_timer(0.1, self.publish_visible)
+        self.timer = self.create_timer(0.001, self.publish_visible)
         self.get_logger().info('DetectionNode started')
 
     # ------------------------------------------------------------------
@@ -93,7 +93,7 @@ class DetectionNode(Node):
             return
         px = float(self.state.x)
         py = float(self.state.y)
-        yaw = math.radians(float(self.delayed_yaw))
+        yaw = - math.radians(float(self.delayed_yaw))
         cos_yaw = math.cos(yaw)
         sin_yaw = math.sin(yaw)
 

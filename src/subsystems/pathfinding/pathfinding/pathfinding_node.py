@@ -59,7 +59,7 @@ ANGLE_SMOOTH_ALPHA  = 0.3   # Faktor für exponentielle Glättung des Winkels
 # Zusätzliche Parameter für Geschwindigkeits- und Lenkwinkelanzeige
 SPEED_PATH_LENGTH   = 30.0
 ANGLE_SPEED_DIVISOR = 45.0
-MAX_SPEED           = 5.0
+MAX_SPEED           = 2.5
 PREDICTION_INTERVAL = 0.1
 MAX_STEERING_ANGLE  = 30.0
 STEERING_RATIO      = 15.0
