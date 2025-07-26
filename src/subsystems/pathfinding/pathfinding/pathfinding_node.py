@@ -108,6 +108,7 @@ def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
             angle = float(np.degrees(np.arctan2(vec[0], vec[1])))
         else:
             angle = 0.0
+        angle_clamped = max(-MAX_STEERING_ANGLE, min(MAX_STEERING_ANGLE, angle))
         remain = total - dist
         speed = max_speed * (
             (1 - abs(angle) / ANGLE_SPEED_DIVISOR + remain / SPEED_PATH_LENGTH) / 2.0
@@ -116,7 +117,7 @@ def predict_speed_angle(path, max_speed, step=PREDICTION_INTERVAL):
         if abs(angle) > MAX_STEERING_ANGLE:
             speed = 0.0
         speeds.append(float(speed))
-        angles.append(float(angle))
+        angles.append(float(angle_clamped))
         dist += step
 
     return speeds, angles
