@@ -498,6 +498,7 @@ class PathNode(Node):
         final_path = base_path
 
         # best-path mit dem Midpoint-Pfad kombinieren
+        path_axis_angle = 0.0
         if all_midpoints:
             first_mid = all_midpoints[0]
             dist_mid = math.hypot(first_mid[0], first_mid[1])
@@ -510,17 +511,15 @@ class PathNode(Node):
             final_path = prefix + [first_mid] + all_midpoints[1:]
 
             # falls der Pfad zur y-Achse > PATH_AXIS_THRESHOLD°, nächstes Midpoint verwenden
-            if (
-                len(final_path) >= 2
-                and abs(
-                    math.degrees(
-                        math.atan2(
-                            final_path[1][0] - final_path[0][0],
-                            final_path[1][1] - final_path[0][1],
-                        )
+            if len(final_path) >= 2:
+                path_axis_angle = math.degrees(
+                    math.atan2(
+                        final_path[1][0] - final_path[0][0],
+                        final_path[1][1] - final_path[0][1],
                     )
                 )
-                > PATH_AXIS_THRESHOLD
+            if (
+                abs(path_axis_angle) > PATH_AXIS_THRESHOLD
                 and len(all_midpoints) > 1
             ):
                 next_mid = all_midpoints[1]
@@ -532,12 +531,31 @@ class PathNode(Node):
                     else:
                         break
                 final_path = prefix + [next_mid] + all_midpoints[2:]
+                if len(final_path) >= 2:
+                    path_axis_angle = math.degrees(
+                        math.atan2(
+                            final_path[1][0] - final_path[0][0],
+                            final_path[1][1] - final_path[0][1],
+                        )
+                    )
+        else:
+            if len(final_path) >= 2:
+                path_axis_angle = math.degrees(
+                    math.atan2(
+                        final_path[1][0] - final_path[0][0],
+                        final_path[1][1] - final_path[0][1],
+                    )
+                )
 
         self.midpoint_best_path = final_path
 
         # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
         speeds, angles = predict_speed_angle(final_path, self.max_speed)
-        if speeds:
+        if abs(path_axis_angle) > PATH_AXIS_THRESHOLD:
+            self.desired_speed = 0.0
+            self.speed_cmd_pub.publish(Float32(data=0.0))
+            self._ignore_next_speed_msg = True
+        elif speeds:
             self.desired_speed = speeds[0]
             self.speed_cmd_pub.publish(Float32(data=float(self.desired_speed)))
             self._ignore_next_speed_msg = True
