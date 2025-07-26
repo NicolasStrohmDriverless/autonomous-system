@@ -62,6 +62,7 @@ MAX_SPEED           = 5.0
 PREDICTION_INTERVAL = 0.1
 MAX_STEERING_ANGLE  = 30.0
 STEERING_RATIO      = 15.0
+PATH_AXIS_THRESHOLD = 30.0  # Maximal erlaubter Winkel zum y-Achse
 
 def _load_wheel_image() -> tuple[str, 'np.ndarray']:
     path = os.path.join(os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg")
@@ -493,19 +494,45 @@ class PathNode(Node):
         best_or = smooth_path(best_or)
 
         # finaler Pfad aus den geglätteten Mittelpunkten
-        final_path = best_bg + best_or
+        base_path = best_bg + best_or
+        final_path = base_path
 
         # best-path mit dem Midpoint-Pfad kombinieren
         if all_midpoints:
             first_mid = all_midpoints[0]
             dist_mid = math.hypot(first_mid[0], first_mid[1])
             prefix = []
-            for x, y in final_path:
+            for x, y in base_path:
                 if math.hypot(x, y) < dist_mid:
                     prefix.append((x, y))
                 else:
                     break
             final_path = prefix + [first_mid] + all_midpoints[1:]
+
+            # falls der Pfad zur y-Achse > PATH_AXIS_THRESHOLD°, nächstes Midpoint verwenden
+            if (
+                len(final_path) >= 2
+                and abs(
+                    math.degrees(
+                        math.atan2(
+                            final_path[1][0] - final_path[0][0],
+                            final_path[1][1] - final_path[0][1],
+                        )
+                    )
+                )
+                > PATH_AXIS_THRESHOLD
+                and len(all_midpoints) > 1
+            ):
+                next_mid = all_midpoints[1]
+                dist_next = math.hypot(next_mid[0], next_mid[1])
+                prefix = []
+                for x, y in base_path:
+                    if math.hypot(x, y) < dist_next:
+                        prefix.append((x, y))
+                    else:
+                        break
+                final_path = prefix + [next_mid] + all_midpoints[2:]
+
         self.midpoint_best_path = final_path
 
         # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
