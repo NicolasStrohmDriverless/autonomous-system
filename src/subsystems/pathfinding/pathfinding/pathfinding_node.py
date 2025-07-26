@@ -518,11 +518,14 @@ class PathNode(Node):
                         final_path[1][1] - final_path[0][1],
                     )
                 )
-            if (
+
+            idx = 0
+            while (
                 abs(path_axis_angle) > PATH_AXIS_THRESHOLD
-                and len(all_midpoints) > 1
+                and idx < len(all_midpoints) - 1
             ):
-                next_mid = all_midpoints[1]
+                idx += 1
+                next_mid = all_midpoints[idx]
                 dist_next = math.hypot(next_mid[0], next_mid[1])
                 prefix = []
                 for x, y in base_path:
@@ -530,7 +533,7 @@ class PathNode(Node):
                         prefix.append((x, y))
                     else:
                         break
-                final_path = prefix + [next_mid] + all_midpoints[2:]
+                final_path = prefix + all_midpoints[idx:]
                 if len(final_path) >= 2:
                     path_axis_angle = math.degrees(
                         math.atan2(
