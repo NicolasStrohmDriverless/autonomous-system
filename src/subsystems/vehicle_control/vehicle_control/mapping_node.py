@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Simple mapping node maintaining a 400x400 grid.
 
-The map shows only the current car pose and cones without persisting
-previous frames. Each pixel represents half a meter in the real world.
+The map persists the driven path and drawn cones. Each pixel represents
+half a meter in the real world.
 """
 import numpy as np
 
@@ -28,7 +28,6 @@ class MappingNode(Node):
         self.map = np.zeros((MAP_SIZE, MAP_SIZE, 3), dtype=np.uint8)
         self.origin = MAP_SIZE // 2
         self.last_state = Pose2D()
-        self.last_cones = None
         self.colors = {
             "blue": (0, 0, 255),
             "yellow": (255, 255, 0),
@@ -48,22 +47,10 @@ class MappingNode(Node):
         self.get_logger().info('MappingNode started')
 
     def state_cb(self, msg: Pose2D):
-        # store state and trigger a map update
+        # store state and draw rectangle at current position
         self.last_state = msg
-        self.publish_map()
-
-    def cone_cb(self, msg: ConeArray3D):
-        # store latest cones and trigger update
-        self.last_cones = msg
-        self.publish_map()
-
-    def publish_map(self) -> None:
-        # clear map for each frame
-        self.map = np.zeros((MAP_SIZE, MAP_SIZE, 3), dtype=np.uint8)
-
-        # draw car at current position
-        ix = int(round(self.last_state.x * PIXELS_PER_METER)) + self.origin
-        iy = int(round(self.last_state.y * PIXELS_PER_METER)) + self.origin
+        ix = int(round(msg.x * PIXELS_PER_METER)) + self.origin
+        iy = int(round(msg.y * PIXELS_PER_METER)) + self.origin
         w = CAR_WIDTH_PX
         length = CAR_LENGTH_PX
         x0 = max(int(ix - w / 2), 0)
@@ -71,25 +58,27 @@ class MappingNode(Node):
         y0 = max(int(iy - length / 2), 0)
         y1 = min(y0 + length - 1, MAP_SIZE - 1)
         self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 0, 0]
+        self.publish_map()
 
-        # draw cones using the last received message
-        if self.last_cones is not None:
-            yaw = math.radians(float(self.last_state.theta))
-            cos_y = math.cos(yaw)
-            sin_y = math.sin(yaw)
-            px = float(self.last_state.x)
-            py = float(self.last_state.y)
-            for c in self.last_cones.cones:
-                local_x = float(c.x)
-                local_z = float(c.z)
-                gx = px + cos_y * local_x - sin_y * local_z
-                gy = py + sin_y * local_x + cos_y * local_z
-                ix = int(round(gx * PIXELS_PER_METER)) + self.origin
-                iy = int(round(gy * PIXELS_PER_METER)) + self.origin
-                if 0 <= ix < MAP_SIZE and 0 <= iy < MAP_SIZE:
-                    color = self.colors.get(str(c.color), (255, 255, 255))
-                    self.map[iy, ix] = color
+    def cone_cb(self, msg: ConeArray3D):
+        yaw = math.radians(float(self.last_state.theta))
+        cos_y = math.cos(yaw)
+        sin_y = math.sin(yaw)
+        px = float(self.last_state.x)
+        py = float(self.last_state.y)
+        for c in msg.cones:
+            local_x = float(c.x)
+            local_z = float(c.z)
+            gx = px + cos_y * local_x - sin_y * local_z
+            gy = py + sin_y * local_x + cos_y * local_z
+            ix = int(round(gx * PIXELS_PER_METER)) + self.origin
+            iy = int(round(gy * PIXELS_PER_METER)) + self.origin
+            if 0 <= ix < MAP_SIZE and 0 <= iy < MAP_SIZE:
+                color = self.colors.get(str(c.color), (255, 255, 255))
+                self.map[iy, ix] = color
+        self.publish_map()
 
+    def publish_map(self) -> None:
         self.map_pub.publish(Header())
         img_msg = self.bridge.cv2_to_imgmsg(self.map, "rgb8")
         img_msg.header.stamp = self.get_clock().now().to_msg()
