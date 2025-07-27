@@ -70,6 +70,9 @@ MAX_STEERING_ANGLE = 30.0
 STEERING_RATIO = 3.0
 PATH_AXIS_THRESHOLD = 30.0  # Maximal erlaubter Winkel zum y-Achse
 
+# Maximum brake pressure for the Autonomous System Brake (ASB)
+MAX_BRAKE_BAR = 14.0
+
 
 def _load_wheel_image() -> tuple[str, "np.ndarray"]:
     path = os.path.join(os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg")
@@ -275,6 +278,9 @@ class PathNode(Node):
             Image, "/path_status/track_image", 1
         )
         self.track_global_pub = self.create_publisher(Image, "/track/image", 1)
+        self.asb_pub = self.create_publisher(
+            Float32, "/vehicle/asb_pressure_cmd", 10
+        )
 
         self.declare_parameter("max_speed", MAX_SPEED)
         self.max_speed = float(self.get_parameter("max_speed").value)
@@ -702,7 +708,12 @@ class PathNode(Node):
 
         # gewünschte Geschwindigkeit und Winkel entlang des Pfads vorhersagen
         speeds, angles = predict_speed_angle(final_path, self.max_speed)
-        if abs(path_axis_angle) > PATH_AXIS_THRESHOLD:
+        if best_or:
+            speeds = [0.0 for _ in speeds]
+            self.desired_speed = 0.0
+            self.speed_cmd_pub.publish(Float32(data=0.0))
+            self._ignore_next_speed_msg = True
+        elif abs(path_axis_angle) > PATH_AXIS_THRESHOLD:
             self.desired_speed = 0.0
             self.speed_cmd_pub.publish(Float32(data=0.0))
             self._ignore_next_speed_msg = True
@@ -821,8 +832,19 @@ class PathNode(Node):
             m.action = Marker.ADD
             m.scale.x = 0.08
             m.points = pts
-            m.color = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
+            color = ColorRGBA(
+                r=1.0 if best_or else 0.0,
+                g=0.0 if best_or else 1.0,
+                b=0.0,
+                a=1.0,
+            )
+            m.color = color
             path_markers.markers.append(m)
+
+        # set ASB pressure depending on red midpoints
+        self.asb_pub.publish(
+            Float32(data=float(MAX_BRAKE_BAR if best_or else 0.0))
+        )
 
         # draw a line through all midpoints for debugging
         if len(all_midpoints) >= 2:
