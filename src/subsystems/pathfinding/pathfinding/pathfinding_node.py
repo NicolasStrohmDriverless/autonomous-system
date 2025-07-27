@@ -63,7 +63,10 @@ ANGLE_SPEED_DIVISOR = 45.0
 MAX_SPEED           = 2.5
 PREDICTION_INTERVAL = 0.1
 MAX_STEERING_ANGLE  = 30.0
-STEERING_RATIO      = 15.0
+# Display steering wheel rotation at 90° when the steering
+# angle reaches ±30°. This corresponds to a ratio of 3:1
+# between steering angle and wheel image rotation.
+STEERING_RATIO      = 3.0
 PATH_AXIS_THRESHOLD = 30.0  # Maximal erlaubter Winkel zum y-Achse
 
 def _load_wheel_image() -> tuple[str, 'np.ndarray']:
