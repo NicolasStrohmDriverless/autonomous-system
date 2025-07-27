@@ -29,10 +29,10 @@ from oak_cone_detect_interfaces.msg import Cone2D, ConeArray2D, ConeArray3D, Con
 
 
 # Global toggle to add random noise simulating camera shake
-CAMERA_SHAKE = True
+CAMERA_SHAKE = False
 
 # Global toggle to add distance dependent noise
-DISTANCE_NOISE = True
+DISTANCE_NOISE = False
 
 # Maximum positional deviation at 30m distance in meters
 MAX_DISTORTION_30M = 0.01
