@@ -49,7 +49,8 @@ PATH_MIDPOINT_COLOR = [0.0, 1.0, 0.0, 1.0]
 SIDE_CHECK_RADIUS = 2.0
 MAX_STEP_DIST     = 2.0
 GEGENCHECK        = 1
-SMOOTH_ALPHA      = 0.4   # Faktor für exponentielle Glättung des Pfades
+SMOOTH_ALPHA      = 0.8   # stärkerer Faktor für exponentielle Glättung
+SPLINE_SMOOTHING  = 5.0   # Smoothing-Parameter für die Spline-Interpolation
 
 # Neuer Winkel-Filter: größere Fenster, höhere Toleranz und EMA-Glättung
 ANGLE_WINDOW        = 7     # Anzahl der letzten Winkel für Median
@@ -204,8 +205,12 @@ def add_linear_prefix(points, length=1.0):
     return [(0.0, 0.0), tuple(prefix)] + list(points)
 
 
-def smooth_path(points, smoothing=1.0, num=200):
-    """Smooth ``points`` using cubic spline interpolation."""
+def smooth_path(points, smoothing=SPLINE_SMOOTHING, num=200):
+    """Smooth ``points`` using cubic spline interpolation.
+
+    ``smoothing`` controls how strongly the points are interpolated. A
+    higher value results in a smoother curve.
+    """
     if len(points) < 3:
         return list(points)
     pts = add_linear_prefix(points)
@@ -398,7 +403,7 @@ class PathNode(Node):
         mids_or = [m for m in combined_filtered if m in mids_or]
 
         # geglättete Linie aller Mittelpunkte für Debugging
-        all_midpoints = smooth_path(combined_filtered)
+        all_midpoints = smooth_path(combined_filtered, smoothing=SPLINE_SMOOTHING)
         debug_path = [(0.0, self.start_offset)] + all_midpoints
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
@@ -598,9 +603,10 @@ class PathNode(Node):
                     )
                 )
 
-        # finalen Pfad mittels Spline glätten und Lenkwinkel begrenzen
-        final_path = smooth_path(final_path)
-        final_path = limit_steering_angles(final_path, MAX_ANGLE)
+        # finalen Pfad mittels Spline glätten und danach Winkel begrenzen
+        final_path = limit_steering_angles(
+            smooth_path(final_path, smoothing=SPLINE_SMOOTHING), MAX_ANGLE
+        )
 
         self.midpoint_best_path = final_path
 
