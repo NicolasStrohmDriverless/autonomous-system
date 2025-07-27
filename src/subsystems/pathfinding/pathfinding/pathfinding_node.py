@@ -46,6 +46,7 @@ COLOR_MAP = {
 }
 MIDPOINT_COLOR = [0.5, 0.5, 0.5, 1.0]
 PATH_MIDPOINT_COLOR = [0.0, 1.0, 0.0, 1.0]
+RED_MIDPOINT_COLOR = [1.0, 0.0, 0.0, 1.0]
 SIDE_CHECK_RADIUS = 2.0
 MAX_STEP_DIST = 2.0
 GEGENCHECK = 1
@@ -420,6 +421,14 @@ class PathNode(Node):
         mids_bg = sorted(set(mids_bg), key=lambda x: x[0])
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
+        # remove red midpoints with nearly identical x-position (+/- 0.3 m)
+        filtered_mids_or = []
+        for mid in mids_or:
+            if any(abs(mid[0] - f_mid[0]) <= 0.3 for f_mid in filtered_mids_or):
+                continue
+            filtered_mids_or.append(mid)
+        mids_or = filtered_mids_or
+
         # ---- Mittelpunkte filtern und sortieren ----
         combined = sorted(set(mids_bg + mids_or), key=lambda m: math.hypot(m[0], m[1]))
         combined_filtered = [
@@ -741,13 +750,13 @@ class PathNode(Node):
         for idx, (mx, my) in enumerate(mids_or):
             m = Marker()
             m.header = msg.header
-            m.ns = "midpoints_or"
+            m.ns = "midpoints_red"
             m.id = 20000 + idx
             m.type = Marker.SPHERE
             m.action = Marker.ADD
             m.pose.position = Point(x=float(mx), y=float(my), z=0.0)
             m.scale.x = m.scale.y = m.scale.z = MIDPOINT_MARKER_SCALE
-            color = PATH_MIDPOINT_COLOR if (mx, my) in used_mids else MIDPOINT_COLOR
+            color = PATH_MIDPOINT_COLOR if (mx, my) in used_mids else RED_MIDPOINT_COLOR
             r, g, b, a = color
             m.color = ColorRGBA(r=r, g=g, b=b, a=a)
             markers.markers.append(m)
