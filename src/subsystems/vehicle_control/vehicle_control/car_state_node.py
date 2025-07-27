@@ -65,7 +65,7 @@ def draw_pressure_gauge(
     y = int(center[1] + (radius - 10) * math.sin(a))
     cv2.line(img, center, (x, y), (0, 0, 255), 2)
 
-    text = f"{pressure:.0f} bar"
+    text = f"{pressure:.2f} bar"
     text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     text_pos = (center[0] - text_size[0] // 2, height - 5)
     cv2.putText(
