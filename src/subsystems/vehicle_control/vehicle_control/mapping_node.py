@@ -28,6 +28,7 @@ class MappingNode(Node):
         self.map = np.zeros((MAP_SIZE, MAP_SIZE, 3), dtype=np.uint8)
         self.origin = MAP_SIZE // 2
         self.last_state = Pose2D()
+        self.last_cones = []
         self.colors = {
             "blue": (0, 0, 255),
             "yellow": (255, 255, 0),
@@ -47,7 +48,7 @@ class MappingNode(Node):
         self.get_logger().info('MappingNode started')
 
     def state_cb(self, msg: Pose2D):
-        # store state and draw rectangle at current position
+        # store state and redraw map with current position and cones
         self.last_state = msg
         ix = int(round(msg.x * PIXELS_PER_METER)) + self.origin
         iy = int(round(msg.y * PIXELS_PER_METER)) + self.origin
@@ -58,15 +59,34 @@ class MappingNode(Node):
         y0 = max(int(iy - length / 2), 0)
         y1 = min(y0 + length - 1, MAP_SIZE - 1)
         self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 0, 0]
+        self.draw_cones()
         self.publish_map()
 
     def cone_cb(self, msg: ConeArray3D):
+        self.last_cones = list(msg.cones)
+        self.draw_cones()
+        self.publish_map()
+
+    def draw_cones(self):
+        self.map[:, :] = 0
+        # draw car at last known position
+        ix = int(round(self.last_state.x * PIXELS_PER_METER)) + self.origin
+        iy = int(round(self.last_state.y * PIXELS_PER_METER)) + self.origin
+        w = CAR_WIDTH_PX
+        length = CAR_LENGTH_PX
+        x0 = max(int(ix - w / 2), 0)
+        x1 = min(x0 + w - 1, MAP_SIZE - 1)
+        y0 = max(int(iy - length / 2), 0)
+        y1 = min(y0 + length - 1, MAP_SIZE - 1)
+        self.map[y0 : y1 + 1, x0 : x1 + 1] = [255, 0, 0]
+
+        # draw stored cones relative to car pose
         yaw = math.radians(float(self.last_state.theta))
         cos_y = math.cos(yaw)
         sin_y = math.sin(yaw)
         px = float(self.last_state.x)
         py = float(self.last_state.y)
-        for c in msg.cones:
+        for c in self.last_cones:
             local_x = float(c.x)
             local_z = float(c.z)
             gx = px + cos_y * local_x - sin_y * local_z
@@ -76,7 +96,6 @@ class MappingNode(Node):
             if 0 <= ix < MAP_SIZE and 0 <= iy < MAP_SIZE:
                 color = self.colors.get(str(c.color), (255, 255, 255))
                 self.map[iy, ix] = color
-        self.publish_map()
 
     def publish_map(self) -> None:
         self.map_pub.publish(Header())

@@ -267,7 +267,7 @@ class PathNode(Node):
         self.declare_parameter("max_speed", MAX_SPEED)
         self.max_speed = float(self.get_parameter("max_speed").value)
 
-        self.speed = None
+        self.speed = 0.0
         self.create_subscription(Float32, "/vehicle/actual_speed", self.speed_callback, 10)
 
         self.actual_steering = 0.0
@@ -629,14 +629,14 @@ class PathNode(Node):
         pred.steering_angles = [float(a) for a in angles]
         self.prediction_pub.publish(pred)
 
-        speed_img = draw_speed_gauge(self.desired_speed, self.max_speed)
+        speed_img = draw_speed_gauge(self.speed, self.max_speed)
         speed_msg = self.bridge.cv2_to_imgmsg(speed_img, "bgr8")
         speed_msg.header = msg.header
         self.speed_image_pub.publish(speed_msg)
 
         wheel_img = draw_steering_wheel(
-            self._angle_smoothed if self._angle_smoothed is not None else 0.0,
-            MAX_STEERING_ANGLE,
+            self.actual_steering,
+            90.0,
             STEERING_RATIO,
         )
         wheel_msg = self.bridge.cv2_to_imgmsg(wheel_img, "bgr8")
