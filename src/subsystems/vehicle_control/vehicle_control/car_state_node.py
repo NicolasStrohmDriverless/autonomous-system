@@ -144,6 +144,13 @@ class CarStateNode(Node):
         self.brake_pub = self.create_publisher(
             Float32, "/vehicle/asb_pressure", 10
         )
+        self.asb_cmd = 0.0
+        self.create_subscription(
+            Float32,
+            "/vehicle/asb_pressure_cmd",
+            self.asb_cmd_cb,
+            10,
+        )
         self.brake_image_pub = self.create_publisher(
             Image, "/path_status/brake_image", 1
         )
@@ -162,11 +169,16 @@ class CarStateNode(Node):
         self.predicted_angles = list(msg.steering_angles)
         self.prediction_idx = 0
 
+    def asb_cmd_cb(self, msg: Float32):
+        self.asb_cmd = float(msg.data)
+
     def update(self):
         now = self.get_clock().now()
         dt = (now - self.last_time).nanoseconds * 1e-9
         self.last_time = now
 
+        cmd_brake = self.asb_cmd
+        self.asb_cmd = 0.0
         brake = 0.0
 
         if self.prediction_idx < len(self.predicted_speeds):
@@ -194,11 +206,15 @@ class CarStateNode(Node):
                 if self.speed > 0.0:
                     diff = self.speed
                     brake = min(MAX_BRAKE_BAR, diff)
-                    self.speed -= brake * dt
-                    if self.speed < 0.0:
-                        self.speed = 0.0
                 if abs(self.speed) < 1e-2:
                     self.speed = 0.0
+
+        # apply external brake command
+        brake = max(brake, cmd_brake)
+        if brake > 0.0:
+            self.speed -= brake * dt
+            if self.speed < 0.0:
+                self.speed = 0.0
 
         # adjust steering angle using PID controller
         if self.desired_angle is not None:
