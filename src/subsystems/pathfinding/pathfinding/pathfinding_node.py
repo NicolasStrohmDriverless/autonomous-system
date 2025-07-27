@@ -28,48 +28,49 @@ qos_sub = QoSProfile(
     reliability=QoSReliabilityPolicy.BEST_EFFORT,
     history=QoSHistoryPolicy.KEEP_LAST,
     depth=1,
-    durability=QoSDurabilityPolicy.VOLATILE
+    durability=QoSDurabilityPolicy.VOLATILE,
 )
 
 # Pfad- und Marker-Parameter
-PATH_LENGTH             = 20.0    # nun 20 m
-MAX_ANGLE               = 40.0
-FIRST_STEP_MAX_ANGLE    = 50.0
-MIDPOINT_MARKER_SCALE   = 0.1
-DEFAULT_CONE_SCALE      = (0.228, 0.228, 0.325)
+PATH_LENGTH = 20.0  # nun 20 m
+MAX_ANGLE = 40.0
+FIRST_STEP_MAX_ANGLE = 50.0
+MIDPOINT_MARKER_SCALE = 0.1
+DEFAULT_CONE_SCALE = (0.228, 0.228, 0.325)
 LARGE_ORANGE_CONE_SCALE = (0.285, 0.285, 0.505)
-CONE_POSITION_SCALE     = (1.0, 1.0, 1.0)
+CONE_POSITION_SCALE = (1.0, 1.0, 1.0)
 COLOR_MAP = {
-    'blue':   [0.0, 0.0, 1.0, 1.0],
-    'yellow': [1.0, 1.0, 0.0, 1.0],
-    'orange': [1.0, 0.5, 0.0, 1.0]
+    "blue": [0.0, 0.0, 1.0, 1.0],
+    "yellow": [1.0, 1.0, 0.0, 1.0],
+    "orange": [1.0, 0.5, 0.0, 1.0],
 }
-MIDPOINT_COLOR       = [0.5, 0.5, 0.5, 1.0]
+MIDPOINT_COLOR = [0.5, 0.5, 0.5, 1.0]
 PATH_MIDPOINT_COLOR = [0.0, 1.0, 0.0, 1.0]
 SIDE_CHECK_RADIUS = 2.0
-MAX_STEP_DIST     = 2.0
-GEGENCHECK        = 1
-SMOOTH_ALPHA      = 0.8   # stärkerer Faktor für exponentielle Glättung
-SPLINE_SMOOTHING  = 5.0   # Smoothing-Parameter für die Spline-Interpolation
+MAX_STEP_DIST = 2.0
+GEGENCHECK = 1
+SMOOTH_ALPHA = 0.8  # stärkerer Faktor für exponentielle Glättung
+SPLINE_SMOOTHING = 5.0  # Smoothing-Parameter für die Spline-Interpolation
 
 # Neuer Winkel-Filter: größere Fenster, höhere Toleranz und EMA-Glättung
-ANGLE_WINDOW        = 7     # Anzahl der letzten Winkel für Median
-ANGLE_JUMP_THRESH   = 30.0  # Maximal erlaubter Sprung in °
-ANGLE_SMOOTH_ALPHA  = 0.3   # Faktor für exponentielle Glättung des Winkels
+ANGLE_WINDOW = 7  # Anzahl der letzten Winkel für Median
+ANGLE_JUMP_THRESH = 30.0  # Maximal erlaubter Sprung in °
+ANGLE_SMOOTH_ALPHA = 0.3  # Faktor für exponentielle Glättung des Winkels
 
 # Zusätzliche Parameter für Geschwindigkeits- und Lenkwinkelanzeige
-SPEED_PATH_LENGTH   = 30.0
+SPEED_PATH_LENGTH = 30.0
 ANGLE_SPEED_DIVISOR = 45.0
-MAX_SPEED           = 2.5
+MAX_SPEED = 2.5
 PREDICTION_INTERVAL = 0.1
-MAX_STEERING_ANGLE  = 30.0
+MAX_STEERING_ANGLE = 30.0
 # Display steering wheel rotation at 90° when the steering
 # angle reaches ±30°. This corresponds to a ratio of 3:1
 # between steering angle and wheel image rotation.
-STEERING_RATIO      = 3.0
+STEERING_RATIO = 3.0
 PATH_AXIS_THRESHOLD = 30.0  # Maximal erlaubter Winkel zum y-Achse
 
-def _load_wheel_image() -> tuple[str, 'np.ndarray']:
+
+def _load_wheel_image() -> tuple[str, "np.ndarray"]:
     path = os.path.join(os.path.dirname(__file__), "..", "resource", "f1_wheel.jpg")
     if not os.path.isfile(path):
         try:
@@ -177,11 +178,12 @@ def draw_steering_wheel(
         )
     else:
         img = np.ones((size, size, 3), dtype=np.uint8) * 255
-    text = f"{angle:.1f} Grad"
+    text = f"{angle:.2f} Grad"
     text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     text_pos = (size // 2 - text_size[0] // 2, size - 5)
     cv2.putText(img, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
     return img
+
 
 def exp_smooth_path(path, alpha=SMOOTH_ALPHA):
     """Exponentielle Glättung eines Pfades."""
@@ -261,31 +263,49 @@ class PathNode(Node):
         self.path_pub = self.create_publisher(MarkerArray, "/best_path_marker", 10)
         self.fps_pub = self.create_publisher(Float32, "/path_inference_fps", 10)
         self.angle_pub = self.create_publisher(Float32, "/path_to_y_axis_angle", 10)
-        self.angle_image_pub = self.create_publisher(Image, "/path_status/angle_image", 1)
-        self.speed_image_pub = self.create_publisher(Image, "/path_status/speed_image", 1)
+        self.angle_image_pub = self.create_publisher(
+            Image, "/path_status/angle_image", 1
+        )
+        self.speed_image_pub = self.create_publisher(
+            Image, "/path_status/speed_image", 1
+        )
         self.prediction_pub = self.create_publisher(PathPrediction, "/prediction", 10)
-        self.track_image_pub = self.create_publisher(Image, "/path_status/track_image", 1)
+        self.track_image_pub = self.create_publisher(
+            Image, "/path_status/track_image", 1
+        )
         self.track_global_pub = self.create_publisher(Image, "/track/image", 1)
 
         self.declare_parameter("max_speed", MAX_SPEED)
         self.max_speed = float(self.get_parameter("max_speed").value)
 
         self.speed = 0.0
-        self.create_subscription(Float32, "/vehicle/actual_speed", self.speed_callback, 10)
+        self.create_subscription(
+            Float32, "/vehicle/actual_speed", self.speed_callback, 10
+        )
 
         self.actual_steering = 0.0
-        self.create_subscription(Float32, "/vehicle/actual_steering", self.actual_steering_cb, 10)
+        self.create_subscription(
+            Float32, "/vehicle/actual_steering", self.actual_steering_cb, 10
+        )
 
-        self.speed_cmd_pub = self.create_publisher(Float32, "/vehicle/desired_speed", 10)
-        self.speed_cmd_sub = self.create_subscription(Float32, "/vehicle/desired_speed", self.speed_cmd_callback, 10)
-        self.angle_shared_pub = self.create_publisher(Float32, "/vehicle/steering_angle", 10)
-        self.angle_shared_sub = self.create_subscription(Float32, "/vehicle/steering_angle", self.angle_shared_callback, 10)
+        self.speed_cmd_pub = self.create_publisher(
+            Float32, "/vehicle/desired_speed", 10
+        )
+        self.speed_cmd_sub = self.create_subscription(
+            Float32, "/vehicle/desired_speed", self.speed_cmd_callback, 10
+        )
+        self.angle_shared_pub = self.create_publisher(
+            Float32, "/vehicle/steering_angle", 10
+        )
+        self.angle_shared_sub = self.create_subscription(
+            Float32, "/vehicle/steering_angle", self.angle_shared_callback, 10
+        )
         self.desired_speed = None
         self.shared_angle = None
         self._ignore_next_speed_msg = False
 
         self.bridge = CvBridge()
-        self.get_logger().info('PathNode started')
+        self.get_logger().info("PathNode started")
 
         # interne Puffer
         self._frame_times = []
@@ -312,6 +332,10 @@ class PathNode(Node):
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
+        img = draw_speed_gauge(self.speed, self.max_speed)
+        msg_img = self.bridge.cv2_to_imgmsg(img, "bgr8")
+        msg_img.header.stamp = self.get_clock().now().to_msg()
+        self.speed_image_pub.publish(msg_img)
 
     def speed_cmd_callback(self, msg: Float32):
         if self._ignore_next_speed_msg:
@@ -324,6 +348,10 @@ class PathNode(Node):
 
     def actual_steering_cb(self, msg: Float32):
         self.actual_steering = float(msg.data)
+        img = draw_steering_wheel(self.actual_steering, 90.0, STEERING_RATIO)
+        msg_img = self.bridge.cv2_to_imgmsg(img, "bgr8")
+        msg_img.header.stamp = self.get_clock().now().to_msg()
+        self.angle_image_pub.publish(msg_img)
 
     def callback(self, msg: ConeArray3D):
         t0 = time.time()
@@ -340,18 +368,21 @@ class PathNode(Node):
 
         # 2) Kegel-Marker
         markers = MarkerArray()
-        clear = Marker(); clear.action = Marker.DELETEALL
+        clear = Marker()
+        clear.action = Marker.DELETEALL
         markers.markers.append(clear)
         for col, pts in cones.items():
             for idx, p in enumerate(pts):
                 m = Marker()
                 m.header = msg.header
-                m.ns     = f'cone_{col}'
-                m.id     = hash(col) % 1000 + idx
-                m.type   = Marker.CYLINDER
+                m.ns = f"cone_{col}"
+                m.id = hash(col) % 1000 + idx
+                m.type = Marker.CYLINDER
                 m.action = Marker.ADD
                 m.pose.position = Point(x=float(p[0]), y=float(p[1]), z=float(p[2]))
-                scale = LARGE_ORANGE_CONE_SCALE if col=='orange' else DEFAULT_CONE_SCALE
+                scale = (
+                    LARGE_ORANGE_CONE_SCALE if col == "orange" else DEFAULT_CONE_SCALE
+                )
                 m.scale.x, m.scale.y, m.scale.z = scale
                 r, g, b, a = COLOR_MAP[col]
                 m.color = ColorRGBA(r=r, g=g, b=b, a=a)
@@ -370,14 +401,16 @@ class PathNode(Node):
                 tri = Delaunay(np.array(pts2d))
                 for s in tri.simplices:
                     for i in range(3):
-                        a, b = s[i], s[(i+1)%3]
+                        a, b = s[i], s[(i + 1) % 3]
                         cs = {cols2d[a], cols2d[b]}
-                        mid = tuple(((np.array(pts2d[a]) + np.array(pts2d[b]))/2).round(4))
+                        mid = tuple(
+                            ((np.array(pts2d[a]) + np.array(pts2d[b])) / 2).round(4)
+                        )
                         if mid[1] <= 0:
                             continue
-                        if cs == {'blue','yellow'}:
+                        if cs == {"blue", "yellow"}:
                             mids_bg.append(mid)
-                        if cs == {'orange'}:
+                        if cs == {"orange"}:
                             if abs(pts2d[a][0] - pts2d[b][0]) <= 0.5:
                                 continue
                             mids_or.append(mid)
@@ -388,15 +421,13 @@ class PathNode(Node):
         mids_or = sorted(set(mids_or), key=lambda x: x[0])
 
         # ---- Mittelpunkte filtern und sortieren ----
-        combined = sorted(
-            set(mids_bg + mids_or),
-            key=lambda m: math.hypot(m[0], m[1])
-        )
+        combined = sorted(set(mids_bg + mids_or), key=lambda m: math.hypot(m[0], m[1]))
         combined_filtered = [
-            m for m in combined
+            m
+            for m in combined
             if (
-                math.hypot(m[0], m[1]) <= PATH_LENGTH and
-                abs(math.degrees(math.atan2(m[0], m[1]))) <= MAX_ANGLE
+                math.hypot(m[0], m[1]) <= PATH_LENGTH
+                and abs(math.degrees(math.atan2(m[0], m[1]))) <= MAX_ANGLE
             )
         ]
         if len(combined_filtered) < 5:
@@ -410,72 +441,112 @@ class PathNode(Node):
         debug_path = [(0.0, self.start_offset)] + all_midpoints
 
         # --- 4) Pfadfindung (Greedy) mit Inertia & Extrapolation ---
-        blue_pts   = np.array([p[:2] for p in cones['blue']])   if cones['blue']   else np.empty((0,2))
-        yellow_pts = np.array([p[:2] for p in cones['yellow']]) if cones['yellow'] else np.empty((0,2))
-        orange_pts = np.array([p[:2] for p in cones['orange']]) if cones['orange'] else np.empty((0,2))
+        blue_pts = (
+            np.array([p[:2] for p in cones["blue"]])
+            if cones["blue"]
+            else np.empty((0, 2))
+        )
+        yellow_pts = (
+            np.array([p[:2] for p in cones["yellow"]])
+            if cones["yellow"]
+            else np.empty((0, 2))
+        )
+        orange_pts = (
+            np.array([p[:2] for p in cones["orange"]])
+            if cones["orange"]
+            else np.empty((0, 2))
+        )
 
         # Start-Vektor aus vorherigem Pfad (Inertia)
         if self.prev_bg and len(self.prev_bg) >= 2:
             vec = np.array(self.prev_bg[-1]) - np.array(self.prev_bg[-2])
-            v0  = vec / np.linalg.norm(vec)
+            v0 = vec / np.linalg.norm(vec)
         else:
             v0 = np.array([0.0, 1.0])
 
         def check_side_bg(mid, prev, nxt):
             v = np.array(nxt) - np.array(prev)
-            if np.linalg.norm(v) < 1e-3: return False
+            if np.linalg.norm(v) < 1e-3:
+                return False
             v = v / np.linalg.norm(v)
             ln, rn = np.array([-v[1], v[0]]), np.array([v[1], -v[0]])
+
             def sides(pts):
-                if pts.shape[0] == 0: return False, False
-                d    = pts - mid
+                if pts.shape[0] == 0:
+                    return False, False
+                d = pts - mid
                 dist = np.linalg.norm(d, axis=1)
-                pl   = np.dot(d, ln); pr = np.dot(d, rn)
-                return np.any((pl>0)&(dist<SIDE_CHECK_RADIUS)), np.any((pr>0)&(dist<SIDE_CHECK_RADIUS))
+                pl = np.dot(d, ln)
+                pr = np.dot(d, rn)
+                return np.any((pl > 0) & (dist < SIDE_CHECK_RADIUS)), np.any(
+                    (pr > 0) & (dist < SIDE_CHECK_RADIUS)
+                )
+
             lb, rb = sides(blue_pts)
             ly, ry = sides(yellow_pts)
             return (lb and ry or ly and rb) and not (lb and rb) and not (ly and ry)
 
         def check_side_or(mid, prev, nxt):
             v = np.array(nxt) - np.array(prev)
-            if np.linalg.norm(v) < 1e-3: return False
+            if np.linalg.norm(v) < 1e-3:
+                return False
             v = v / np.linalg.norm(v)
             ln, rn = np.array([-v[1], v[0]]), np.array([v[1], -v[0]])
-            if orange_pts.shape[0] == 0: return False
-            d    = orange_pts - mid
+            if orange_pts.shape[0] == 0:
+                return False
+            d = orange_pts - mid
             dist = np.linalg.norm(d, axis=1)
-            pl   = np.dot(d, ln); pr   = np.dot(d, rn)
-            return np.any((pl>0)&(dist<SIDE_CHECK_RADIUS)) and np.any((pr>0)&(dist<SIDE_CHECK_RADIUS))
+            pl = np.dot(d, ln)
+            pr = np.dot(d, rn)
+            return np.any((pl > 0) & (dist < SIDE_CHECK_RADIUS)) and np.any(
+                (pr > 0) & (dist < SIDE_CHECK_RADIUS)
+            )
 
-        def find_greedy_path(mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST):
+        def find_greedy_path(
+            mids, check_fn, start_pt, last_vec, max_len, max_step=MAX_STEP_DIST
+        ):
             if not mids:
                 return [], 0.0, last_vec
-            arr  = np.array(mids)
+            arr = np.array(mids)
             path = [tuple(start_pt)]
             used = set()
             last = np.array(start_pt)
             total = 0.0
-            y_axis = np.array([0.0,1.0])
+            y_axis = np.array([0.0, 1.0])
 
             while total < max_len:
                 dists = np.linalg.norm(arr - last, axis=1)
                 cands = [
-                    (i, mids[i], dists[i]) for i in range(len(mids))
-                    if (i not in used
+                    (i, mids[i], dists[i])
+                    for i in range(len(mids))
+                    if (
+                        i not in used
                         and dists[i] > 0.1
                         and dists[i] <= max_step
                         and total + dists[i] <= max_len
-                        and mids[i][1] > 0)
+                        and mids[i][1] > 0
+                    )
                 ]
                 if len(path) == 1:
                     cands = [
-                        (i, p, d) for (i, p, d) in cands
-                        if abs(np.degrees(np.arccos(
-                            np.clip(
-                                np.dot((np.array(p)-last)/np.linalg.norm(np.array(p)-last), y_axis),
-                                -1, 1
+                        (i, p, d)
+                        for (i, p, d) in cands
+                        if abs(
+                            np.degrees(
+                                np.arccos(
+                                    np.clip(
+                                        np.dot(
+                                            (np.array(p) - last)
+                                            / np.linalg.norm(np.array(p) - last),
+                                            y_axis,
+                                        ),
+                                        -1,
+                                        1,
+                                    )
+                                )
                             )
-                        ))) <= FIRST_STEP_MAX_ANGLE
+                        )
+                        <= FIRST_STEP_MAX_ANGLE
                     ]
                 if not cands:
                     break
@@ -489,7 +560,9 @@ class PathNode(Node):
                         continue
                     dirv = v / n
                     if len(path) > 1:
-                        ang = np.degrees(np.arccos(np.clip(np.dot(last_vec, dirv), -1, 1)))
+                        ang = np.degrees(
+                            np.arccos(np.clip(np.dot(last_vec, dirv), -1, 1))
+                        )
                         if ang > MAX_ANGLE:
                             continue
                     if not check_fn(p, last, p):
@@ -515,22 +588,30 @@ class PathNode(Node):
 
         # nur eine Konfiguration (GEGENCHECK = 1)
         for _ in range(GEGENCHECK):
-            p_bg, l_bg, v1 = find_greedy_path(mids_bg, check_side_bg, (0, self.start_offset), v0, PATH_LENGTH)
+            p_bg, l_bg, v1 = find_greedy_path(
+                mids_bg, check_side_bg, (0, self.start_offset), v0, PATH_LENGTH
+            )
             l_or_max = PATH_LENGTH - l_bg
             p_or, l_or = [], 0.0
             if l_or_max > 0 and len(p_bg) > 1:
-                p_or, l_or, _ = find_greedy_path(mids_or, check_side_or, p_bg[-1], v1, l_or_max)
+                p_or, l_or, _ = find_greedy_path(
+                    mids_or, check_side_or, p_bg[-1], v1, l_or_max
+                )
 
             pts_count = len(p_bg) + len(p_or)
             total_len = l_bg + l_or
 
             # Auswahl: zuerst mehr Punkte, dann längere Strecke
             if (pts_count > max_pts) or (pts_count == max_pts and total_len > best_len):
-                max_pts  = pts_count
+                max_pts = pts_count
                 best_len = total_len
-                best_bg  = p_bg
-                best_or  = p_or
-                abort = "" if best_len >= PATH_LENGTH else f"Nur {best_len:.2f}m erreicht ({max_pts} Punkte)."
+                best_bg = p_bg
+                best_or = p_or
+                abort = (
+                    ""
+                    if best_len >= PATH_LENGTH
+                    else f"Nur {best_len:.2f}m erreicht ({max_pts} Punkte)."
+                )
 
         # Extrapolation, damit immer genau PATH_LENGTH erreicht wird
         combined = best_bg + best_or
@@ -540,7 +621,7 @@ class PathNode(Node):
             dir_vec = last_pt - prev_pt
             dir_vec /= np.linalg.norm(dir_vec)
             missing = PATH_LENGTH - best_len
-            ext_pt  = tuple((last_pt + dir_vec * missing).tolist())
+            ext_pt = tuple((last_pt + dir_vec * missing).tolist())
             if best_or:
                 best_or.append(ext_pt)
             else:
@@ -577,10 +658,7 @@ class PathNode(Node):
                         final_path[1][1] - final_path[0][1],
                     )
                 )
-            if (
-                abs(path_axis_angle) > PATH_AXIS_THRESHOLD
-                and len(all_midpoints) > 1
-            ):
+            if abs(path_axis_angle) > PATH_AXIS_THRESHOLD and len(all_midpoints) > 1:
                 next_mid = all_midpoints[1]
                 dist_next = math.hypot(next_mid[0], next_mid[1])
                 prefix = []
@@ -650,7 +728,7 @@ class PathNode(Node):
         for idx, (mx, my) in enumerate(mids_bg):
             m = Marker()
             m.header = msg.header
-            m.ns = 'midpoints_bg'
+            m.ns = "midpoints_bg"
             m.id = 10000 + idx
             m.type = Marker.SPHERE
             m.action = Marker.ADD
@@ -663,7 +741,7 @@ class PathNode(Node):
         for idx, (mx, my) in enumerate(mids_or):
             m = Marker()
             m.header = msg.header
-            m.ns = 'midpoints_or'
+            m.ns = "midpoints_or"
             m.id = 20000 + idx
             m.type = Marker.SPHERE
             m.action = Marker.ADD
@@ -680,7 +758,10 @@ class PathNode(Node):
             raw_angle = float(np.degrees(np.arctan2(v[0], v[1])))
 
             # Ausreißerprüfung
-            if self._angle_buffer and abs(raw_angle - self._angle_buffer[-1]) > ANGLE_JUMP_THRESH:
+            if (
+                self._angle_buffer
+                and abs(raw_angle - self._angle_buffer[-1]) > ANGLE_JUMP_THRESH
+            ):
                 self.get_logger().warn(
                     f"Ausreißer erkannt: Δ{(raw_angle - self._angle_buffer[-1]):.1f}° > {ANGLE_JUMP_THRESH}°"
                 )
@@ -691,15 +772,19 @@ class PathNode(Node):
                     self._angle_buffer.pop(0)
 
             # Median-Filter
-            filtered = float(np.median(self._angle_buffer)) if self._angle_buffer else raw_angle
+            filtered = (
+                float(np.median(self._angle_buffer))
+                if self._angle_buffer
+                else raw_angle
+            )
 
             # EMA-Glättung
             if self._angle_smoothed is None:
                 self._angle_smoothed = filtered
             else:
                 self._angle_smoothed = (
-                    ANGLE_SMOOTH_ALPHA * self._angle_smoothed +
-                    (1 - ANGLE_SMOOTH_ALPHA) * filtered
+                    ANGLE_SMOOTH_ALPHA * self._angle_smoothed
+                    + (1 - ANGLE_SMOOTH_ALPHA) * filtered
                 )
 
             # Publizieren
@@ -709,8 +794,11 @@ class PathNode(Node):
 
         # Pfad in MarkerArray
         path_markers = MarkerArray()
-        clr = Marker(); clr.action = Marker.DELETEALL
-        clr.header = msg.header; clr.ns='best_path'; clr.id=40000
+        clr = Marker()
+        clr.action = Marker.DELETEALL
+        clr.header = msg.header
+        clr.ns = "best_path"
+        clr.id = 40000
         path_markers.markers.append(clr)
 
         path_points = final_path
@@ -718,7 +806,7 @@ class PathNode(Node):
             pts = [Point(x=float(x), y=float(y), z=0.0) for x, y in path_points]
             m = Marker()
             m.header = msg.header
-            m.ns = 'best_path'
+            m.ns = "best_path"
             m.id = 30000
             m.type = Marker.LINE_STRIP
             m.action = Marker.ADD
@@ -731,7 +819,7 @@ class PathNode(Node):
         if len(all_midpoints) >= 2:
             mp = Marker()
             mp.header = msg.header
-            mp.ns = 'midpoint_path'
+            mp.ns = "midpoint_path"
             mp.id = 31000
             mp.type = Marker.LINE_STRIP
             mp.action = Marker.ADD
@@ -750,7 +838,7 @@ class PathNode(Node):
         if len(self._frame_times) > 10:
             self._frame_times.pop(0)
         avg = sum(self._frame_times) / len(self._frame_times)
-        self.fps_pub.publish(Float32(data=(1.0/avg if avg>0 else 0.0)))
+        self.fps_pub.publish(Float32(data=(1.0 / avg if avg > 0 else 0.0)))
 
         # 9) Warnung bei Kürze
         if abort:
@@ -769,5 +857,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
