@@ -24,6 +24,14 @@ MAX_YAW_ACCEL = 180.0  # deg/s^2
 STEERING_KP = 5
 STEERING_KI = 3
 STEERING_KD = 3
+# PID gains for speed control
+SPEED_KP = 1.0
+SPEED_KI = 0.0
+SPEED_KD = 0.0
+# PID gains for brake pressure control
+BRAKE_KP = 1.0
+BRAKE_KI = 0.0
+BRAKE_KD = 0.0
 # Lenkwinkelgeschwindigkeit
 # θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
@@ -117,7 +125,13 @@ class CarStateNode(Node):
         self.predicted_speeds = []
         self.predicted_angles = []
         self.prediction_idx = 0
-        self.steering_pid = PIDController(STEERING_KP, STEERING_KI, STEERING_KD)
+        self.steering_pid = PIDController(
+            STEERING_KP,
+            STEERING_KI,
+            STEERING_KD,
+        )
+        self.speed_pid = PIDController(SPEED_KP, SPEED_KI, SPEED_KD)
+        self.brake_pid = PIDController(BRAKE_KP, BRAKE_KI, BRAKE_KD)
         self.last_time = self.get_clock().now()
 
         self.declare_parameter("max_yaw_accel", MAX_YAW_ACCEL)
@@ -187,18 +201,21 @@ class CarStateNode(Node):
                 self.desired_angle = self.predicted_angles[self.prediction_idx]
             self.prediction_idx += 1
 
-        # adjust speed towards desired speed
+        # adjust speed towards desired speed using separate PID controllers
         if self.desired_speed is not None:
             if self.desired_speed > 0.0:
-                if self.speed < self.desired_speed:
-                    self.speed += ACCELERATION * dt
+                control = self.speed_pid.update(
+                    self.desired_speed,
+                    self.speed,
+                    dt,
+                )
+                if control > 0.0:
+                    accel = min(control, ACCELERATION * dt)
+                    self.speed += accel
                     if self.speed > self.desired_speed:
                         self.speed = self.desired_speed
-                elif self.speed > self.desired_speed:
-                    decel = min(
-                        DECELERATION * dt,
-                        self.speed - self.desired_speed,
-                    )
+                elif control < 0.0:
+                    decel = min(-control, DECELERATION * dt)
                     self.speed -= decel
                     if self.speed < self.desired_speed:
                         self.speed = self.desired_speed
@@ -206,6 +223,8 @@ class CarStateNode(Node):
                 if self.speed > 0.0:
                     diff = self.speed
                     brake = min(MAX_BRAKE_BAR, diff)
+                    brake_cmd = self.brake_pid.update(0.0, self.speed, dt)
+                    brake = min(MAX_BRAKE_BAR, max(brake, brake_cmd))
                 if abs(self.speed) < 1e-2:
                     self.speed = 0.0
 
