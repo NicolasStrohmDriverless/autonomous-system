@@ -336,6 +336,7 @@ class PathNode(Node):
         self.longest_or = []
         self.longest_len = 0.0
         self.midpoint_best_path = []
+        self.red_midpoint_counter = 0
 
     def speed_callback(self, msg: Float32):
         self.speed = float(msg.data)
@@ -842,10 +843,14 @@ class PathNode(Node):
             m.color = color
             path_markers.markers.append(m)
 
-        # set ASB pressure depending on red midpoints
-        self.asb_pub.publish(
-            Float32(data=float(MAX_BRAKE_BAR if best_or else 0.0))
-        )
+        # set ASB pressure after encountering three consecutive red midpoints
+        if best_or:
+            self.red_midpoint_counter += 1
+        else:
+            self.red_midpoint_counter = 0
+
+        pressure = MAX_BRAKE_BAR if self.red_midpoint_counter >= 3 else 0.0
+        self.asb_pub.publish(Float32(data=float(pressure)))
 
         # draw a line through all midpoints for debugging
         if len(all_midpoints) >= 2:
