@@ -21,17 +21,17 @@ MAX_STEERING_ANGLE = 30.0  # deg
 STEERING_TRANSLATION = 15.0  # ratio
 MAX_YAW_ACCEL = 180.0  # deg/s^2
 # PID gains for steering control
-STEERING_KP = 5
-STEERING_KI = 3
-STEERING_KD = 3
+STEERING_KP = 2.5
+STEERING_KI = 0.1
+STEERING_KD = 0.8
 # PID gains for speed control
-SPEED_KP = 1.0
-SPEED_KI = 0.0
-SPEED_KD = 0.0
+SPEED_KP = 1.2
+SPEED_KI = 0.05
+SPEED_KD = 0.3
 # PID gains for brake pressure control
-BRAKE_KP = 1.0
-BRAKE_KI = 0.0
-BRAKE_KD = 0.0
+BRAKE_KP = 2.0
+BRAKE_KI = 0.1
+BRAKE_KD = 0.5
 # Lenkwinkelgeschwindigkeit
 # θ_dot = R * v × i ≈ STEERING_TRANSLATION * v
 
