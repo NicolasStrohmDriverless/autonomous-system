@@ -32,7 +32,7 @@ from vehicle_control.mapping_node import MappingNode
 from vehicle_control.slam_node import SlamNode
 from vehicle_control.car_state_node import CarStateNode
 from ebs_active.ebs_active_node import EbsActiveNode
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Bool
 
 MODES = ["accel", "skidpad", "autox", "endu"]
 
@@ -81,27 +81,11 @@ class MultiWatchdogNode(Node):
             return
         node = random.choice(candidates)
         name = node.get_name()
-        self.get_logger().warn(f"Closing node {name} via keyboard trigger")
-
-        if hasattr(node, "shutdown"):
-            try:
-                node.shutdown()
-            except Exception:
-                pass
-
-        with self.node_lock:
-            if self.exec is not None:
-                try:
-                    self.exec.remove_node(node)
-                except Exception as e:
-                    self.get_logger().warn(f"Error removing node {name}: {e}")
-
-            time.sleep(0.2)
-
-            try:
-                node.destroy_node()
-            except Exception as e:
-                self.get_logger().warn(f"Error destroying node {name}: {e}")
+        self.get_logger().warn(
+            f"Requesting shutdown of node {name} via keyboard trigger"
+        )
+        shutdown_pub = self.create_publisher(Bool, f"/shutdown/{name}", 1)
+        shutdown_pub.publish(Bool(data=True))
 
     def set_managed_nodes(self, nodes, executor):
         self.nodes_to_kill = [n for n in nodes if n is not self]
@@ -161,8 +145,22 @@ class SystemUsageNode(Node):
         self.gpu_pub = self.create_publisher(Float32, '/system/gpu_load', 10)
         self.cpu_temp_pub = self.create_publisher(Float32, '/system/cpu_temp', 10)
         self.gpu_temp_pub = self.create_publisher(Float32, '/system/gpu_temp', 10)
-        self.create_timer(1.0, self.publish_usage)
+        self.tmr = self.create_timer(1.0, self.publish_usage)
+        self.shutdown_sub = self.create_subscription(
+            Bool,
+            '/shutdown/system_usage_node',
+            self._on_shutdown,
+            1,
+        )
+        self._shutdown_requested = False
         self.get_logger().info('SystemUsageNode started')
+
+    def _on_shutdown(self, msg: Bool) -> None:
+        if msg.data and not self._shutdown_requested:
+            self.get_logger().info('Shutdown requested, cleaning up...')
+            self._shutdown_requested = True
+            self.tmr.cancel()
+            self.destroy_node()
 
     def publish_usage(self) -> None:
         import psutil
