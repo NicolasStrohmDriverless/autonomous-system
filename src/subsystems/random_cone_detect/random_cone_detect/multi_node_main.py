@@ -12,6 +12,7 @@ separately.
 import argparse
 import threading
 import time
+from threading import Lock
 
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
@@ -50,6 +51,7 @@ class MultiWatchdogNode(Node):
         self.timer = self.create_timer(0.25, self.check_nodes)
         self.nodes_to_kill = []
         self.exec = None
+        self.node_lock = Lock()
         self.input_thread = None
         self.get_logger().info('MultiWatchdogNode started')
 
@@ -80,17 +82,26 @@ class MultiWatchdogNode(Node):
         node = random.choice(candidates)
         name = node.get_name()
         self.get_logger().warn(f"Closing node {name} via keyboard trigger")
-        if self.exec is not None:
-            try:
-                self.exec.remove_node(node)
-            except Exception:
-                pass
+
         if hasattr(node, "shutdown"):
             try:
                 node.shutdown()
             except Exception:
                 pass
-        node.destroy_node()
+
+        with self.node_lock:
+            if self.exec is not None:
+                try:
+                    self.exec.remove_node(node)
+                except Exception as e:
+                    self.get_logger().warn(f"Error removing node {name}: {e}")
+
+            time.sleep(0.2)
+
+            try:
+                node.destroy_node()
+            except Exception as e:
+                self.get_logger().warn(f"Error destroying node {name}: {e}")
 
     def set_managed_nodes(self, nodes, executor):
         self.nodes_to_kill = [n for n in nodes if n is not self]
@@ -276,8 +287,10 @@ def run_mode(
                 n.shutdown()
             except Exception:
                 pass
-        executor.remove_node(n)
-        n.destroy_node()
+        with watchdog.node_lock:
+            executor.remove_node(n)
+            time.sleep(0.2)
+            n.destroy_node()
 
 
 def main(argv=None) -> None:
