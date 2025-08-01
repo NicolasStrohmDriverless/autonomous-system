@@ -51,7 +51,6 @@ nav:
   - Software:
     - software/index.md
     - Autonomous System Repository: software/autonomous_system_repo.md
-    - Forward Feedback Control: software/forward_feedback.md
   - Hardware:
     - hardware/index.md
     - Sensors:
