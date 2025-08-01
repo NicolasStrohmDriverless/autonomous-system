@@ -162,7 +162,7 @@ def run_mode(
 
     def abort() -> None:
         """Trigger the emergency brake and stop the current mission."""
-        ebs_node.trigger()
+        ebs_node.trigger()  # keep active until manually reset
         stop_event.set()
 
     nodes = [
@@ -203,9 +203,17 @@ def run_mode(
     if stop_event.is_set():
         print("EBS event triggered, aborting mission.")
         ebs_node.trigger()
-        # Give other nodes a short time to react to the EBS trigger before
-        # tearing everything down.
-        time.sleep(10.0)
+        time.sleep(5.0)
+        while True:
+            try:
+                ans = input(
+                    "Zur\u00fcck zur Missionsauswahl? (Y/Enter f\u00fcr Ja) "
+                ).strip().lower()
+            except EOFError:
+                ans = "y"
+            if ans in ("", "y", "yes", "j", "ja"):
+                break
+            time.sleep(5.0)
         stop_event.clear()
 
     for n in nodes:
