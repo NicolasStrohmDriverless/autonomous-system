@@ -20,6 +20,8 @@ MAX_BRAKE_BAR = 14.0  # 1 bar = -1 m/s^2
 MAX_STEERING_ANGLE = 30.0  # deg
 STEERING_TRANSLATION = 15.0  # ratio
 MAX_YAW_ACCEL = 180.0  # deg/s^2
+# Step distance used for path predictions
+PREDICTION_INTERVAL = 0.1
 # PID gains for steering control
 STEERING_KP = 2.5
 STEERING_KI = 0.1
@@ -184,7 +186,14 @@ class CarStateNode(Node):
     def prediction_cb(self, msg: PathPrediction):
         self.predicted_speeds = list(msg.speeds)
         self.predicted_angles = list(msg.steering_angles)
-        self.prediction_idx = 0
+
+        # estimate how far the vehicle has travelled since the prediction was
+        # generated and fast-forward the index accordingly
+        now = self.get_clock().now()
+        dt = (now - msg.header.stamp).nanoseconds * 1e-9
+        travelled = self.speed * dt
+        skip = int(travelled / PREDICTION_INTERVAL)
+        self.prediction_idx = min(max(skip, 0), len(self.predicted_speeds))
 
     def asb_cmd_cb(self, msg: Float32):
         self.asb_cmd = float(msg.data)
