@@ -9,7 +9,7 @@ from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Bool
 from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import Image
 from oak_cone_detect_interfaces.msg import PathPrediction
@@ -133,6 +133,8 @@ class CarStateNode(Node):
         self.speed_pid = PIDController(SPEED_KP, SPEED_KI, SPEED_KD)
         self.brake_pid = PIDController(BRAKE_KP, BRAKE_KI, BRAKE_KD)
         self.last_time = self.get_clock().now()
+        self.ebs_active = False
+        self.frozen_angle: Optional[float] = None
 
         self.declare_parameter("max_yaw_accel", MAX_YAW_ACCEL)
         self.max_yaw_accel = float(self.get_parameter("max_yaw_accel").value)
@@ -168,6 +170,7 @@ class CarStateNode(Node):
         self.brake_image_pub = self.create_publisher(
             Image, "/path_status/brake_image", 1
         )
+        self.create_subscription(Bool, "/system/ebs_active", self.ebs_active_cb, 10)
         self.bridge = CvBridge()
         self.timer = self.create_timer(0.05, self.update)
         self.get_logger().info('CarStateNode started')
@@ -186,6 +189,12 @@ class CarStateNode(Node):
     def asb_cmd_cb(self, msg: Float32):
         self.asb_cmd = float(msg.data)
 
+    def ebs_active_cb(self, msg: Bool) -> None:
+        active = bool(msg.data)
+        if active and not self.ebs_active:
+            self.frozen_angle = self.steering_angle
+        self.ebs_active = active
+
     def update(self):
         now = self.get_clock().now()
         dt = (now - self.last_time).nanoseconds * 1e-9
@@ -195,11 +204,17 @@ class CarStateNode(Node):
         self.asb_cmd = 0.0
         brake = 0.0
 
-        if self.prediction_idx < len(self.predicted_speeds):
-            self.desired_speed = self.predicted_speeds[self.prediction_idx]
-            if self.predicted_angles:
-                self.desired_angle = self.predicted_angles[self.prediction_idx]
-            self.prediction_idx += 1
+        if self.ebs_active:
+            self.desired_speed = 0.0
+            if self.frozen_angle is not None:
+                self.desired_angle = self.frozen_angle
+            brake = MAX_BRAKE_BAR
+        else:
+            if self.prediction_idx < len(self.predicted_speeds):
+                self.desired_speed = self.predicted_speeds[self.prediction_idx]
+                if self.predicted_angles:
+                    self.desired_angle = self.predicted_angles[self.prediction_idx]
+                self.prediction_idx += 1
 
         # adjust speed towards desired speed using separate PID controllers
         if self.desired_speed is not None:

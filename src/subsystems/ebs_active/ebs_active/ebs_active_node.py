@@ -31,8 +31,13 @@ class EbsActiveNode(Node):
         self.pub_active.publish(Bool(data=bool(self.active)))
         self.pub_ready.publish(Bool(data=bool(self.ready)))
 
-    def trigger(self, duration: float = 10.0):
-        """Activate EBS for ``duration`` seconds."""
+    def trigger(self, duration: float | None = None) -> None:
+        """Activate the EBS.
+
+        If ``duration`` is ``None`` (the default) the brake stays active until
+        :meth:`deactivate` is called manually.  Otherwise the EBS automatically
+        resets after the given amount of seconds.
+        """
         if self.active:
             return
         self.active = True
@@ -41,7 +46,8 @@ class EbsActiveNode(Node):
         self.publish_state()
         if self.reset_timer is not None:
             self.reset_timer.cancel()
-        self.reset_timer = self.create_timer(duration, self.deactivate)
+        if duration is not None and duration > 0:
+            self.reset_timer = self.create_timer(duration, self.deactivate)
 
     def shutdown(self) -> None:
         """Cancel pending timers before node destruction."""
