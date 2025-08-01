@@ -6,16 +6,10 @@ import random
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 from typing import List
-import argparse
 
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
-
-try:
-    import cupy as cp
-except Exception:  # pragma: no cover - optional dependency
-    cp = None
 
 import rclpy
 from rclpy.node import Node
@@ -43,7 +37,7 @@ class TrackPublisher(Node):
         "FSS22_V2.yaml",
     ]
 
-    def __init__(self, mode: str = "autox", use_gpu: bool = False) -> None:
+    def __init__(self, mode: str = "autox") -> None:
         super().__init__("track_publisher")
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
@@ -55,8 +49,6 @@ class TrackPublisher(Node):
         self.image_pub = self.create_publisher(Image, "/track/image", 10)
         self.bridge = CvBridge()
         self.mode = mode
-        self.use_gpu = bool(use_gpu and cp is not None)
-        self.xp = cp if self.use_gpu else np
         # cache track so we don't change it between publishes
         self.left, self.right, self.centerline, self.start = self._load_track()
         self.publish_track()
@@ -145,12 +137,11 @@ class TrackPublisher(Node):
     def publish_image(
         self, left: np.ndarray, right: np.ndarray, start: np.ndarray
     ) -> None:
-        xp = self.xp
-        cones = xp.vstack(
+        cones = np.vstack(
             [
-                xp.asarray(left[:, :2].astype(float)),
-                xp.asarray(right[:, :2].astype(float)),
-                xp.asarray(start[:, :2].astype(float)),
+                left[:, :2].astype(float),
+                right[:, :2].astype(float),
+                start[:, :2].astype(float),
             ]
         )
         if cones.size == 0:
@@ -174,23 +165,16 @@ class TrackPublisher(Node):
             "red": (0, 0, 255, 255),
         }
 
-        def draw(cones_arr: xp.ndarray) -> None:
-            if cones_arr.size == 0:
-                return
-            xs = (cones_arr[:, 0] * scale + off_x).astype(int)
-            ys = (height - (cones_arr[:, 1] * scale + off_y)).astype(int)
-            xs = xp.asnumpy(xs)
-            ys = xp.asnumpy(ys)
-            cols = xp.asnumpy(cones_arr[:, 2])
-            for x, y, col in zip(xs, ys, cols):
-                xi = int(x)
-                yi = int(y)
+        def draw(cones_arr: np.ndarray) -> None:
+            for x, y, col in cones_arr:
+                xi = int(x * scale + off_x)
+                yi = int(height - (y * scale + off_y))
                 color = colors.get(str(col), (255, 255, 255, 255))
                 cv2.circle(img, (xi, yi), 3, color, -1)
 
-        draw(xp.asarray(left))
-        draw(xp.asarray(right))
-        draw(xp.asarray(start))
+        draw(left)
+        draw(right)
+        draw(start)
 
         msg = self.bridge.cv2_to_imgmsg(img, encoding="rgba8")
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -199,16 +183,8 @@ class TrackPublisher(Node):
 
 
 def main(args: List[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Track publisher node")
-    parser.add_argument(
-        "--use-gpu",
-        action="store_true",
-        help="use cupy for GPU accelerated processing if available",
-    )
-    parsed_args = parser.parse_args(args)
-
     rclpy.init(args=args)
-    node = TrackPublisher(use_gpu=parsed_args.use_gpu)
+    node = TrackPublisher()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

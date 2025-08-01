@@ -14,12 +14,6 @@ import math
 from typing import List
 import argparse
 import random
-import numpy as np
-
-try:
-    import cupy as cp
-except Exception:  # pragma: no cover - optional dependency
-    cp = None
 
 import rclpy
 from rclpy.node import Node
@@ -50,7 +44,7 @@ DELAY_DISTANCE = 0.1  # meters
 class DetectionNode(Node):
     """Publish cones based on ground truth positions."""
 
-    def __init__(self, publish_all: bool = False, use_gpu: bool = False) -> None:
+    def __init__(self, publish_all: bool = False) -> None:
         super().__init__("cone_detection_node")
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -71,8 +65,6 @@ class DetectionNode(Node):
         self.delayed_yaw = 0.0
         self._yaw_update_pos: tuple[float, float] | None = None
         self.publish_all = self.declare_parameter("publish_all", publish_all).value
-        self.use_gpu = bool(use_gpu and cp is not None)
-        self.xp = cp if self.use_gpu else np
         self.timer = self.create_timer(0.001, self.publish_visible)
         self.get_logger().info('DetectionNode started')
 
@@ -109,41 +101,39 @@ class DetectionNode(Node):
         out.header.stamp = self.get_clock().now().to_msg()
         out.header.frame_id = "map"
 
-        xp = self.xp
-        coords = xp.array([[float(c.x), float(c.y)] for c in self.cones])
-        dx = coords[:, 0] - px
-        dy = coords[:, 1] - py
-        local_x = cos_yaw * dx + sin_yaw * dy
-        local_y = -sin_yaw * dx + cos_yaw * dy
+        for c in self.cones:
+            dx = float(c.x) - px
+            dy = float(c.y) - py
+            # transform to vehicle coordinate frame
+            local_x = cos_yaw * dx + sin_yaw * dy
+            local_y = -sin_yaw * dx + cos_yaw * dy
 
-        dist = xp.sqrt(local_x ** 2 + local_y ** 2)
+            dist = math.hypot(local_x, local_y)
 
-        if DISTANCE_NOISE:
-            noise = xp.minimum(dist / 30.0, 1.0) * MAX_DISTORTION_30M
-            local_x += xp.random.uniform(-noise, noise)
-            local_y += xp.random.uniform(-noise, noise)
+            if DISTANCE_NOISE:
+                noise = min(dist / 30.0, 1.0) * MAX_DISTORTION_30M
+                local_x += random.uniform(-noise, noise)
+                local_y += random.uniform(-noise, noise)
 
-        if CAMERA_SHAKE:
-            local_x += xp.random.uniform(-0.05, 0.05, size=local_x.shape)
-            local_y += xp.random.uniform(-0.05, 0.05, size=local_y.shape)
+            if CAMERA_SHAKE:
+                # Add small random jitter to simulate a shaky camera
+                local_x += random.uniform(-0.05, 0.05)
+                local_y += random.uniform(-0.05, 0.05)
 
-        mask = xp.ones_like(local_x, dtype=bool)
-        if not self.publish_all:
-            mask &= xp.logical_not((30.0 < local_y) & (local_y < 0.0))
-            mask &= xp.logical_not((-15.0 > local_x) & (local_x > 15.0))
+            if not self.publish_all:
+                if 30.0 < local_y < 0.0:
+                    continue
+                if -15.0 > local_x > 15.0:
+                    continue
 
-        sel_x = xp.asnumpy(local_x[mask])
-        sel_y = xp.asnumpy(local_y[mask])
-        cones = [c for c, m in zip(self.cones, xp.asnumpy(mask)) if m]
-
-        for c, lx, ly in zip(cones, sel_x, sel_y):
             new_c = Cone3D(
                 id=c.id,
                 label=c.label,
                 conf=c.conf,
-                x=float(lx),
+                # Output cones in vehicle coordinates (z is forward axis)
+                x=local_x,
                 y=0.0,
-                z=float(ly),
+                z=local_y,
                 color=c.color,
             )
             out.cones.append(new_c)
@@ -159,18 +149,10 @@ def main(args: List[str] | None = None) -> None:
         action="store_true",
         help="publish all cones without visibility filtering",
     )
-    parser.add_argument(
-        "--use-gpu",
-        action="store_true",
-        help="use cupy for GPU accelerated processing if available",
-    )
     parsed_args = parser.parse_args(args)
 
     rclpy.init(args=None)
-    node = DetectionNode(
-        publish_all=parsed_args.publish_all,
-        use_gpu=parsed_args.use_gpu,
-    )
+    node = DetectionNode(publish_all=parsed_args.publish_all)
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

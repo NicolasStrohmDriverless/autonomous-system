@@ -38,7 +38,6 @@ setup(
         "art_slam",
         "ebs_active",
         "ament_index_python",
-        "cupy",
     ],
     zip_safe=True,
     maintainer="Nicolas Müller",
