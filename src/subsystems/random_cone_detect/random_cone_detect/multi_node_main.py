@@ -48,7 +48,58 @@ class MultiWatchdogNode(Node):
         self.bridge = CvBridge()
         self.image_pub = self.create_publisher(Image, "/watchdog/image", 1)
         self.timer = self.create_timer(0.25, self.check_nodes)
+        self.nodes_to_kill = []
+        self.exec = None
+        self.input_thread = None
         self.get_logger().info('MultiWatchdogNode started')
+
+    def _input_loop(self) -> None:
+        import sys
+        import select
+        import termios
+        import tty
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        tty.setcbreak(fd)
+        try:
+            while rclpy.ok():
+                r, _, _ = select.select([sys.stdin], [], [], 0.1)
+                if r:
+                    ch = sys.stdin.read(1)
+                    if ch.lower() == "e":
+                        self._kill_random_node()
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+    def _kill_random_node(self) -> None:
+        import random
+        candidates = [n for n in self.nodes_to_kill if hasattr(n, "destroy_node")]
+        if not candidates:
+            self.get_logger().warn("No nodes available to close")
+            return
+        node = random.choice(candidates)
+        name = node.get_name()
+        self.get_logger().warn(f"Closing node {name} via keyboard trigger")
+        if self.exec is not None:
+            try:
+                self.exec.remove_node(node)
+            except Exception:
+                pass
+        if hasattr(node, "shutdown"):
+            try:
+                node.shutdown()
+            except Exception:
+                pass
+        node.destroy_node()
+
+    def set_managed_nodes(self, nodes, executor):
+        self.nodes_to_kill = [n for n in nodes if n is not self]
+        self.exec = executor
+        if self.input_thread is None:
+            self.input_thread = threading.Thread(
+                target=self._input_loop, daemon=True
+            )
+            self.input_thread.start()
 
     def check_nodes(self) -> None:
         alive = set(self.get_node_names())
@@ -165,8 +216,7 @@ def run_mode(
         ebs_node.trigger()  # keep active until manually reset
         stop_event.set()
 
-    nodes = [
-        MultiWatchdogNode(
+    watchdog = MultiWatchdogNode(
             [
                 "safety_watchdog_node",
                 "ebs_active_node",
@@ -175,8 +225,11 @@ def run_mode(
                 "midpoint_path_node",
             ],
             on_failure=abort,
-        ),
-        SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort),
+        )
+    safety_watchdog = SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort)
+    nodes = [
+        watchdog,
+        safety_watchdog,
         TrackPublisher(mode=mode),
         DetectionNode(publish_all=True),
         PathNode(start_offset=0.0),
@@ -191,6 +244,7 @@ def run_mode(
         DetectionMonitorNode(on_failure=abort),
         ebs_node,
     ]
+    watchdog.set_managed_nodes(nodes, executor)
     for n in nodes:
         executor.add_node(n)
 
