@@ -12,6 +12,11 @@ separately.
 import argparse
 import threading
 import time
+import random
+import sys
+import select
+import termios
+import tty
 
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
@@ -194,11 +199,43 @@ def run_mode(
     for n in nodes:
         executor.add_node(n)
 
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    tty.setcbreak(fd)
+
+    def kill_random_node() -> None:
+        """Kill a random watched node to trigger the watchdog."""
+        kill_names = {
+            "slam_node",
+            "mapping_node",
+            "midpoint_path_node",
+            "safety_watchdog_node",
+        }
+        candidates = [n for n in nodes if getattr(n, "get_name", lambda: "")() in kill_names]
+        if not candidates:
+            return
+        victim = random.choice(candidates)
+        print(f"Killing node {victim.get_name()} for EBS test")
+        if hasattr(victim, "shutdown"):
+            try:
+                victim.shutdown()
+            except Exception:
+                pass
+        executor.remove_node(victim)
+        victim.destroy_node()
+        nodes.remove(victim)
+
     try:
         while rclpy.ok() and not stop_event.is_set():
+            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                ch = sys.stdin.read(1)
+                if ch.lower() == "e":
+                    kill_random_node()
             time.sleep(0.1)
     except KeyboardInterrupt:
         pass
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
     if stop_event.is_set():
         print("EBS event triggered, aborting mission.")
