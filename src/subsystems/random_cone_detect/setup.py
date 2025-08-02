@@ -37,6 +37,7 @@ setup(
         "gpxpy",
         "art_slam",
         "ebs_active",
+        "pynput",
         "ament_index_python",
     ],
     zip_safe=True,
