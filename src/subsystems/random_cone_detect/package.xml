@@ -18,6 +18,7 @@
   <depend>art_slam</depend>
   <depend>imu_viz</depend>
   <depend>ebs_active</depend>
+  <depend>pynput</depend>
 
   <export>
     <build_type>ament_python</build_type>
