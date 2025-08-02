@@ -27,6 +27,7 @@ from random_cone_detect.detection_monitor_node import DetectionMonitorNode
 from random_cone_detect.track_publisher import TrackPublisher
 from random_cone_detect.detection_node import DetectionNode
 from random_cone_detect.safety_watchdog_node import SafetyWatchdogNode
+from random_cone_detect.manual_control_node import ManualControlNode
 from pathfinding.pathfinding_node import PathNode
 from vehicle_control.mapping_node import MappingNode
 from vehicle_control.slam_node import SlamNode
@@ -34,7 +35,7 @@ from vehicle_control.car_state_node import CarStateNode
 from ebs_active.ebs_active_node import EbsActiveNode
 from std_msgs.msg import Float32
 
-MODES = ["accel", "skidpad", "autox", "endu"]
+MODES = ["accel", "skidpad", "autox", "endu", "manuell"]
 
 
 class MultiWatchdogNode(Node):
@@ -227,7 +228,39 @@ def run_mode(
         ebs_node.trigger()  # keep active until manually reset
         stop_event.set()
 
-    watchdog = MultiWatchdogNode(
+    if mode == "manuell":
+        import random
+
+        track_mode = random.choice(["accel", "skidpad", "autox"])
+        watchdog = MultiWatchdogNode(
+            [
+                "safety_watchdog_node",
+                "ebs_active_node",
+                "car_state_node",
+                "manual_control_node",
+            ],
+            on_failure=abort,
+        )
+        safety_watchdog = SafetyWatchdogNode([
+            "multi_watchdog_node"
+        ], on_failure=abort)
+        nodes = [
+            watchdog,
+            safety_watchdog,
+            TrackPublisher(mode=track_mode),
+            ManualControlNode(),
+            SystemUsageNode(),
+            CarStateNode(),
+            LapCounterNode(
+                max_laps=
+                1 if track_mode == "accel" else (
+                    4 if track_mode == "skidpad" else 2
+                )
+            ),
+            ebs_node,
+        ]
+    else:
+        watchdog = MultiWatchdogNode(
             [
                 "safety_watchdog_node",
                 "ebs_active_node",
@@ -237,24 +270,28 @@ def run_mode(
             ],
             on_failure=abort,
         )
-    safety_watchdog = SafetyWatchdogNode(["multi_watchdog_node"], on_failure=abort)
-    nodes = [
-        watchdog,
-        safety_watchdog,
-        TrackPublisher(mode=mode),
-        DetectionNode(publish_all=True),
-        PathNode(start_offset=0.0),
-        MappingNode(),
-        SlamNode(),
-        SystemUsageNode(),
-        CarStateNode(),
-        LapCounterNode(
-            max_laps=
-            1 if mode == "accel" else (4 if mode == "skidpad" else (22 if mode == "endu" else 2))
-        ),
-        DetectionMonitorNode(on_failure=abort),
-        ebs_node,
-    ]
+        safety_watchdog = SafetyWatchdogNode([
+            "multi_watchdog_node"
+        ], on_failure=abort)
+        nodes = [
+            watchdog,
+            safety_watchdog,
+            TrackPublisher(mode=mode),
+            DetectionNode(publish_all=True),
+            PathNode(start_offset=0.0),
+            MappingNode(),
+            SlamNode(),
+            SystemUsageNode(),
+            CarStateNode(),
+            LapCounterNode(
+                max_laps=
+                1 if mode == "accel" else (
+                    4 if mode == "skidpad" else (22 if mode == "endu" else 2)
+                )
+            ),
+            DetectionMonitorNode(on_failure=abort),
+            ebs_node,
+        ]
     watchdog.set_managed_nodes(nodes, executor)
     for n in nodes:
         executor.add_node(n)
@@ -316,7 +353,7 @@ def main(argv=None) -> None:
                 try:
                     inp = (
                         input(
-                            "Modus wählen ('accel' = Acceleration Track, 'skidpad' = Skidpad, 'autox' = Autocross Track, 'endu' = Endurance) [autox]: "
+                            "Modus wählen ('accel' = Acceleration Track, 'skidpad' = Skidpad, 'autox' = Autocross Track, 'endu' = Endurance, 'manuell' = Manuelle Steuerung) [autox]: "
                         )
                         .strip()
                         .lower()
