@@ -9,6 +9,7 @@ from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
+from rclpy.time import Time
 from std_msgs.msg import Float32, Bool
 from geometry_msgs.msg import Pose2D
 from sensor_msgs.msg import Image
@@ -190,7 +191,8 @@ class CarStateNode(Node):
         # estimate how far the vehicle has travelled since the prediction was
         # generated and fast-forward the index accordingly
         now = self.get_clock().now()
-        dt = (now - msg.header.stamp).nanoseconds * 1e-9
+        msg_time = Time.from_msg(msg.header.stamp)
+        dt = (now - msg_time).nanoseconds * 1e-9
         travelled = self.speed * dt
         skip = int(travelled / PREDICTION_INTERVAL)
         self.prediction_idx = min(max(skip, 0), len(self.predicted_speeds))
