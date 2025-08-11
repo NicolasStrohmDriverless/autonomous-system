@@ -16,6 +16,8 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 
 from array_cone_detect.detection_node import ConeArrayPublisher
+from array_cone_detect.watchdog_node import WatchdogNode
+from array_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from pathfinding.pathfinding_node import PathNode
 from path_viz.path_viz_node import PathVizNode
 from vehicle_control.car_state_node import CarStateNode
@@ -91,9 +93,16 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
 
     usage = SystemUsageNode()
 
-    nodes = [mission, path, viz, usage, car_state]
-    for n in nodes:
+    core_nodes = [mission, path, viz, usage, car_state]
+    for n in core_nodes:
         executor.add_node(n)
+
+    watched = [n.get_name() for n in core_nodes]
+    watchdog = WatchdogNode(watched)
+    safety = SafetyWatchdogNode([watchdog.get_name()])
+    nodes = core_nodes + [watchdog, safety]
+    executor.add_node(watchdog)
+    executor.add_node(safety)
 
     if auto_start:
         ready_ok = True

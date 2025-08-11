@@ -19,7 +19,10 @@ from rclpy.node import Node
 from std_msgs.msg import Float32
 from ament_index_python.packages import get_package_share_directory
 
+from tensorrt_cone_detect_cpp.watchdog_node import WatchdogNode
+from tensorrt_cone_detect_cpp.safety_watchdog_node import SafetyWatchdogNode
 from depth_tracking.depth_node import DepthTrackingNode
+from pathfinding.pathfinding_node import PathNode
 from path_viz.path_viz_node import PathVizNode
 from imu_viz.imu_viz_node import ImuVizNode
 from vehicle_control.car_state_node import CarStateNode
@@ -87,15 +90,23 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         '--ros-args', '-p', f'onnx_path:={model_path}'
     ])
 
-    nodes = [
+    core_nodes = [
         DepthTrackingNode(),
+        PathNode(),
         PathVizNode(),
         ImuVizNode(),
         SystemUsageNode(),
         CarStateNode(),
     ]
-    for n in nodes:
+    for n in core_nodes:
         executor.add_node(n)
+
+    watched = [n.get_name() for n in core_nodes]
+    watchdog = WatchdogNode(watched)
+    safety = SafetyWatchdogNode([watchdog.get_name()])
+    nodes = core_nodes + [watchdog, safety]
+    executor.add_node(watchdog)
+    executor.add_node(safety)
 
     if auto_start:
         ready_ok = True

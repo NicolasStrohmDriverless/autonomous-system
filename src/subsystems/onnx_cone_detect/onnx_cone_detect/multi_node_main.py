@@ -16,7 +16,10 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 
 from onnx_cone_detect.detection_node import DepthAIDriver
+from onnx_cone_detect.watchdog_node import WatchdogNode
+from onnx_cone_detect.safety_watchdog_node import SafetyWatchdogNode
 from depth_tracking.depth_node import DepthTrackingNode
+from pathfinding.pathfinding_node import PathNode
 from path_viz.path_viz_node import PathVizNode
 from imu_viz.imu_viz_node import ImuVizNode
 from vehicle_control.car_state_node import CarStateNode
@@ -79,16 +82,24 @@ CONTROL_MODULE = "vehicle_control.control_main"
 
 
 def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = False) -> None:
-    nodes = [
+    core_nodes = [
         DepthAIDriver(),
         DepthTrackingNode(),
+        PathNode(),
         PathVizNode(),
         ImuVizNode(),
         SystemUsageNode(),
         CarStateNode(),
     ]
-    for n in nodes:
+    for n in core_nodes:
         executor.add_node(n)
+
+    watched_names = [n.get_name() for n in core_nodes]
+    watchdog = WatchdogNode(watched_names)
+    safety_watchdog = SafetyWatchdogNode([watchdog.get_name()])
+    nodes = core_nodes + [watchdog, safety_watchdog]
+    executor.add_node(watchdog)
+    executor.add_node(safety_watchdog)
 
     if auto_start:
         ready_ok = True
