@@ -21,7 +21,6 @@ from ament_index_python.packages import get_package_share_directory
 
 from depth_tracking.depth_node import DepthTrackingNode
 from path_viz.path_viz_node import PathVizNode
-from art_slam.art_slam_node import ArtSlamNode
 from imu_viz.imu_viz_node import ImuVizNode
 from vehicle_control.car_state_node import CarStateNode
 
@@ -91,7 +90,6 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
     nodes = [
         DepthTrackingNode(),
         PathVizNode(),
-        ArtSlamNode(),
         ImuVizNode(),
         SystemUsageNode(),
         CarStateNode(),

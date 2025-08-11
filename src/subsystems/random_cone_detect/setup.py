@@ -35,7 +35,6 @@ setup(
         "scipy",
         "shapely",
         "gpxpy",
-        "art_slam",
         "ebs_active",
         "ament_index_python",
     ],

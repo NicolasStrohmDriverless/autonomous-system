@@ -18,7 +18,6 @@ from rclpy.executors import MultiThreadedExecutor
 from onnx_cone_detect.detection_node import DepthAIDriver
 from depth_tracking.depth_node import DepthTrackingNode
 from path_viz.path_viz_node import PathVizNode
-from art_slam.art_slam_node import ArtSlamNode
 from imu_viz.imu_viz_node import ImuVizNode
 from vehicle_control.car_state_node import CarStateNode
 from std_msgs.msg import Float32
@@ -84,7 +83,6 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
         DepthAIDriver(),
         DepthTrackingNode(),
         PathVizNode(),
-        ArtSlamNode(),
         ImuVizNode(),
         SystemUsageNode(),
         CarStateNode(),

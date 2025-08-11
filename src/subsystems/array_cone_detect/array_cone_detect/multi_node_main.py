@@ -18,7 +18,6 @@ from rclpy.executors import MultiThreadedExecutor
 from array_cone_detect.detection_node import ConeArrayPublisher
 from pathfinding.pathfinding_node import PathNode
 from path_viz.path_viz_node import PathVizNode
-from art_slam.art_slam_node import ArtSlamNode
 from vehicle_control.car_state_node import CarStateNode
 from rclpy.node import Node
 from std_msgs.msg import Float32
@@ -88,12 +87,11 @@ def run_mode(mode: str, executor: MultiThreadedExecutor, auto_start: bool = Fals
     mission = ConeArrayPublisher()
     path = PathNode()
     viz = PathVizNode()
-    slam = ArtSlamNode()
     car_state = CarStateNode()
 
     usage = SystemUsageNode()
 
-    nodes = [mission, path, viz, slam, usage, car_state]
+    nodes = [mission, path, viz, usage, car_state]
     for n in nodes:
         executor.add_node(n)
 
