@@ -9,26 +9,44 @@ import cv2
 
 
 class SafetyWatchdogNode(Node):
-    def __init__(self, watched_nodes):
+    def __init__(self, watched_nodes, on_failure=None):
         super().__init__('safety_watchdog_node')
         self.watched_nodes = list(watched_nodes)
+        self.on_failure = on_failure
         self.declare_parameter('check_period', 1.0)
         period = float(self.get_parameter('check_period').value)
         self.timer = self.create_timer(period, self.check_nodes)
         self.status = {name: True for name in self.watched_nodes}
+        self.miss_count = {name: 0 for name in self.watched_nodes}
         self.bridge = CvBridge()
         self.image_pub = self.create_publisher(Image, '/safety_watchdog/image', 1)
         self.get_logger().info(
             f'Watching nodes: {", ".join(self.watched_nodes)}')
         self.get_logger().info('SafetyWatchdogNode started')
 
+    def shutdown(self):
+        for name in self.status:
+            self.status[name] = False
+            self.miss_count[name] = 0
+        self.publish_image()
+
     def check_nodes(self):
         alive_nodes = set(self.get_node_names())
         for name in self.watched_nodes:
-            alive = name in alive_nodes
-            self.status[name] = alive
-            if not alive:
-                self.get_logger().warn(f'Node "{name}" is not alive!')
+            if name in alive_nodes:
+                self.status[name] = True
+                self.miss_count[name] = 0
+            else:
+                self.status[name] = False
+                self.miss_count[name] += 1
+                if self.miss_count[name] >= 3:
+                    self.get_logger().warn(f'Node "{name}" is not alive!')
+                    if self.on_failure is not None:
+                        try:
+                            self.on_failure()
+                        finally:
+                            pass
+                    self.miss_count[name] = 0
         self.publish_image()
 
     def publish_image(self):
@@ -52,6 +70,7 @@ def main():
     try:
         rclpy.spin(node)
     finally:
+        node.shutdown()
         node.destroy_node()
         rclpy.shutdown()
 
