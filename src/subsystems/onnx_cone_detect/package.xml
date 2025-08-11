@@ -17,7 +17,6 @@
   <depend>pathfinding</depend>
   <depend>depth_tracking</depend>
   <depend>sort_tracking</depend>
-  <depend>art_slam</depend>
   <depend>imu_viz</depend>
   <depend>path_viz</depend>
 

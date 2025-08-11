@@ -15,7 +15,6 @@
   <depend>rclpy</depend>
   <depend>pathfinding</depend>
   <depend>depth_tracking</depend>
-  <exec_depend>art_slam</exec_depend>
   <exec_depend>imu_viz</exec_depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

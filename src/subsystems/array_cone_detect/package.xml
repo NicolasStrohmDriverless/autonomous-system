@@ -15,7 +15,6 @@
   <depend>std_msgs</depend>
   <depend>oak_cone_detect_interfaces</depend>
   <depend>pathfinding</depend>
-  <depend>art_slam</depend>
   <depend>imu_viz</depend>
 
   <export>
