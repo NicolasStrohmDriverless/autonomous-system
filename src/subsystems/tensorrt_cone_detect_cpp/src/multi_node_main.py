@@ -45,7 +45,7 @@ class SystemUsageNode(Node):
         cpu_temp = 0.0
         try:
             temps = psutil.sensors_temperatures()
-            for label in ('cpu-thermal', 'cpu_thermal', 'coretemp'):
+            for label in ('cpu-thermal', 'cpu_thermal', 'coretemp', 'k10temp'):
                 if label in temps and temps[label]:
                     cpu_temp = float(temps[label][0].current)
                     break
