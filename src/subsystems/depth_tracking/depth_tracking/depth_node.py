@@ -81,15 +81,25 @@ class DepthTrackingNode(Node):
         for c in self.latest_detections.cones:
             xi, yi = int(round(c.x)), int(round(c.y))
             if 0 <= xi < w and 0 <= yi < h:
+                # Binary mask around the cone center
+                mask = np.zeros_like(disp_img, dtype=np.uint8)
+                cv2.circle(mask, (xi, yi), ROI_RADIUS_PX, 1, -1)
+
+                # Random sampling within the mask
                 x0 = max(0, xi - ROI_RADIUS_PX)
                 x1 = min(w, xi + ROI_RADIUS_PX + 1)
                 y0 = max(0, yi - ROI_RADIUS_PX)
                 y1 = min(h, yi + ROI_RADIUS_PX + 1)
-                patch = disp_img[y0:y1, x0:x1].astype(float)
-                patch = patch[patch >= MIN_DISP]
-                if patch.size == 0:
+                num_samples = 50
+                xs = np.random.randint(x0, x1, size=num_samples)
+                ys = np.random.randint(y0, y1, size=num_samples)
+                valid = mask[ys, xs] == 1
+                xs, ys = xs[valid], ys[valid]
+                disp_samples = disp_img[ys, xs].astype(float)
+                disp_samples = disp_samples[disp_samples >= MIN_DISP]
+                if disp_samples.size == 0:
                     continue
-                disp_med = float(np.median(patch))
+                disp_med = float(np.median(disp_samples))
                 if disp_med < MIN_DISP:
                     continue
                 z = (FOCAL_LENGTH_PX * BASELINE_M) / disp_med
