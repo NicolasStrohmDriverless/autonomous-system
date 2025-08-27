@@ -27,6 +27,7 @@ setup(
             'mapping_node = vehicle_control.mapping_node:main',
             'slam_node = vehicle_control.slam_node:main',
             'vehicle_controll_node = vehicle_control.vehicle_controll_node:main',
+            'stanley_pid_controller = vehicle_control.stanley_pid_controller:main',
         ],
     },
 )
